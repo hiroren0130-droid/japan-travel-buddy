@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Header from "@/components/Header";
 
 export default function HomePage() {
@@ -20,9 +21,11 @@ export default function HomePage() {
             personal AI travel companion.
           </p>
 
-          <button className="mt-10 rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:bg-blue-700">
-            Start Planning
-          </button>
+          <Link href="/chat">
+            <button className="mt-10 rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:bg-blue-700">
+              Start Planning
+            </button>
+          </Link>
         </section>
       </main>
     </>
