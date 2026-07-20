@@ -6,15 +6,36 @@ export interface TravelPlan {
 
 export interface TravelDay {
   day: number;
-  items: TravelItem[];
+  items: TravelSpot[];
 }
 
-export interface TravelItem {
+export interface TravelSpot {
   time: string;
-  spot: string;
+
+  // Spot DatabaseのID
+  spotId: string;
+
+  // AIが生成する説明
   description: string;
+
+  // 移動情報
+  transport?: string;
+  duration?: string;
 }
 
 export interface SavedTravelPlan extends TravelPlan {
   id: string;
+}
+
+export interface TravelRequest {
+  destination: string;
+  days: number;
+  people: string;
+  budget: string;
+  interest: string;
+}
+
+export interface TravelResponse {
+  message: string;
+  plan: TravelPlan;
 }

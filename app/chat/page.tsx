@@ -6,11 +6,6 @@ import ChatMessages from "@/components/ChatMessages";
 import TravelForm from "@/components/TravelForm";
 import TravelPlanSkeleton from "@/components/TravelPlanSkeleton";
 import type { TravelPlan } from "@/types/travel";
-import {
-  saveFavorite,
-  removeFavorite,
-  isFavorite,
-} from "@/lib/favorites";
 
 type Message = {
   role: "user" | "assistant";
@@ -64,12 +59,14 @@ export default function ChatPage() {
 
       const data = await res.json();
 
-      const json = data.message
-        .replace(/```json/g, "")
-        .replace(/```/g, "")
-        .trim();
+const travelPlan: TravelPlan = data.plan;
 
-      const travelPlan: TravelPlan = JSON.parse(json);
+setMessages([
+  {
+    role: "assistant",
+    travelPlan,
+  },
+]);
       
       setMessages([
         {

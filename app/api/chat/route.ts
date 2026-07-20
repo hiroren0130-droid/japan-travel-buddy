@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
+import { getSpotByName } from "@/lib/spotService";
 
 export async function POST(req: Request) {
   try {
@@ -9,17 +10,12 @@ export async function POST(req: Request) {
       model: "gpt-5",
 
       input: `
-あなたはプロの旅行プランナーです。
+あなたは日本旅行専門のプロ旅行プランナーです。
 
-ユーザーの希望に合わせて旅行プランを作成してください。
-
-あなたはプロの旅行プランナーです。
+ユーザーの条件に合わせて、現実的で効率の良い旅行プランを作成してください。
 
 必ずJSONのみ返してください。
-
-JSON以外の文章は絶対に書かないでください。
-
-以下のJSON形式を厳守してください。
+JSON以外の文章・コードブロック・説明は一切書かないでください。
 
 {
   "title": "旅行プラン名",
@@ -30,19 +26,24 @@ JSON以外の文章は絶対に書かないでください。
       "items": [
         {
           "time": "09:00",
-          "spot": "観光地名",
-          "description": "説明"
+          "spot": "清水寺",
+          "description": "京都を代表する世界遺産を散策します。",
+          "transport": "徒歩",
+          "duration": "15分"
         }
       ]
     }
   ]
 }
 
-時間は必ず HH:mm 形式にしてください。
+ルール
 
-spot は観光地名だけを書いてください。
-
-description は1〜2文で簡潔にしてください。
+・time は HH:mm
+・spot はスポット名のみ
+・description は1〜2文
+・transport は次スポットへの移動手段
+・duration は移動時間
+・営業時間・現実的な移動を考慮する
 
 ユーザーの希望
 
@@ -50,11 +51,31 @@ ${message}
 `,
     });
 
-    console.log(response);
+    const aiPlan = JSON.parse(response.output_text);
 
-return NextResponse.json({
-  message: response.output_text,
-});
+    // Spot Databaseと紐付け
+    const plan = {
+      ...aiPlan,
+      days: aiPlan.days.map((day: any) => ({
+        ...day,
+        items: day.items.map((item: any) => {
+          const spot = getSpotByName(item.spot);
+
+          return {
+            time: item.time,
+            spotId: spot?.id ?? "",
+            description: item.description,
+            transport: item.transport,
+            duration: item.duration,
+          };
+        }),
+      })),
+    };
+
+    return NextResponse.json({
+      message: response.output_text,
+      plan,
+    });
   } catch (error) {
     console.error("OpenAI Error:", error);
 

@@ -1,11 +1,12 @@
-import { spots, Spot } from "@/data/spots";
+import type { Spot } from "@/data/types";
+import { allSpots } from "@/data";
 
 export function getAllSpots(): Spot[] {
-  return spots;
+  return allSpots;
 }
 
 export function getSpotById(id: string): Spot | undefined {
-  return spots.find((spot) => spot.id === id);
+  return allSpots.find((spot) => spot.id === id);
 }
 
 export function getSpotByName(name: string): Spot | undefined {
@@ -18,10 +19,14 @@ export function getSpotByName(name: string): Spot | undefined {
     .replace(/【.*?】/g, "")
     .replace(/\[.*?\]/g, "")
     .replace(/\s+/g, "")
-    .trim();
+    .trim()
+    .toLowerCase();
 
-  return spots.find((spot) => {
-    const spotName = spot.name.replace(/\s+/g, "").trim();
+  return allSpots.find((spot) => {
+    const spotName = spot.name
+      .replace(/\s+/g, "")
+      .trim()
+      .toLowerCase();
 
     return (
       normalized === spotName ||
@@ -32,9 +37,10 @@ export function getSpotByName(name: string): Spot | undefined {
 }
 
 export function getSpotsByArea(area: string): Spot[] {
-  return spots.filter((spot) => spot.area === area);
+  return allSpots.filter((spot) => spot.area === area);
 }
 
 export function getSpotsByCategory(category: string): Spot[] {
-  return spots.filter((spot) => spot.category === category);
+  return allSpots.filter((spot) => spot.category === category);
 }
+

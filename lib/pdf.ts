@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 
 import { TravelPlan } from "@/types/travel";
+import { getSpotById } from "@/lib/spotService";
 
 export function downloadTravelPlanPdf(plan: TravelPlan) {
   const pdf = new jsPDF();
@@ -21,13 +22,16 @@ export function downloadTravelPlanPdf(plan: TravelPlan) {
   plan.days.forEach((day) => {
     pdf.setFontSize(16);
     pdf.text(`Day ${day.day}`, 20, y);
+
     y += 10;
 
     day.items.forEach((item) => {
+      const spot = getSpotById(item.spotId);
+
       pdf.setFontSize(11);
 
       pdf.text(
-        `${item.time}  ${item.spot}  ${item.description}`,
+        `${item.time}  ${spot?.name ?? "Unknown Spot"}  ${item.description}`,
         25,
         y
       );

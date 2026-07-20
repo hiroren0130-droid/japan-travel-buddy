@@ -5,6 +5,7 @@ import {
   doc,
   getDoc,
   getDocs,
+　orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -19,10 +20,10 @@ export async function saveTravelPlan(
   plan: TravelPlan
 ): Promise<void> {
   const q = query(
-    collection(db, "travelPlans"),
-    where("uid", "==", uid),
-    where("title", "==", plan.title)
-  );
+  collection(db, "travelPlans"),
+  where("uid", "==", uid),
+  orderBy("createdAt", "desc")
+);
 
   const snapshot = await getDocs(q);
 

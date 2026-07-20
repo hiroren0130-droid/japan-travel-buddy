@@ -6,12 +6,14 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   children: ReactNode;
   loading?: boolean;
   variant?: "primary" | "secondary" | "danger";
+  size?: "default" | "icon";
 };
 
 export default function Button({
   children,
   loading = false,
   variant = "primary",
+  size = "default",
   className = "",
   disabled,
   ...props
@@ -25,6 +27,11 @@ export default function Button({
       "bg-red-600 text-white hover:bg-red-700",
   };
 
+  const sizes = {
+    default: "px-5 py-2.5 text-sm",
+    icon: "h-11 w-11 p-0",
+  };
+
   return (
     <button
       {...props}
@@ -35,14 +42,13 @@ export default function Button({
         justify-center
         gap-2
         rounded-xl
-        px-5
-        py-2.5
-        text-sm
         font-semibold
-        transition
+        transition-all
+        duration-200
         disabled:cursor-not-allowed
         disabled:opacity-60
         ${variants[variant]}
+        ${sizes[size]}
         ${className}
       `}
     >

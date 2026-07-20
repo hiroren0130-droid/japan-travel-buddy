@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
+import { Timestamp } from "firebase/firestore";
 
 import { auth } from "@/lib/firebase";
 import {
@@ -10,13 +11,10 @@ import {
   deleteTravelPlan,
 } from "@/lib/firestore";
 
-type SavedPlan = {
-  id: string;
-  title: string;
-  summary?: string;
-  createdAt?: {
-    seconds: number;
-  };
+import { SavedTravelPlan } from "@/types/travel";
+
+type SavedPlan = SavedTravelPlan & {
+  createdAt?: Timestamp;
 };
 
 export default function MyPage() {
@@ -82,7 +80,7 @@ export default function MyPage() {
           {plans.map((plan) => (
             <div
               key={plan.id}
-              className="rounded-xl border bg-white p-5 shadow-sm"
+              className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md"
             >
               <h2 className="text-xl font-bold">
                 {plan.title}
@@ -97,30 +95,28 @@ export default function MyPage() {
               {plan.createdAt && (
                 <p className="mt-3 text-sm text-gray-500">
                   作成日：
-                  {new Date(
-                    plan.createdAt.seconds * 1000
-                  ).toLocaleDateString("ja-JP")}
+                  {plan.createdAt.toDate().toLocaleDateString("ja-JP")}
                 </p>
               )}
 
-              <div className="mt-4 flex gap-3">
+              <div className="mt-5 flex flex-wrap gap-3">
                 <Link
                   href={`/mypage/${plan.id}`}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700"
                 >
                   詳細を見る
                 </Link>
 
                 <button
                   onClick={() => handleDelete(plan.id)}
-                  className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+                  className="rounded-lg bg-red-600 px-4 py-2 text-white transition hover:bg-red-700"
                 >
                   削除
                 </button>
 
                 <Link
                   href="/"
-                  className="rounded-lg border px-4 py-2 hover:bg-gray-100"
+                  className="rounded-lg border px-4 py-2 transition hover:bg-gray-100"
                 >
                   ホームへ戻る
                 </Link>

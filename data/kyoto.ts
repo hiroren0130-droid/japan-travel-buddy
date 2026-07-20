@@ -1,18 +1,4 @@
-export type Spot = {
-  id: string;
-  name: string;
-  area: string;
-  category: string;
-  description: string;
-  image: string;
-  latitude: number;
-  longitude: number;
-  address?: string;
-hours?: string;
-price?: string;
-rating?: number;
-website?: string;
-};
+import type { Spot } from "./types";
 
 export const spots: Spot[] = [
   {
