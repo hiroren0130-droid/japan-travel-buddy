@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import ChatMessages from "@/components/ChatMessages";
 import TravelForm from "@/components/TravelForm";
@@ -22,69 +22,73 @@ export default function ChatPage() {
   const [travelers, setTravelers] = useState("");
   const [budget, setBudget] = useState("");
   const [interests, setInterests] = useState("");
+  const [currentLocation, setCurrentLocation] = useState<{
+  latitude: number;
+  longitude: number;
+} | null>(null);
+useEffect(() => {
+  if (!navigator.geolocation) return;
 
-  async function sendMessage() {
-    if (loading) return;
-    
-    if (
-      !destination.trim() ||
-      !days.trim() ||
-      !travelers.trim() ||
-      !budget.trim() ||
-      !interests.trim()
-    ) {
-      return;
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      setCurrentLocation({
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      });
+    },
+    (error) => {
+      console.error("位置情報取得エラー:", error);
     }
+  );
+}, []);
+  async function sendMessage() {
+  console.log("sendMessage called");
 
-    setLoading(true);
+  if (loading) return;
 
-    try {
-      const prompt = `
-行き先: ${destination}
-日数: ${days}
-人数: ${travelers}
-予算: ${budget}
-興味: ${interests}
+  setLoading(true);
+
+  try {
+    const prompt = `
+行き先: ${destination || "京都"}
+日数: ${days || "2日"}
+人数: ${travelers || "2人"}
+予算: ${budget || "指定なし"}
+興味: ${interests || "人気スポット・グルメ"}
 `;
 
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: prompt,
-        }),
-      });
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: prompt,
+        currentLocation,
+      }),
+    });
 
-      const data = await res.json();
+    const data = await res.json();
 
-const travelPlan: TravelPlan = data.plan;
+    const travelPlan: TravelPlan = data.plan;
 
-setMessages([
-  {
-    role: "assistant",
-    travelPlan,
-  },
-]);
-      
-      setMessages([
-        {
-          role: "assistant",
-          travelPlan,
-        },
-      ]);
-    } catch {
-      setMessages([
-        {
-          role: "assistant",
-          content: "エラーが発生しました。",
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
+    setMessages([
+      {
+        role: "assistant",
+        travelPlan,
+      },
+    ]);
+  } catch {
+    setMessages([
+      {
+        role: "assistant",
+        content: "エラーが発生しました。",
+      },
+    ]);
+  } finally {
+    setLoading(false);
   }
+}
 
   return (
     <main className="min-h-screen bg-gray-100">

@@ -14,4 +14,5 @@ export type Spot = {
   price?: string;
   rating?: number;
   website?: string;
+  nearby?: string[];
 };

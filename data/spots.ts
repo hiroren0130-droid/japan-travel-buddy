@@ -12,6 +12,7 @@ hours?: string;
 price?: string;
 rating?: number;
 website?: string;
+nearby?: string[];
 };
 
 export const spots: Spot[] = [
@@ -29,7 +30,12 @@ export const spots: Spot[] = [
   hours: "06:00〜18:00",
   price: "大人500円",
   rating: 4.7,
-  website: "https://www.kiyomizudera.or.jp/"
+  website: "https://www.kiyomizudera.or.jp/",
+nearby: [
+  "八坂神社",
+  "祇園",
+  "錦市場",
+],
 },
   {
     id: "fushimi-inari",
@@ -52,35 +58,48 @@ export const spots: Spot[] = [
     longitude: 135.7292,
   },
   {
-    id: "ginkakuji",
-    name: "銀閣寺",
-    area: "京都",
-    category: "寺院",
-    description: "侘び寂びの美を象徴する世界遺産の寺院。",
-    image: "/spots/ginkakuji.jpg",
-    latitude: 35.0272,
-    longitude: 135.7982,
-  },
+  id: "gion",
+  name: "祇園",
+  area: "京都",
+  category: "街並み",
+  description: "京都らしい風情を感じられる花街。",
+  image: "/spots/gion.jpg",
+  latitude: 35.0036,
+  longitude: 135.7751,
+
+  nearby: [
+    "八坂神社",
+    "清水寺",
+    "錦市場",
+    "平安神宮",
+  ],
+},
   {
-    id: "arashiyama",
-    name: "嵐山",
-    area: "京都",
-    category: "景勝地",
-    description: "四季折々の景色が楽しめる京都屈指の観光地。",
-    image: "/spots/arashiyama.jpg",
-    latitude: 35.0094,
-    longitude: 135.6668,
-  },
-  {
-    id: "bamboo-grove",
-    name: "竹林の小径",
-    area: "京都",
-    category: "自然",
-    description: "幻想的な竹林が続く人気の散策スポット。",
-    image: "/spots/bamboo-grove.jpg",
-    latitude: 35.017,
-    longitude: 135.6713,
-  },
+  id: "arashiyama",
+  name: "嵐山",
+  area: "京都",
+  category: "景勝地",
+  description: "四季折々の景色が楽しめる京都屈指の観光地。",
+  image: "/spots/arashiyama.jpg",
+  latitude: 35.0094,
+  longitude: 135.6668,
+
+  nearby: [
+    "竹林の小径",
+    "渡月橋",
+    "天龍寺",
+  ],
+},
+{
+  id: "bamboo-grove",
+  name: "竹林の小径",
+  area: "京都",
+  category: "自然",
+  description: "幻想的な竹林が続く人気の散策スポット。",
+  image: "/spots/bamboo-grove.jpg",
+  latitude: 35.017,
+  longitude: 135.6713,
+},
   {
     id: "togetsukyo",
     name: "渡月橋",
