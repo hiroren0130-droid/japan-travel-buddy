@@ -69,9 +69,13 @@ export default function MyPage() {
 
   return (
     <main className="mx-auto max-w-5xl p-6">
-      <h1 className="mb-8 text-3xl font-bold">
-        📁 マイ旅行プラン
-      </h1>
+      <h1 className="text-3xl font-bold">
+  📁 マイ旅行プラン
+</h1>
+
+<p className="mb-8 mt-2 text-gray-500">
+  保存件数：{plans.length}件
+</p>
 
       {plans.length === 0 ? (
         <p>保存された旅行プランはありません。</p>

@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface TravelPlan {
   title: string;
   summary: string;
@@ -25,6 +27,7 @@ export interface TravelSpot {
 
 export interface SavedTravelPlan extends TravelPlan {
   id: string;
+  createdAt?: Timestamp;
 }
 
 export interface TravelRequest {

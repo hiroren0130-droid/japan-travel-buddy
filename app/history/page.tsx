@@ -64,7 +64,9 @@ export default function HistoryPage() {
       <h1 className="mb-8 text-3xl font-bold">
         📚 保存した旅行プラン
       </h1>
-
+      <p className="mt-2 text-gray-500">
+  保存件数：{plans.length}件
+</p>
       {plans.length === 0 ? (
         <div className="rounded-xl border bg-white p-8 text-center">
           <p className="text-gray-500">
@@ -94,13 +96,20 @@ export default function HistoryPage() {
               </p>
 
               <div className="mt-6 flex gap-3">
-                <button
-                  onClick={() => handleDelete(plan.id)}
-                  className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-                >
-                  削除
-                </button>
-              </div>
+  <Link
+    href={`/history/${plan.id}`}
+    className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+  >
+    開く
+  </Link>
+
+  <button
+    onClick={() => handleDelete(plan.id)}
+    className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
+  >
+    削除
+  </button>
+</div>
             </div>
           ))}
         </div>

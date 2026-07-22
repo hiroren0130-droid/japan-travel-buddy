@@ -27,9 +27,15 @@ export async function saveTravelPlan(
 
   const snapshot = await getDocs(q);
 
-  if (!snapshot.empty) {
-    throw new Error("この旅行プランはすでに保存されています。");
-  }
+const alreadyExists = snapshot.docs.some((doc) => {
+  const data = doc.data();
+
+  return data.title === plan.title;
+});
+
+if (alreadyExists) {
+  throw new Error("同じタイトルの旅行プランはすでに保存されています。");
+}
 
   await addDoc(collection(db, "travelPlans"), {
     uid,

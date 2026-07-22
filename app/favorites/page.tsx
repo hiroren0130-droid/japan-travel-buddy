@@ -20,7 +20,9 @@ export default function FavoritesPage() {
       <h1 className="mb-6 text-3xl font-bold">
         ❤️ お気に入り
       </h1>
-
+      <p className="mb-6 text-gray-500">
+  保存件数：{favorites.length}件
+</p>
       {favorites.length === 0 ? (
         <EmptyState
           icon="❤️"
