@@ -24,21 +24,21 @@ export default function HomePage() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link
               href="/chat"
-              className="rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:bg-blue-700"
+              className="rounded-xl bg-blue-600 px-8 py-4 text-lg font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               ✨ Start Planning
             </Link>
 
             <Link
               href="/mypage"
-              className="rounded-xl border border-gray-300 bg-white px-8 py-4 text-lg font-semibold text-gray-700 transition hover:bg-gray-100"
+              className="rounded-xl border border-gray-300 bg-white px-8 py-4 text-lg font-semibold text-gray-700 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
             >
               📁 My Travel Plans
             </Link>
           </div>
 
           <div className="mt-14 grid gap-6 md:grid-cols-3">
-            <div className="rounded-2xl bg-white p-6 shadow">
+            <div className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
               <div className="text-3xl">🤖</div>
               <h3 className="mt-3 font-bold">AI Planning</h3>
               <p className="mt-2 text-sm text-gray-600">
@@ -46,7 +46,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-white p-6 shadow">
+            <div className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
               <div className="text-3xl">🗺️</div>
               <h3 className="mt-3 font-bold">Interactive Maps</h3>
               <p className="mt-2 text-sm text-gray-600">
@@ -54,7 +54,7 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-white p-6 shadow">
+            <div className="rounded-2xl bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
               <div className="text-3xl">💾</div>
               <h3 className="mt-3 font-bold">Save Trips</h3>
               <p className="mt-2 text-sm text-gray-600">

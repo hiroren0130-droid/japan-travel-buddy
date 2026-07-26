@@ -20,11 +20,12 @@ export default function SpotImage({
   return (
     <div className="relative mb-4 h-48 overflow-hidden rounded-xl">
       <Image
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover transition-transform duration-300 hover:scale-105"
-      />
+  src={src}
+  alt={alt}
+  fill
+  sizes="100vw"
+  className="object-cover transition-transform duration-300 hover:scale-105"
+/>
     </div>
   );
 }

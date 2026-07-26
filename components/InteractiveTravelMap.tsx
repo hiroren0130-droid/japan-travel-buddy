@@ -24,42 +24,62 @@ export default function InteractiveTravelMap({
 }: Props) {
   const [selected, setSelected] = useState<Spot | null>(null);
 
-  if (spots.length === 0) return null;
-
   const center = useMemo(() => {
-    return {
-      lat:
-        spots.reduce((sum, s) => sum + s.latitude, 0) /
-        spots.length,
-      lng:
-        spots.reduce((sum, s) => sum + s.longitude, 0) /
-        spots.length,
-    };
-  }, [spots]);
+  return {
+    lat:
+      spots.reduce((sum, spot) => sum + spot.latitude, 0) /
+      Math.max(spots.length, 1),
+
+    lng:
+      spots.reduce((sum, spot) => sum + spot.longitude, 0) /
+      Math.max(spots.length, 1),
+  };
+}, [spots]);
+
+if (spots.length === 0) {
+  return null;
+}
+
+const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+if (!apiKey) {
+  return (
+    <div
+      className="rounded-3xl border border-gray-200 bg-white p-6 text-center text-gray-500"
+      role="status"
+    >
+      Google Maps API Key が設定されていません。
+    </div>
+  );
+}
 
   return (
-    <APIProvider
-      apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!}
-    >
-      <div className="overflow-hidden rounded-3xl border bg-white shadow-lg">
-
+    <APIProvider apiKey={apiKey}>
+      <div
+        className="overflow-hidden rounded-3xl border bg-white shadow-sm"
+        aria-labelledby="travel-route-map"
+      >
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-5 text-white">
-          <h2 className="text-xl font-bold">
-            🗺️ Interactive Travel Map
+          <h2
+            id="travel-route-map"
+            className="text-xl font-bold"
+          >
+            🗺️ 旅行ルートマップ
           </h2>
 
           <p className="text-sm text-blue-100">
-            Explore every destination.
+            旅行スポットの位置を地図で確認できます。
           </p>
         </div>
 
         <div className="h-[600px]">
           <Map
-  center={center}
-  defaultZoom={11}
-  mapId="travel-map"
-  gestureHandling="greedy"
->
+            className="h-full w-full"
+            center={center}
+            defaultZoom={11}
+            mapId="travel-map"
+            gestureHandling="greedy"
+          >
             {spots.map((spot, index) => (
               <AdvancedMarker
                 key={spot.name}
@@ -86,7 +106,7 @@ export default function InteractiveTravelMap({
                 }}
                 onCloseClick={() => setSelected(null)}
               >
-                <div className="font-bold">
+                <div className="break-words font-bold">
                   {selected.name}
                 </div>
               </InfoWindow>

@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+
+import HistoryHeader from "@/components/history/HistoryHeader";
+import HistoryEmpty from "@/components/history/HistoryEmpty";
+import HistoryGrid from "@/components/history/HistoryGrid";
+import HistorySearch from "@/components/history/HistorySearch";
+import HistorySort from "@/components/history/HistorySort";
+import HistoryViewToggle from "@/components/history/HistoryViewToggle";
 
 import { auth } from "@/lib/firebase";
 import {
@@ -13,6 +19,10 @@ import { SavedTravelPlan } from "@/types/travel";
 export default function HistoryPage() {
   const [plans, setPlans] = useState<SavedTravelPlan[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<"newest" | "oldest">("newest");
+  const [view, setView] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     async function loadPlans() {
@@ -51,6 +61,24 @@ export default function HistoryPage() {
     }
   }
 
+  const filteredPlans = [...plans]
+    .filter((plan) => {
+      const keyword = search.toLowerCase();
+
+      return (
+        plan.title.toLowerCase().includes(keyword) ||
+        plan.summary.toLowerCase().includes(keyword)
+      );
+    })
+    .sort((a, b) => {
+      const aTime = a.createdAt?.toMillis() ?? 0;
+      const bTime = b.createdAt?.toMillis() ?? 0;
+
+      return sort === "newest"
+        ? bTime - aTime
+        : aTime - bTime;
+    });
+
   if (loading) {
     return (
       <main className="mx-auto max-w-5xl p-8">
@@ -61,58 +89,31 @@ export default function HistoryPage() {
 
   return (
     <main className="mx-auto max-w-5xl p-8">
-      <h1 className="mb-8 text-3xl font-bold">
-        📚 保存した旅行プラン
-      </h1>
-      <p className="mt-2 text-gray-500">
-  保存件数：{plans.length}件
-</p>
-      {plans.length === 0 ? (
-        <div className="rounded-xl border bg-white p-8 text-center">
-          <p className="text-gray-500">
-            保存された旅行プランはありません。
-          </p>
+      <HistoryHeader count={plans.length} />
 
-          <Link
-            href="/chat"
-            className="mt-6 inline-block rounded-lg bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
-          >
-            AIで旅行プランを作成する
-          </Link>
-        </div>
+      <HistorySearch
+        value={search}
+        onChange={setSearch}
+      />
+
+      <HistoryViewToggle
+        view={view}
+        onChange={setView}
+      />
+
+      <HistorySort
+        value={sort}
+        onChange={setSort}
+      />
+
+      {filteredPlans.length === 0 ? (
+        <HistoryEmpty />
       ) : (
-        <div className="space-y-5">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              className="rounded-xl border bg-white p-6 shadow-sm"
-            >
-              <h2 className="text-xl font-bold">
-                {plan.title}
-              </h2>
-
-              <p className="mt-3 text-gray-600">
-                {plan.summary}
-              </p>
-
-              <div className="mt-6 flex gap-3">
-  <Link
-    href={`/history/${plan.id}`}
-    className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-  >
-    開く
-  </Link>
-
-  <button
-    onClick={() => handleDelete(plan.id)}
-    className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-  >
-    削除
-  </button>
-</div>
-            </div>
-          ))}
-        </div>
+        <HistoryGrid
+  plans={filteredPlans}
+  view={view}
+  onDelete={handleDelete}
+        />
       )}
     </main>
   );

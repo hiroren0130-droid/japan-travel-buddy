@@ -1,21 +1,9 @@
-import GoogleAnalytics from "@/components/GoogleAnalytics";
-import Navbar from "../components/Navbar";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://your-domain.vercel.app"),
+  metadataBase: new URL("https://www.japantravelbuddy.com"),
 
   title: {
     default: "Japan Travel Buddy",
@@ -23,15 +11,18 @@ export const metadata: Metadata = {
   },
 
   description:
-    "AI-powered Japan travel planner. Create personalized itineraries, discover Kyoto attractions, explore interactive maps, and plan unforgettable trips.",
+    "AI-powered travel planner for Japan. Create personalized itineraries, discover attractions, explore maps, and save your favorite travel plans.",
 
   keywords: [
-    "Japan Travel",
+    "Japan",
+    "Travel",
     "Kyoto",
-    "AI Travel Planner",
+    "AI",
+    "Travel Planner",
     "Japan Trip",
-    "Travel Itinerary",
-    "Japan Travel Buddy",
+    "Itinerary",
+    "Tourism",
+    "OpenAI",
   ],
 
   authors: [
@@ -41,32 +32,43 @@ export const metadata: Metadata = {
   ],
 
   creator: "Japan Travel Buddy",
-  publisher: "Japan Travel Buddy",
 
-  openGraph: {
-    title: "Japan Travel Buddy",
-    description:
-      "Plan your perfect Japan trip with AI-powered travel planning.",
-    url: "https://your-domain.vercel.app",
-    siteName: "Japan Travel Buddy",
-    locale: "en_US",
-    type: "website",
-  },
-
-  twitter: {
-    card: "summary_large_image",
-    title: "Japan Travel Buddy",
-    description:
-      "AI-powered travel planner for exploring Japan.",
-  },
+  applicationName: "Japan Travel Buddy",
 
   robots: {
     index: true,
     follow: true,
   },
 
+  openGraph: {
+    type: "website",
+    locale: "ja_JP",
+    url: "https://japantravelbuddy.com",
+    siteName: "Japan Travel Buddy",
+    title: "Japan Travel Buddy",
+    description:
+      "Create personalized Japan travel plans with AI.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Japan Travel Buddy",
+      },
+    ],
+  },
+
+  twitter: {
+    card: "summary_large_image",
+    title: "Japan Travel Buddy",
+    description:
+      "Create personalized Japan travel plans with AI.",
+    images: ["/og-image.jpg"],
+  },
+
   icons: {
     icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
 };
 
@@ -76,18 +78,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <Navbar />
-
+    <html lang="ja">
+      <body className="min-h-screen bg-gray-50 text-gray-900">
         {children}
-
-        <GoogleAnalytics
-          measurementId={process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? ""}
-        />
+        <Footer />
       </body>
     </html>
   );

@@ -1,5 +1,3 @@
-import { useEffect, useRef } from "react";
-
 import type { TravelPlan } from "@/types/travel";
 
 import MessageBubble from "./MessageBubble";
@@ -17,26 +15,21 @@ type Props = {
 export default function ChatMessages({
   messages,
 }: Props) {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [messages]);
-
   return (
-    <div className="flex-1 space-y-6 overflow-y-auto bg-gray-50 p-6">
+    <div
+      className="space-y-6 bg-gray-50 p-6"
+      role="log"
+      aria-live="polite"
+      aria-label="チャットメッセージ"
+    >
       {messages.map((msg, index) => (
         <MessageBubble
-          key={index}
+          key={`${msg.role}-${index}`}
           role={msg.role}
           content={msg.content}
           plan={msg.travelPlan}
         />
       ))}
-
-      <div ref={messagesEndRef} />
     </div>
   );
 }

@@ -4,12 +4,12 @@ import {
   Copy,
   FileText,
   Save,
-  Route,
+  Map,
   Share2,
 } from "lucide-react";
 import InteractiveTravelMap from "./InteractiveTravelMap";
 import { getSpotById } from "@/lib/spotService";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createGoogleMapsRoute } from "@/lib/googleMaps";
 import { auth } from "@/lib/firebase";
 import { saveTravelPlan } from "@/lib/firestore";
@@ -29,11 +29,11 @@ type Props = {
 };
 
 export default function TravelPlanCard({ plan }: Props) {
-  const [favorite, setFavorite] = useState(false);
+  const [favorite, setFavorite] = useState(() =>
+  isFavorite(plan.title)
+);
 
-  useEffect(() => {
-    setFavorite(isFavorite(plan.title));
-  }, [plan.title]);
+  
 
   function handleFavorite() {
   if (favorite) {
@@ -77,33 +77,41 @@ async function handleSave() {
 }
 
 async function handleShare() {
-  const shareUrl = window.location.href;
+  const shareText = `${plan.title}
+
+${plan.summary}
+
+Japan Travel Buddyで作成した旅行プラン`;
 
   if (navigator.share) {
     try {
       await navigator.share({
         title: plan.title,
-        text: plan.summary,
-        url: shareUrl,
+        text: shareText,
       });
     } catch {
-      // キャンセルされた場合は何もしない
+      // キャンセル時は何もしない
     }
   } else {
-    await navigator.clipboard.writeText(shareUrl);
-    alert("URLをコピーしました。");
+    await navigator.clipboard.writeText(shareText);
+    alert("旅行プランをコピーしました。");
   }
 }
 function handleRoute() {
   const spots = plan.days
-  .flatMap((day) => day.items)
-  .map((item) => getSpotById(item.spotId))
-  .filter((spot): spot is NonNullable<typeof spot> => !!spot)
-  .map((spot) => spot.name);
+    .flatMap((day) => day.items)
+    .map((item) => getSpotById(item.spotId))
+    .filter((spot): spot is NonNullable<typeof spot> => !!spot)
+    .map((spot) => spot.name);
 
-const url = createGoogleMapsRoute(spots);
+  if (spots.length === 0) {
+    alert("ルートを作成できるスポットがありません。");
+    return;
+  }
 
-window.open(url, "_blank");
+  const url = createGoogleMapsRoute(spots);
+
+  window.open(url, "_blank");
 }
 const routeSpots = plan.days
   .flatMap((day) => day.items)
@@ -142,10 +150,11 @@ return (
           <Button
   size="icon"
   onClick={handleFavorite}
-            variant="secondary"
-            className="h-11 w-11 rounded-xl bg-white/20 hover:bg-white/30 hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm"
-            title="お気に入り"
-          >
+  variant="secondary"
+  aria-label="お気に入り"
+  className="..."
+  title="お気に入り"
+>
             <Heart
               size={20}
               className={favorite ? "fill-red-500 text-red-500" : ""}
@@ -155,50 +164,55 @@ return (
           <Button
   size="icon"
   onClick={handleCopy}
-            variant="secondary"
-            className="h-11 w-11 rounded-xl bg-white/20 hover:bg-white/30 hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm"
-            title="コピー"
-          >
+  variant="secondary"
+  aria-label="コピー"
+  className="..."
+  title="コピー"
+>
             <Copy size={20} />
           </Button>
 
           <Button
   size="icon"
   onClick={handlePdf}
-            variant="secondary"
-            className="h-11 w-11 rounded-xl bg-white/20 hover:bg-white/30 hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm"
-            title="PDFとして保存"
-          >
+  variant="secondary"
+  aria-label="PDFとして保存"
+  className="..."
+  title="PDFとして保存"
+>
             <FileText size={20} />
           </Button>
 
           <Button
   size="icon"
   onClick={handleSave}
-            variant="secondary"
-            className="h-11 w-11 rounded-xl bg-white/20 hover:bg-white/30 hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm"
-            title="保存"
-          >
+  variant="secondary"
+  aria-label="保存"
+  className="..."
+  title="保存"
+>
             <Save size={20} />
           </Button>
 
           <Button
   size="icon"
   onClick={handleRoute}
-            variant="secondary"
-            className="h-11 w-11 rounded-xl bg-white/20 hover:bg-white/30 hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm"
-            title="Google Mapsでルートを開く"
-          >
-            <Route size={20} />
+  variant="secondary"
+  aria-label="Google Mapsでルートを開く"
+  className="..."
+  title="Google Mapsでルートを開く"
+>
+            <Map size={20} />
           </Button>
 
           <Button
   size="icon"
   onClick={handleShare}
-            variant="secondary"
-            className="h-11 w-11 rounded-xl bg-white/20 hover:bg-white/30 hover:scale-110 active:scale-95 transition-all duration-200 shadow-sm"
-            title="共有"
-          >
+  variant="secondary"
+  aria-label="共有"
+  className="..."
+  title="共有"
+>
             <Share2 size={20} />
           </Button>
         </div>

@@ -13,12 +13,7 @@ export default function TravelRouteMap({
 
   const center = spots[0];
 
-  const markers = spots
-    .map(
-      (spot) =>
-        `${spot.latitude},${spot.longitude}`
-    )
-    .join("|");
+  
 
   const src = `https://www.google.com/maps?q=${center.latitude},${center.longitude}&z=13&output=embed`;
 

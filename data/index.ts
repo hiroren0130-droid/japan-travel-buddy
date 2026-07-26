@@ -1,9 +1,9 @@
 // data/index.ts
 
+import { spots as kyotoSpots } from "./kyoto";
+
 export type { Spot } from "./types";
 
-export { spots as kyotoSpots } from "./kyoto";
-
-import { spots as kyotoSpots } from "./kyoto";
+export { kyotoSpots };
 
 export const allSpots = [...kyotoSpots];

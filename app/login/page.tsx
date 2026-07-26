@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 import { auth } from "@/lib/firebase";
 
 export default function LoginPage() {
@@ -15,11 +16,15 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      router.push("/dashboard");
-    } catch (error: any) {
-      alert(error.message);
-    }
+  await signInWithEmailAndPassword(auth, email, password);
+  router.push("/dashboard");
+} catch (error) {
+  if (error instanceof FirebaseError) {
+    alert(error.message);
+  } else {
+    alert("ログインに失敗しました。");
+  }
+}
   };
 
   return (

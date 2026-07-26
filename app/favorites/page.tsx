@@ -1,43 +1,97 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
-import TravelPlanCard from "@/components/TravelPlanCard";
-import EmptyState from "@/components/ui/EmptyState";
+import FavoriteHeader from "@/components/favorite/FavoriteHeader";
+import FavoriteGrid from "@/components/favorite/FavoriteGrid";
+import FavoriteEmpty from "@/components/favorite/FavoriteEmpty";
+import FavoriteSearch from "@/components/favorite/FavoriteSearch";
+import FavoriteSort, {
+  FavoriteSortType,
+} from "@/components/favorite/FavoriteSort";
 
-import { getFavorites } from "@/lib/favorites";
+import {
+  getFavoriteItems,
+  removeFavorite,
+} from "@/lib/favorites";
+
 import type { TravelPlan } from "@/types/travel";
 
 export default function FavoritesPage() {
-  const [favorites, setFavorites] = useState<TravelPlan[]>([]);
+  const [favorites, setFavorites] = useState(getFavoriteItems());
+  const [search, setSearch] = useState("");
+  const [sort, setSort] =
+    useState<FavoriteSortType>("newest");
 
-  useEffect(() => {
-    setFavorites(getFavorites());
-  }, []);
+  
+
+  function handleRemove(plan: TravelPlan) {
+    removeFavorite(plan.title);
+    setFavorites(getFavoriteItems());
+  }
+
+  function handleCardClick(plan: TravelPlan) {
+    console.log(plan.title);
+
+    // router.push(...)
+  }
+
+  const filteredFavorites = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    const list = favorites.filter((item) => {
+      if (!keyword) return true;
+
+      return (
+        item.plan.title.toLowerCase().includes(keyword) ||
+        item.plan.summary.toLowerCase().includes(keyword)
+      );
+    });
+
+    switch (sort) {
+      case "oldest":
+        list.sort((a, b) => a.savedAt - b.savedAt);
+        break;
+
+      case "title":
+        list.sort((a, b) =>
+          a.plan.title.localeCompare(b.plan.title, "ja")
+        );
+        break;
+
+      default:
+        list.sort((a, b) => b.savedAt - a.savedAt);
+    }
+
+    return list.map((item) => item.plan);
+  }, [favorites, search, sort]);
 
   return (
     <main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-6 text-3xl font-bold">
-        ❤️ お気に入り
-      </h1>
-      <p className="mb-6 text-gray-500">
-  保存件数：{favorites.length}件
-</p>
-      {favorites.length === 0 ? (
-        <EmptyState
-          icon="❤️"
-          title="お気に入りはまだありません"
-          description="旅行プランを保存するとここに表示されます。"
-        />
+      <FavoriteHeader count={favorites.length} />
+
+      {favorites.length > 0 && (
+        <>
+          <FavoriteSearch
+            value={search}
+            onChange={setSearch}
+          />
+
+          <FavoriteSort
+            value={sort}
+            onChange={setSort}
+          />
+        </>
+      )}
+
+      {filteredFavorites.length === 0 ? (
+        <FavoriteEmpty />
       ) : (
-        <div className="space-y-6">
-          {favorites.map((plan) => (
-            <TravelPlanCard
-              key={plan.title}
-              plan={plan}
-            />
-          ))}
-        </div>
+        <FavoriteGrid
+          favorites={filteredFavorites}
+          onCardClick={handleCardClick}
+          onRemove={handleRemove}
+        />
       )}
     </main>
   );

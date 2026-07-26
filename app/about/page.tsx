@@ -1,28 +1,31 @@
 export const metadata = {
-  title: "About",
+  title: "About | Japan Travel Buddy",
+  description: "Learn more about Japan Travel Buddy",
 };
 
 export default function AboutPage() {
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
+    <main className="mx-auto max-w-4xl px-6 py-16">
       <h1 className="mb-8 text-4xl font-bold">
         About Japan Travel Buddy
       </h1>
 
-      <div className="space-y-10 text-gray-700 leading-8">
+      <div className="space-y-10">
+
         <section>
           <h2 className="mb-3 text-2xl font-semibold">
             Our Mission
           </h2>
 
-          <p>
-            Japan Travel Buddy helps travelers discover Japan more
-            easily through AI-powered travel planning.
+          <p className="leading-8 text-gray-700">
+            Japan Travel Buddy was created to make traveling in Japan easier,
+            more enjoyable, and more personal through the power of AI.
           </p>
 
-          <p className="mt-4">
-            From famous landmarks to hidden local gems, our goal is to
-            make every journey simple, personalized, and unforgettable.
+          <p className="mt-4 leading-8 text-gray-700">
+            Instead of spending hours researching destinations, transportation,
+            and itineraries, travelers can receive personalized travel plans in
+            seconds.
           </p>
         </section>
 
@@ -31,27 +34,14 @@ export default function AboutPage() {
             What We Offer
           </h2>
 
-          <ul className="list-disc space-y-2 pl-6">
-            <li>AI-generated personalized travel itineraries</li>
-            <li>Interactive travel maps</li>
-            <li>Kyoto attractions database</li>
-            <li>Google Maps integration</li>
-            <li>Save and manage travel plans</li>
-            <li>PDF itinerary export</li>
+          <ul className="list-disc pl-6 space-y-2 leading-8 text-gray-700">
+            <li>AI-powered travel itinerary generation</li>
+            <li>Curated sightseeing spot database</li>
+            <li>Interactive maps</li>
+            <li>Favorite travel plans</li>
+            <li>PDF export</li>
+            <li>Responsive experience across devices</li>
           </ul>
-        </section>
-
-        <section>
-          <h2 className="mb-3 text-2xl font-semibold">
-            Why Japan Travel Buddy?
-          </h2>
-
-          <p>
-            Planning a trip to Japan can be overwhelming.
-            Japan Travel Buddy simplifies the process by combining AI,
-            local travel information, and interactive tools into one
-            easy-to-use platform.
-          </p>
         </section>
 
         <section>
@@ -59,11 +49,18 @@ export default function AboutPage() {
             Our Vision
           </h2>
 
-          <p>
-            We aim to become the most trusted AI travel companion for
-            visitors exploring Japan.
+          <p className="leading-8 text-gray-700">
+            We aim to become the most trusted AI travel companion for visitors
+            exploring Japan.
+          </p>
+
+          <p className="mt-4 leading-8 text-gray-700">
+            Our goal is to continuously improve the service by expanding
+            destination coverage, enhancing AI recommendations, and delivering
+            a better travel experience for every user.
           </p>
         </section>
+
       </div>
     </main>
   );

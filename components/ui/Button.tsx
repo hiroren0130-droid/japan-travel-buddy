@@ -34,8 +34,10 @@ export default function Button({
 
   return (
     <button
-      {...props}
+  type={props.type ?? "button"}
+  {...props}
       disabled={disabled || loading}
+      aria-busy={loading}
       className={`
         inline-flex
         items-center
@@ -54,7 +56,8 @@ export default function Button({
     >
       {loading && (
         <svg
-          className="h-4 w-4 animate-spin"
+  className="h-4 w-4 animate-spin"
+  aria-hidden="true"
           viewBox="0 0 24 24"
           fill="none"
         >

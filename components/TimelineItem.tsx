@@ -52,7 +52,10 @@ export default function TimelineItem({
   const spotData = getSpotByName(spot);
 
   return (
-    <div className="relative mb-10 ml-6">
+    <div
+  className="relative mb-10 ml-6"
+  role="listitem"
+>
       <div className="absolute -left-[38px] top-8 h-5 w-5 rounded-full border-4 border-white bg-blue-600 shadow-lg" />
 
       <Card className="rounded-3xl border border-gray-200 bg-white p-6 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -79,9 +82,9 @@ export default function TimelineItem({
         </div>
 
         {/* 説明 */}
-        <p className="leading-8 text-gray-700">
-          {description}
-        </p>
+        <p className="break-words leading-8 text-gray-700">
+  {description || "説明はありません。"}
+</p>
 
         {/* 移動情報 */}
         {(transport || duration) && (
@@ -112,7 +115,11 @@ export default function TimelineItem({
         </div>
 
         {/* Spot情報 */}
-        {spotData && <SpotCard spot={spotData} />}
+        {spotData && (
+  <div className="mt-6">
+    <SpotCard spot={spotData} />
+  </div>
+)}
       </Card>
     </div>
   );

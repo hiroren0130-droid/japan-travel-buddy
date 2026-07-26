@@ -37,11 +37,12 @@ export default function SpotCard({ spot }: Props) {
       {spot.image && (
         <div className="relative h-64 w-full overflow-hidden">
           <Image
-            src={spot.image}
-            alt={spot.name}
-            fill
-            className="object-cover transition-transform duration-500 hover:scale-105"
-          />
+  src={spot.image}
+  alt={spot.name}
+  fill
+  sizes="100vw"
+  className="object-cover transition-transform duration-500 hover:scale-105"
+/>
         </div>
       )}
 
@@ -67,7 +68,7 @@ export default function SpotCard({ spot }: Props) {
             </div>
           </div>
 
-          {spot.rating && (
+          {spot.rating != null && (
             <div className="flex items-center gap-1 rounded-full bg-yellow-100 px-3 py-2">
               <Star
                 size={16}
@@ -138,7 +139,7 @@ export default function SpotCard({ spot }: Props) {
               </span>
             </div>
 
-            <p className="leading-8 text-gray-700">
+            <p className="break-words leading-8 text-gray-700">
               {spot.description}
             </p>
           </div>
@@ -147,10 +148,11 @@ export default function SpotCard({ spot }: Props) {
         {/* ボタン */}
         {spot.website && (
           <a
-            href={spot.website}
+  href={spot.website}
+  aria-label={`${spot.name}の公式サイトを新しいタブで開く`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-all duration-200 hover:bg-blue-700 hover:shadow-lg"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 font-semibold text-white transition-all duration-200 hover:bg-blue-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
             <Globe size={18} />
             公式サイトを見る

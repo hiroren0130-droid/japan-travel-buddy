@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 type Props = {
   name: string;
 };
@@ -31,15 +33,22 @@ export default function PlaceImage({ name }: Props) {
   if (!image) return null;
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-white shadow">
-      <img
-        src={image}
-        alt={name}
-        className="h-40 w-full object-cover"
-      />
+    <div className="overflow-hidden rounded-xl border bg-white shadow-sm transition hover:shadow-md">
+      <div className="relative h-40 w-full">
+        <Image
+          src={image}
+          alt={`${name}の写真`}
+          fill
+          loading="lazy"
+          sizes="100vw"
+          className="object-cover transition-transform duration-300 hover:scale-105"
+        />
+      </div>
 
       <div className="p-3">
-        <p className="font-semibold">{name}</p>
+        <p className="break-words font-semibold text-gray-900">
+          {name}
+        </p>
       </div>
     </div>
   );

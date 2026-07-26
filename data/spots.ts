@@ -8,12 +8,12 @@ export type Spot = {
   latitude: number;
   longitude: number;
   address?: string;
-hours?: string;
-price?: string;
-rating?: number;
-website?: string;
-nearby?: string[];
-};
+  hours?: string;
+  price?: string;
+  rating?: number;
+  website?: string;
+  nearby?: string[];
+  };
 
 export const spots: Spot[] = [
   {
@@ -31,7 +31,7 @@ export const spots: Spot[] = [
   price: "大人500円",
   rating: 4.7,
   website: "https://www.kiyomizudera.or.jp/",
-nearby: [
+  nearby: [
   "八坂神社",
   "祇園",
   "錦市場",
@@ -129,16 +129,6 @@ nearby: [
     image: "/spots/yasaka-shrine.jpg",
     latitude: 35.0037,
     longitude: 135.7788,
-  },
-  {
-    id: "gion",
-    name: "祇園",
-    area: "京都",
-    category: "街並み",
-    description: "京都らしい風情を感じられる花街。",
-    image: "/spots/gion.jpg",
-    latitude: 35.0036,
-    longitude: 135.7751,
   },
   {
     id: "nijo-castle",

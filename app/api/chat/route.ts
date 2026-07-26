@@ -53,6 +53,34 @@ const spotList = nearestSpots
     const response = await openai.responses.create({
       model: "gpt-5",
 
+      text: {
+    format: {
+      type: "json_schema",
+      name: "travel_plan",
+      strict: true,
+      schema: {
+  type: "object",
+  additionalProperties: false,
+
+  properties: {
+    title: {
+      type: "string",
+    },
+
+    summary: {
+      type: "string",
+    },
+
+    days: {
+      type: "array",
+    },
+  },
+
+  required: ["title", "summary", "days"],
+},
+    },
+  },
+
       input: `
 あなたは日本旅行専門のプロ旅行プランナーです。
 
@@ -119,6 +147,7 @@ ${currentLocation ? `${currentLocation.latitude}, ${currentLocation.longitude}` 
 ⑥ 昼食・休憩を適切な時間に配置する
 ⑦ 現実的に観光できるか確認する
 ⑧ JSONのみ返す
+
 ルール
 
 ・time は HH:mm
@@ -166,27 +195,91 @@ ${message}
 `,
     });
 
-    const aiPlan = JSON.parse(response.output_text);
+    let aiPlan;
 
-// 開発時のみ使用
-console.log(JSON.stringify(aiPlan, null, 2));
+try {
+  aiPlan = JSON.parse(response.output_text);
+} catch {
+  console.error("JSON Parse Error:", response.output_text);
+
+  return NextResponse.json(
+    {
+      error: "AIが正しい旅行プランを生成できませんでした。",
+    },
+    {
+      status: 500,
+    }
+  );
+}
+
+if (
+  !aiPlan ||
+  typeof aiPlan !== "object" ||
+  !Array.isArray(aiPlan.days)
+) {
+  console.error("Invalid AI response:", aiPlan);
+
+  return NextResponse.json(
+    {
+      error: "AIが不正な旅行プランを返しました。",
+    },
+    {
+      status: 500,
+    }
+  );
+}
+
+if (process.env.NODE_ENV === "development") {
+  console.log("===== AI Travel Plan =====");
+  console.log(JSON.stringify(aiPlan, null, 2));
+}
+
+type AIPlanItem = {
+  time: string;
+  spot: string;
+  description: string;
+  transport: string;
+  duration: string;
+};
+
+type AIPlanDay = {
+  items: AIPlanItem[];
+};
 
     // Spot Databaseと紐付け
     const plan = {
       ...aiPlan,
-      days: aiPlan.days.map((day: any) => ({
+      days: aiPlan.days.map((day: AIPlanDay) => ({
         ...day,
-        items: day.items.map((item: any) => {
-          const spot = getSpotByName(item.spot);
+        items: day.items
+  .map((item: AIPlanItem) => {
+    const spot = getSpotByName(item.spot);
 
-          return {
-            time: item.time,
-            spotId: spot?.id ?? "",
-            description: item.description,
-            transport: item.transport,
-            duration: item.duration,
-          };
-        }),
+    // Spot Databaseに存在しないスポットは除外
+    if (!spot) {
+      console.warn(`Spot not found: ${item.spot}`);
+      return null;
+    }
+
+    return {
+      time: item.time,
+      spotId: spot.id,
+      description: item.description,
+      transport: item.transport,
+      duration: item.duration,
+    };
+  })
+  .filter(
+    (
+      item
+    ): item is {
+      time: string;
+      spotId: string;
+      description: string;
+      transport: string;
+      duration: string;
+    } => item !== null
+  ),
       })),
     };
 

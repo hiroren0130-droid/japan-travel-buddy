@@ -13,6 +13,10 @@ function getGoogleMapsUrl(query: string) {
 }
 
 export default function TimelineMapButton({ spot }: Props) {
+  if (!spot.trim()) {
+    return null;
+  }
+
   return (
     <a
       href={getGoogleMapsUrl(spot)}

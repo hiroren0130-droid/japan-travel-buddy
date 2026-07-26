@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import jsPDF from "jspdf";
 
 type Props = {
@@ -7,26 +8,44 @@ type Props = {
 };
 
 export default function PdfButton({ text }: Props) {
-  const downloadPdf = () => {
-    const pdf = new jsPDF();
+  const [creating, setCreating] = useState(false);
 
-    pdf.setFontSize(16);
-    pdf.text("Japan Travel Buddy", 10, 15);
+  const downloadPdf = async () => {
+    const trimmedText = text.trim();
 
-    pdf.setFontSize(10);
+    if (!trimmedText || creating) return;
 
-    const lines = pdf.splitTextToSize(text, 180);
-    pdf.text(lines, 10, 30);
+    setCreating(true);
 
-    pdf.save("travel-plan.pdf");
+    try {
+      const pdf = new jsPDF();
+
+      pdf.setFontSize(16);
+      pdf.text("Japan Travel Buddy", 10, 15);
+
+      pdf.setFontSize(10);
+
+      const lines = pdf.splitTextToSize(trimmedText, 180);
+
+      pdf.text(lines, 10, 30);
+
+      pdf.save("travel-plan.pdf");
+    } catch (error) {
+      console.error("PDFの作成に失敗しました。", error);
+    } finally {
+      setCreating(false);
+    }
   };
 
   return (
     <button
+      type="button"
       onClick={downloadPdf}
-      className="rounded-lg bg-red-500 px-4 py-2 text-white font-semibold hover:bg-red-600"
+      disabled={creating}
+      aria-label="旅行プランをPDFで保存"
+      className="rounded-lg bg-red-500 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-300"
     >
-      📄 PDF保存
+      {creating ? "📄 作成中..." : "📄 PDF保存"}
     </button>
   );
 }

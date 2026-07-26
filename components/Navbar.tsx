@@ -21,7 +21,8 @@ export default function Navbar() {
           <Link
             key={menu.href}
             href={menu.href}
-            className={`rounded-lg px-4 py-2 font-medium transition ${
+            aria-current={pathname === menu.href ? "page" : undefined}
+            className={`rounded-lg px-4 py-2 font-medium transition focus:outline-none focus:ring-2 focus:ring-blue-300 ${
               pathname === menu.href
                 ? "bg-blue-600 text-white"
                 : "bg-gray-100 hover:bg-gray-200"

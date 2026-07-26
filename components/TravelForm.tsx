@@ -67,17 +67,24 @@ const budgetOptions = [
   "200,000円以上",
 ];
 
-  return (
+    return (
     <Card>
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
-          ✈️ AI旅行プラン作成
-        </h2>
+      <form
+  onSubmit={(e) => {
+    e.preventDefault();
+    onSubmit();
+  }}
+>
 
-        <p className="mt-2 text-sm text-gray-500">
-          条件を入力するとAIが旅行プランを作成します。
-        </p>
-      </div>
+<div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">
+            ✈️ AI旅行プラン作成
+          </h2>
+
+          <p className="mt-2 text-sm text-gray-500">
+            条件を入力するとAIが旅行プランを作成します。
+          </p>
+        </div>
 
       <div className="grid gap-4 md:grid-cols-3">
         <div className="md:col-span-3">
@@ -199,27 +206,27 @@ const budgetOptions = [
       </div>
 
       <Button
-        type="button"
-        onClick={onSubmit}
-        loading={loading}
-        className="mt-8 w-full"
-      >
+  type="submit"
+  loading={loading}
+  className="mt-8 w-full"
+>
         ✨ AIで旅行プランを作成
       </Button>
 
-      {loading && (
-  <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5 text-center">
-    <div className="animate-pulse text-4xl">🤖</div>
+              {loading && (
+          <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5 text-center">
+            <div className="animate-pulse text-4xl">🤖</div>
 
-    <p className="mt-3 font-semibold text-blue-700">
-      AIが旅行プランを作成中...
-    </p>
+            <p className="mt-3 font-semibold text-blue-700">
+              AIが旅行プランを作成中...
+            </p>
 
-    <p className="mt-2 text-sm text-gray-600">
-      最適なスポット・移動ルート・スケジュールを考えています。
-    </p>
-  </div>
-)}
+            <p className="mt-2 text-sm text-gray-600">
+              最適なスポット・移動ルート・スケジュールを考えています。
+            </p>
+          </div>
+        )}
+      </form>
     </Card>
   );
 }

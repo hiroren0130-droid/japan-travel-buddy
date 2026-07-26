@@ -21,7 +21,7 @@ export default function PlaceGallery({ content }: Props) {
   if (!content) return null;
   
   const detectedPlaces = places.filter((place) =>
-  (content ?? "").includes(place)
+  content.includes(place)
 );
 
   if (detectedPlaces.length === 0) return null;
