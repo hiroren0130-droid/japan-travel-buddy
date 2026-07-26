@@ -5,7 +5,7 @@ import {
   doc,
   getDoc,
   getDocs,
-　orderBy,
+  orderBy,
   query,
   serverTimestamp,
   updateDoc,
@@ -42,6 +42,7 @@ if (alreadyExists) {
     title: plan.title,
     summary: plan.summary,
     days: plan.days,
+    favorite: false,
     createdAt: serverTimestamp(),
   });
 }
@@ -78,10 +79,7 @@ export async function deleteTravelPlan(id: string) {
 }
 export async function updateTravelPlan(
   id: string,
-  data: {
-    title?: string;
-    summary?: string;
-  }
+  data: Partial<TravelPlan>
 ) {
   const ref = doc(db, "travelPlans", id);
 

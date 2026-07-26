@@ -4,6 +4,8 @@ export interface TravelPlan {
   title: string;
   summary: string;
   days: TravelDay[];
+
+  favorite?: boolean;
 }
 
 export interface TravelDay {

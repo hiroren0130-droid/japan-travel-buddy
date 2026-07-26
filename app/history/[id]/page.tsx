@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
@@ -50,8 +51,15 @@ export default function HistoryDetailPage() {
   return (
     <main className="min-h-screen bg-gray-100">
       <div className="mx-auto max-w-6xl p-4">
-        <TravelPlanCard plan={plan} />
-      </div>
+  <Link
+    href="/dashboard"
+    className="mb-4 inline-block rounded-lg bg-gray-200 px-4 py-2 hover:bg-gray-300"
+  >
+    ← Dashboardへ戻る
+  </Link>
+
+  <TravelPlanCard plan={plan} />
+</div>
     </main>
   );
 }

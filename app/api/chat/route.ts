@@ -72,8 +72,49 @@ const spotList = nearestSpots
     },
 
     days: {
-      type: "array",
+  type: "array",
+  items: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      day: {
+        type: "number",
+      },
+      items: {
+        type: "array",
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            time: {
+              type: "string",
+            },
+            spot: {
+              type: "string",
+            },
+            description: {
+              type: "string",
+            },
+            transport: {
+              type: "string",
+            },
+            duration: {
+              type: "string",
+            },
+          },
+          required: [
+            "time",
+            "spot",
+            "description",
+            "transport",
+            "duration",
+          ],
+        },
+      },
     },
+    required: ["day", "items"],
+  },
+},
   },
 
   required: ["title", "summary", "days"],
@@ -288,15 +329,19 @@ type AIPlanDay = {
       plan,
     });
   } catch (error) {
-    console.error("OpenAI Error:", error);
+  console.error("OpenAI Error:", error);
 
-    return NextResponse.json(
-      {
-        error: "旅行プランの生成に失敗しました。",
-      },
-      {
-        status: 500,
-      }
-    );
-  }
+  return NextResponse.json(
+    {
+      error: "旅行プランの生成に失敗しました。",
+      detail:
+        error instanceof Error
+          ? error.message
+          : JSON.stringify(error),
+    },
+    {
+      status: 500,
+    }
+  );
+}
 }

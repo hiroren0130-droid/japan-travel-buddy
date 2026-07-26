@@ -3,7 +3,7 @@ import "./globals.css";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.japantravelbuddy.com"),
+  metadataBase: new URL("https://japantravelbuddy.com"),
 
   title: {
     default: "Japan Travel Buddy",
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   },
 
   description:
-    "AI-powered travel planner for Japan. Create personalized itineraries, discover attractions, explore maps, and save your favorite travel plans.",
+  "Plan your perfect trip to Japan with AI. Discover destinations, build personalized itineraries, explore interactive maps, and save your travel plans with Japan Travel Buddy.",
 
   keywords: [
     "Japan",
