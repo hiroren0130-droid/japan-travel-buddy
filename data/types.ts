@@ -15,4 +15,6 @@ export type Spot = {
   rating?: number;
   website?: string;
   nearby?: string[];
+  recommendedStay?: string;
+  bestVisitTime?: "朝" | "昼" | "夕方";
 };

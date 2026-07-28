@@ -123,98 +123,143 @@ const routeSpots = plan.days
     longitude: spot!.longitude,
   }));
 
+  const firstSpot = plan.days
+  .flatMap((day) => day.items)
+  .map((item) => getSpotById(item.spotId))
+  .find((spot) => spot != null);
+
+const totalDays = plan.days.length;
+
+const totalSpots = plan.days.reduce(
+  (sum, day) => sum + day.items.length,
+  0
+);
+
 return (
   <Card className="overflow-hidden p-0">
     {/* Header */}
-    <div className="bg-gradient-to-r from-blue-600 to-sky-500 p-6 text-white">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div>
+    <div className="overflow-hidden">
+      {/* Hero画像（今はグレー） */}
+      <div className="relative h-[420px] w-full overflow-hidden">
+  {firstSpot && (
+    <>
+      <img
+        src={firstSpot.image}
+        alt={firstSpot.name}
+        className="h-full w-full object-cover"
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+      <div className="absolute bottom-0 left-0 w-full p-8 text-white">
+        <p className="mb-2 text-sm uppercase tracking-[0.3em] text-white/80">
+          Japan Travel Buddy
+        </p>
+
+        <h1 className="text-5xl font-bold drop-shadow-lg">
+          {plan.title}
+        </h1>
+
+        <p className="mt-3 max-w-2xl text-lg text-white/90">
+          AIがあなたのためだけにデザインした旅行プラン
+        </p>
+      </div>
+    </>
+  )}
+</div>
+
+      {/* Header本体 */}
+      <div className="bg-gradient-to-br from-sky-600 via-blue-500 to-cyan-400 px-8 py-12 text-white">
+        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
-  <div className="flex items-center gap-2">
-    <span className="text-3xl">🧳</span>
+            <div className="flex items-start gap-4">
+              <div className="flex flex-wrap gap-3">
+  <div className="rounded-full bg-white/20 px-4 py-2">
+    🗓 {totalDays}日間
+  </div>
 
-    <div>
-      <h2 className="text-2xl font-bold tracking-tight">
-        {plan.title}
-      </h2>
+  <div className="rounded-full bg-white/20 px-4 py-2">
+    🚶 {totalSpots}スポット
+  </div>
 
-      <p className="text-sm text-blue-100">
-        AIがあなた専用に作成した旅行プラン
-      </p>
-    </div>
+  <div className="rounded-full bg-white/20 px-4 py-2">
+    📍 京都
+  </div>
+
+  <div className="rounded-full bg-white/20 px-4 py-2">
+    ✨ AI Concierge
   </div>
 </div>
-        </div>
 
-        <div className="flex flex-wrap justify-center gap-3">
-          <Button
-  size="icon"
-  onClick={handleFavorite}
-  variant="secondary"
-  aria-label="お気に入り"
-  className="..."
-  title="お気に入り"
->
-            <Heart
-              size={20}
-              className={favorite ? "fill-red-500 text-red-500" : ""}
-            />
-          </Button>
+                <div className="mt-5 flex flex-wrap gap-3 text-sm">
+              </div>
+            </div>
+          </div>
 
-          <Button
-  size="icon"
-  onClick={handleCopy}
-  variant="secondary"
-  aria-label="コピー"
-  className="..."
-  title="コピー"
->
-            <Copy size={20} />
-          </Button>
+          <div className="flex flex-wrap justify-center gap-3">
+            <Button
+              size="icon"
+              onClick={handleFavorite}
+              variant="secondary"
+              aria-label="お気に入り"
+              title="お気に入り"
+            >
+              <Heart
+                size={20}
+                className={favorite ? "fill-red-500 text-red-500" : ""}
+              />
+            </Button>
 
-          <Button
-  size="icon"
-  onClick={handlePdf}
-  variant="secondary"
-  aria-label="PDFとして保存"
-  className="..."
-  title="PDFとして保存"
->
-            <FileText size={20} />
-          </Button>
+            <Button
+              size="icon"
+              onClick={handleCopy}
+              variant="secondary"
+              aria-label="コピー"
+              title="コピー"
+            >
+              <Copy size={20} />
+            </Button>
 
-          <Button
-  size="icon"
-  onClick={handleSave}
-  variant="secondary"
-  aria-label="保存"
-  className="..."
-  title="保存"
->
-            <Save size={20} />
-          </Button>
+            <Button
+              size="icon"
+              onClick={handlePdf}
+              variant="secondary"
+              aria-label="PDF"
+              title="PDF"
+            >
+              <FileText size={20} />
+            </Button>
 
-          <Button
-  size="icon"
-  onClick={handleRoute}
-  variant="secondary"
-  aria-label="Google Mapsでルートを開く"
-  className="..."
-  title="Google Mapsでルートを開く"
->
-            <Map size={20} />
-          </Button>
+            <Button
+              size="icon"
+              onClick={handleSave}
+              variant="secondary"
+              aria-label="保存"
+              title="保存"
+            >
+              <Save size={20} />
+            </Button>
 
-          <Button
-  size="icon"
-  onClick={handleShare}
-  variant="secondary"
-  aria-label="共有"
-  className="..."
-  title="共有"
->
-            <Share2 size={20} />
-          </Button>
+            <Button
+              size="icon"
+              onClick={handleRoute}
+              variant="secondary"
+              aria-label="Google Maps"
+              title="Google Maps"
+            >
+              <Map size={20} />
+            </Button>
+
+            <Button
+              size="icon"
+              onClick={handleShare}
+              variant="secondary"
+              aria-label="共有"
+              title="共有"
+            >
+              <Share2 size={20} />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

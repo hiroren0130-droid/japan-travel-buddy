@@ -22,7 +22,7 @@ export default function Header() {
           </h1>
 
           <p className="text-sm text-gray-500">
-            Discover Japan with AI
+            AIで日本を旅しよう
           </p>
         </div>
 

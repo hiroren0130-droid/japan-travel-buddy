@@ -7,13 +7,18 @@ export type Spot = {
   image: string;
   latitude: number;
   longitude: number;
+
   address?: string;
   hours?: string;
   price?: string;
   rating?: number;
   website?: string;
   nearby?: string[];
-  };
+
+  // AI旅行プラン生成用
+  recommendedStay?: string;
+  bestVisitTime?: "morning" | "afternoon" | "evening";
+};
 
 export const spots: Spot[] = [
   {

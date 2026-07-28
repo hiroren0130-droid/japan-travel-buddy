@@ -18,11 +18,13 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
 
   const [destination, setDestination] = useState("");
-  const [days, setDays] = useState("");
-  const [travelers, setTravelers] = useState("");
-  const [budget, setBudget] = useState("");
-  const [interests, setInterests] = useState("");
-  const [currentLocation, setCurrentLocation] = useState<{
+const [days, setDays] = useState("");
+const [travelers, setTravelers] = useState("");
+const [budget, setBudget] = useState("");
+const [interests, setInterests] = useState("");
+const [specialRequest, setSpecialRequest] = useState("");
+
+const [currentLocation, setCurrentLocation] = useState<{
   latitude: number;
   longitude: number;
 } | null>(null);
@@ -55,6 +57,9 @@ useEffect(() => {
 人数: ${travelers || "2人"}
 予算: ${budget || "指定なし"}
 興味: ${interests || "人気スポット・グルメ"}
+
+その他の希望:
+${specialRequest || "なし"}
 `;
 
     const res = await fetch("/api/chat", {
@@ -63,9 +68,10 @@ useEffect(() => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        message: prompt,
-        currentLocation,
-      }),
+  message: prompt,
+  specialRequest,
+  currentLocation,
+}),
     });
 
     const data = await res.json();
@@ -105,19 +111,23 @@ useEffect(() => {
         </header>
 
         <TravelForm
-          destination={destination}
-          setDestination={setDestination}
-          days={days}
-          setDays={setDays}
-          travelers={travelers}
-          setTravelers={setTravelers}
-          budget={budget}
-          setBudget={setBudget}
-          interests={interests}
-          setInterests={setInterests}
-          onSubmit={sendMessage}
-          loading={loading}
-        />
+  destination={destination}
+  setDestination={setDestination}
+  days={days}
+  setDays={setDays}
+  travelers={travelers}
+  setTravelers={setTravelers}
+  budget={budget}
+  setBudget={setBudget}
+  interests={interests}
+  setInterests={setInterests}
+
+  specialRequest={specialRequest}
+  setSpecialRequest={setSpecialRequest}
+
+  onSubmit={sendMessage}
+  loading={loading}
+/>
 
         <div className="mt-6">
           <>

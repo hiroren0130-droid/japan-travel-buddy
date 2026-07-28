@@ -24,20 +24,20 @@ export default function TravelTimeline({ plan }: Props) {
               </div>
 
               <div>
-                <p className="text-sm uppercase tracking-widest text-blue-100">
-                  Travel Schedule
+                <p className="text-sm font-semibold tracking-widest text-blue-100">
+                  JAPAN TRAVEL BUDDY
                 </p>
 
                 <h2
-  id={`day-${day.day}`}
-  className="text-3xl font-bold"
->
-                  Day {day.day}
+                 id={`day-${day.day}`}
+                 className="text-3xl font-bold"
+                 >
+                  📅 Day {day.day}
                 </h2>
 
                 <div className="mt-2">
                   <Badge color="green">
-                    {day.items.length}スポット
+                    📍 {day.items.length}スポット
                   </Badge>
                 </div>
               </div>
@@ -46,7 +46,7 @@ export default function TravelTimeline({ plan }: Props) {
 
           {/* Timeline */}
           <div
-  className="relative ml-6 border-l-4 border-blue-200 pl-4"
+  className="relative ml-6 border-l-4 border-blue-400 pl-4"
   role="list"
 >
             {day.items.length === 0 ? (

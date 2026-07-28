@@ -17,6 +17,9 @@ type Props = {
   interests: string;
   setInterests: (value: string) => void;
 
+  specialRequest: string;
+  setSpecialRequest: (value: string) => void;
+
   onSubmit: () => void;
   loading: boolean;
 };
@@ -32,6 +35,8 @@ export default function TravelForm({
   setBudget,
   interests,
   setInterests,
+  specialRequest,
+  setSpecialRequest,
   onSubmit,
   loading,
 }: Props) {
@@ -40,43 +45,43 @@ export default function TravelForm({
 
   const labelClass =
     "mb-1 block text-sm font-medium text-gray-700";
+
   const interestOptions = [
-  "🏯 神社・お寺",
-  "🍣 グルメ",
-  "☕ カフェ",
-  "🌿 自然",
-  "♨️ 温泉",
-  "🛍️ ショッピング",
-  "🎌 アニメ・ゲーム",
-  "🌃 夜景",
-  "👨‍👩‍👧‍👦 家族向け",
-  "💎 穴場スポット",
-];
+    "🏯 神社・お寺",
+    "🍣 グルメ",
+    "☕ カフェ",
+    "🌿 自然",
+    "♨️ 温泉",
+    "🛍️ ショッピング",
+    "🎌 アニメ・ゲーム",
+    "🌃 夜景",
+    "👨‍👩‍👧‍👦 家族向け",
+    "💎 穴場スポット",
+  ];
 
-const dayOptions = Array.from({ length: 14 }, (_, i) => i + 1);
+  const dayOptions = Array.from({ length: 14 }, (_, i) => i + 1);
 
-const travelerOptions = Array.from({ length: 10 }, (_, i) => i + 1);
+  const travelerOptions = Array.from({ length: 10 }, (_, i) => i + 1);
 
-const budgetOptions = [
-  "指定なし",
-  "10,000円",
-  "30,000円",
-  "50,000円",
-  "100,000円",
-  "150,000円",
-  "200,000円以上",
-];
+  const budgetOptions = [
+    "指定なし",
+    "10,000円",
+    "30,000円",
+    "50,000円",
+    "100,000円",
+    "150,000円",
+    "200,000円以上",
+  ];
 
-    return (
+  return (
     <Card>
       <form
-  onSubmit={(e) => {
-    e.preventDefault();
-    onSubmit();
-  }}
->
-
-<div className="mb-6">
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit();
+        }}
+      >
+        <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900">
             ✈️ AI旅行プラン作成
           </h2>
@@ -86,134 +91,151 @@ const budgetOptions = [
           </p>
         </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <div className="md:col-span-3">
-          <label className={labelClass}>
-            📍 行き先
-          </label>
+        <div className="grid gap-4 md:grid-cols-3"></div>
+                  <div className="md:col-span-3">
+            <label className={labelClass}>
+              📍 行き先
+            </label>
 
-          <input
-            type="text"
-            value={destination}
-            onChange={(e) => setDestination(e.target.value)}
-            placeholder="例：京都"
-            className={inputClass}
-            disabled={loading}
-          />
-        </div>
+            <input
+              type="text"
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              placeholder="例：京都"
+              className={inputClass}
+              disabled={loading}
+            />
+          </div>
 
-        <div>
-          <label className={labelClass}>
-            📅 日数
-          </label>
+          <div>
+            <label className={labelClass}>
+              📅 日数
+            </label>
 
-          <select
-  value={days}
-  onChange={(e) => setDays(e.target.value)}
-  className={inputClass}
-  disabled={loading}
->
-  <option value="">選択してください</option>
+            <select
+              value={days}
+              onChange={(e) => setDays(e.target.value)}
+              className={inputClass}
+              disabled={loading}
+            >
+              <option value="">選択してください</option>
 
-  {dayOptions.map((day) => (
-    <option key={day} value={day}>
-      {day}日
-    </option>
-  ))}
-</select>
-        </div>
+              {dayOptions.map((day) => (
+                <option key={day} value={day}>
+                  {day}日
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label className={labelClass}>
-            👥 人数
-          </label>
+          <div>
+            <label className={labelClass}>
+              👥 人数
+            </label>
 
-          <select
-  value={travelers}
-  onChange={(e) => setTravelers(e.target.value)}
-  className={inputClass}
-  disabled={loading}
->
-  <option value="">選択してください</option>
+            <select
+              value={travelers}
+              onChange={(e) => setTravelers(e.target.value)}
+              className={inputClass}
+              disabled={loading}
+            >
+              <option value="">選択してください</option>
 
-  {travelerOptions.map((person) => (
-    <option key={person} value={person}>
-      {person}人
-    </option>
-  ))}
-</select>
-        </div>
+              {travelerOptions.map((person) => (
+                <option key={person} value={person}>
+                  {person}人
+                </option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label className={labelClass}>
-            💴 予算
-          </label>
+          <div>
+            <label className={labelClass}>
+              💴 予算
+            </label>
 
-          <select
-  value={budget}
-  onChange={(e) => setBudget(e.target.value)}
-  className={inputClass}
-  disabled={loading}
->
-  {budgetOptions.map((option) => (
-    <option key={option} value={option}>
-      {option}
-    </option>
-  ))}
-</select>
-        </div>
+            <select
+              value={budget}
+              onChange={(e) => setBudget(e.target.value)}
+              className={inputClass}
+              disabled={loading}
+            >
+              {budgetOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
+                    <div className="md:col-span-3">
+            <label className={labelClass}>
+              🎯 興味
+            </label>
 
-        <div className="md:col-span-3">
-          <label className={labelClass}>
-            🎯 興味
-          </label>
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+              {interestOptions.map((item) => {
+                const checked = interests
+                  .split(",")
+                  .filter(Boolean)
+                  .includes(item);
 
-          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-  {interestOptions.map((item) => {
-    const checked = interests
-      .split(",")
-      .filter(Boolean)
-      .includes(item);
+                return (
+                  <label
+                    key={item}
+                    className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 p-3 hover:bg-blue-50"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={loading}
+                      onChange={(e) => {
+                        const current = interests
+                          .split(",")
+                          .filter(Boolean);
 
-    return (
-      <label
-        key={item}
-        className="flex cursor-pointer items-center gap-2 rounded-xl border border-gray-200 p-3 hover:bg-blue-50"
-      >
-        <input
-          type="checkbox"
-          checked={checked}
-          disabled={loading}
-          onChange={(e) => {
-            const current = interests
-              .split(",")
-              .filter(Boolean);
+                        const updated = e.target.checked
+                          ? [...current, item]
+                          : current.filter((i) => i !== item);
 
-            const updated = e.target.checked
-              ? [...current, item]
-              : current.filter((i) => i !== item);
+                        setInterests(updated.join(","));
+                      }}
+                    />
 
-            setInterests(updated.join(","));
-          }}
-        />
+                    <span className="text-sm">{item}</span>
+                  </label>
+                );
+              })}
+            </div>
 
-        <span className="text-sm">{item}</span>
-      </label>
-    );
-  })}
-</div>
-        </div>
-      </div>
+            <div className="mt-6">
+              <label className={labelClass}>
+                ✍️ その他のご希望（任意）
+              </label>
 
-      <Button
-  type="submit"
-  loading={loading}
-  className="mt-8 w-full"
->
-        ✨ AIで旅行プランを作成
-      </Button>
+              <textarea
+                value={specialRequest}
+                onChange={(e) => setSpecialRequest(e.target.value)}
+                placeholder={`例：
+・抹茶スイーツを食べたい
+・夜景を見たい
+・人混みは避けたい
+・アニメショップへ行きたい
+・雨でも楽しめる場所がいい`}
+                rows={5}
+                className={inputClass}
+                disabled={loading}
+              />
+            </div>
+          </div>
+                  <Button
+          type="submit"
+          loading={loading}
+          className="mt-8 w-full"
+        >
+          ✨ AIで旅行プランを作成
+        </Button>
 
-              {loading && (
+        {loading && (
           <div className="mt-6 rounded-xl border border-blue-200 bg-blue-50 p-5 text-center">
             <div className="animate-pulse text-4xl">🤖</div>
 

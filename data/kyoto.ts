@@ -8,6 +8,10 @@ export const spots: Spot[] = [
   category: "寺院",
   description: "京都を代表する世界遺産。清水の舞台から京都市街を一望できます。",
   image: "/spots/kiyomizudera.jpg",
+
+  recommendedStay: "90分",
+  bestVisitTime: "朝",
+
   latitude: 34.9949,
   longitude: 135.7850,
 
