@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPinned } from "lucide-react";
+import { ExternalLink, MapPinned } from "lucide-react";
 
 type Props = {
   spot: string;
@@ -12,7 +12,9 @@ function getGoogleMapsUrl(query: string) {
   )}`;
 }
 
-export default function TimelineMapButton({ spot }: Props) {
+export default function TimelineMapButton({
+  spot,
+}: Props) {
   if (!spot.trim()) {
     return null;
   }
@@ -21,11 +23,48 @@ export default function TimelineMapButton({ spot }: Props) {
     <a
       href={getGoogleMapsUrl(spot)}
       target="_blank"
-      rel="noreferrer"
-      className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 hover:bg-blue-700 hover:shadow-md active:scale-95"
+      rel="noopener noreferrer"
+      aria-label={`${spot}をGoogle Mapsで開く`}
+      className="
+        group
+        inline-flex
+        items-center
+        gap-2
+        rounded-xl
+        border
+        border-blue-200
+        bg-blue-50
+        px-4
+        py-2
+        text-sm
+        font-semibold
+        text-blue-700
+        transition-all
+        duration-300
+        hover:-translate-y-0.5
+        hover:border-blue-300
+        hover:bg-blue-600
+        hover:text-white
+        hover:shadow-md
+        focus:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-blue-500
+        focus-visible:ring-offset-2
+      "
     >
-      <MapPinned size={18} />
-      <span>Google Mapsで開く</span>
+      <MapPinned
+        size={17}
+        className="transition-transform duration-300 group-hover:scale-110"
+        aria-hidden="true"
+      />
+
+      <span>Google Maps</span>
+
+      <ExternalLink
+        size={14}
+        className="opacity-70 transition-all duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+        aria-hidden="true"
+      />
     </a>
   );
 }

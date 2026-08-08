@@ -1,44 +1,71 @@
 import { TravelPlan } from "@/types/travel";
-import Badge from "@/components/ui/Badge";
 import TimelineItem from "./TimelineItem";
-import { CalendarDays } from "lucide-react";
+
+import { CalendarDays, MapPin } from "lucide-react";
+
 import { getSpotById } from "@/lib/spotService";
 
 type Props = {
   plan: TravelPlan;
 };
 
-export default function TravelTimeline({ plan }: Props) {
+export default function TravelTimeline({
+  plan,
+}: Props) {
   return (
     <div className="space-y-12">
       {plan.days.map((day) => (
         <section
-  key={day.day}
-  aria-labelledby={`day-${day.day}`}
->
+          key={day.day}
+          aria-labelledby={`day-${day.day}`}
+          className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm"
+        >
           {/* Day Header */}
-          <div className="mb-8 rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20">
-                <CalendarDays size={28} />
+          <div className="relative overflow-hidden bg-gradient-to-r from-blue-700 via-blue-600 to-blue-700 px-5 py-5 sm:px-7 sm:py-6">
+            {/* 背景装飾 */}
+            <div
+              aria-hidden="true"
+              className="absolute -right-16 -top-20 h-56 w-56 rounded-full bg-cyan-400/20 blur-3xl"
+            />
+
+            <div
+              aria-hidden="true"
+              className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-blue-400/20 blur-3xl"
+            />
+
+            <div className="relative flex items-center gap-4">
+              {/* カレンダーアイコン */}
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm sm:h-16 sm:w-16">
+                <CalendarDays
+                  size={30}
+                  strokeWidth={2.2}
+                  aria-hidden="true"
+                />
               </div>
 
-              <div>
-                <p className="text-sm font-semibold tracking-widest text-blue-100">
+              {/* Day情報 */}
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-blue-100 sm:text-xs">
                   JAPAN TRAVEL BUDDY
                 </p>
 
-                <h2
-                 id={`day-${day.day}`}
-                 className="text-3xl font-bold"
-                 >
-                  📅 Day {day.day}
-                </h2>
+                <div className="mt-1 flex flex-wrap items-center gap-3">
+                  <h2
+                    id={`day-${day.day}`}
+                    className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
+                  >
+                    Day {day.day}
+                  </h2>
 
-                <div className="mt-2">
-                  <Badge color="green">
-                    📍 {day.items.length}スポット
-                  </Badge>
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 shadow-sm sm:text-sm">
+                    <MapPin
+                      size={14}
+                      className="text-rose-500"
+                      aria-hidden="true"
+                    />
+
+                    {day.items.length}スポット
+                  </span>
                 </div>
               </div>
             </div>
@@ -46,13 +73,15 @@ export default function TravelTimeline({ plan }: Props) {
 
           {/* Timeline */}
           <div
-  className="relative ml-6 border-l-4 border-blue-400 pl-4"
-  role="list"
->
+            role="list"
+            className="relative px-3 py-6 sm:px-6 sm:py-8 lg:px-8"
+          >
             {day.items.length === 0 ? (
-              <p className="py-4 text-gray-500">
-                この日の旅行プランはありません。
-              </p>
+              <div className="rounded-2xl bg-slate-50 px-5 py-10 text-center">
+                <p className="text-sm font-medium text-slate-500">
+                  この日の旅行プランはありません。
+                </p>
+              </div>
             ) : (
               day.items.map((item) => {
                 const spot = getSpotById(item.spotId);

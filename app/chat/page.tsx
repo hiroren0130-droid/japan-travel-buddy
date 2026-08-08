@@ -1,10 +1,18 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import {
+  Bot,
+  CheckCircle2,
+  MapPin,
+  Sparkles,
+} from "lucide-react";
 
 import ChatMessages from "@/components/ChatMessages";
+import Header from "@/components/Header";
 import TravelForm from "@/components/TravelForm";
 import TravelPlanSkeleton from "@/components/TravelPlanSkeleton";
+
 import type { TravelPlan } from "@/types/travel";
 
 type Message = {
@@ -13,48 +21,62 @@ type Message = {
   travelPlan?: TravelPlan;
 };
 
+type CurrentLocation = {
+  latitude: number;
+  longitude: number;
+};
+
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [destination, setDestination] = useState("");
-const [days, setDays] = useState("");
-const [travelers, setTravelers] = useState("");
-const [budget, setBudget] = useState("");
-const [interests, setInterests] = useState("");
-const [specialRequest, setSpecialRequest] = useState("");
+  const [days, setDays] = useState("");
+  const [travelers, setTravelers] = useState("");
+  const [budget, setBudget] = useState("");
+  const [interests, setInterests] = useState("");
+  const [specialRequest, setSpecialRequest] = useState("");
 
-const [currentLocation, setCurrentLocation] = useState<{
-  latitude: number;
-  longitude: number;
-} | null>(null);
-useEffect(() => {
-  if (!navigator.geolocation) return;
+  const [currentLocation, setCurrentLocation] =
+    useState<CurrentLocation | null>(null);
 
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      setCurrentLocation({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      });
-    },
-    (error) => {
-      console.error("位置情報取得エラー:", error);
+  useEffect(() => {
+    if (!navigator.geolocation) {
+      return;
     }
-  );
-}, []);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setCurrentLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+      },
+      (error) => {
+        console.error("位置情報取得エラー:", error);
+      }
+    );
+  }, []);
+
   async function sendMessage() {
-  console.log("sendMessage called");
+    if (loading) {
+      return;
+    }
 
-  if (loading) return;
+    setLoading(true);
 
-  setLoading(true);
+try {
+  const selectedDays = Number(days || "2");
 
-  try {
-    const prompt = `
+  const shouldUseCurrentLocation =
+    /現在地|今いる場所|ここから/.test(
+      specialRequest
+    );
+
+  const prompt = `
 行き先: ${destination || "京都"}
-日数: ${days || "2日"}
-人数: ${travelers || "2人"}
+日数: ${selectedDays}日
+人数: ${travelers || "2"}人
 予算: ${budget || "指定なし"}
 興味: ${interests || "人気スポット・グルメ"}
 
@@ -62,84 +84,217 @@ useEffect(() => {
 ${specialRequest || "なし"}
 `;
 
-    const res = await fetch("/api/chat", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-  message: prompt,
-  specialRequest,
-  currentLocation,
-}),
-    });
+  const response = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      message: prompt,
+      days: selectedDays,
+      specialRequest,
+      currentLocation:
+        shouldUseCurrentLocation
+          ? currentLocation
+          : null,
+    }),
+  });
 
-    const data = await res.json();
-
-    const travelPlan: TravelPlan = data.plan;
-
-    setMessages([
-      {
-        role: "assistant",
-        travelPlan,
-      },
-    ]);
-  } catch {
-    setMessages([
-      {
-        role: "assistant",
-        content: "エラーが発生しました。",
-      },
-    ]);
-  } finally {
-    setLoading(false);
+  if (!response.ok) {
+    throw new Error(
+      "旅行プランの生成に失敗しました。"
+    );
   }
+
+  const data = await response.json();
+
+  const travelPlan: TravelPlan | undefined =
+    data.plan;
+
+  if (!travelPlan) {
+    throw new Error(
+      "旅行プランを取得できませんでした。"
+    );
+  }
+
+  setMessages([
+    {
+      role: "assistant",
+      travelPlan,
+    },
+  ]);
+} catch (error) {
+  console.error(
+    "旅行プラン生成エラー:",
+    error
+  );
+
+  setMessages([
+    {
+      role: "assistant",
+      content:
+        "旅行プランの作成中にエラーが発生しました。時間を置いて、もう一度お試しください。",
+    },
+  ]);
+} finally {
+  setLoading(false);
+}
 }
 
-  return (
-    <main className="min-h-screen bg-gray-100">
-      <div className="mx-auto max-w-6xl p-4">
+return (
+    <>
+      <Header />
 
-        <header className="mb-4 rounded-xl bg-white p-5 shadow-sm">
-          <h1 className="text-3xl font-bold text-blue-600">
-            ✈️ AI旅行プランナー
-          </h1>
+      <main className="relative min-h-[calc(100vh-80px)] overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-100">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 overflow-hidden"
+        >
+          <div className="absolute -left-36 -top-40 h-[480px] w-[480px] rounded-full bg-blue-200/30 blur-[130px]" />
 
-          <p className="mt-1 text-gray-500">
-            AIがあなた専用の旅行プランを作成します。
-          </p>
-        </header>
+          <div className="absolute -right-32 top-32 h-[400px] w-[400px] rounded-full bg-cyan-200/25 blur-[120px]" />
 
-        <TravelForm
-  destination={destination}
-  setDestination={setDestination}
-  days={days}
-  setDays={setDays}
-  travelers={travelers}
-  setTravelers={setTravelers}
-  budget={budget}
-  setBudget={setBudget}
-  interests={interests}
-  setInterests={setInterests}
-
-  specialRequest={specialRequest}
-  setSpecialRequest={setSpecialRequest}
-
-  onSubmit={sendMessage}
-  loading={loading}
-/>
-
-        <div className="mt-6">
-          <>
-  {loading ? (
-    <TravelPlanSkeleton />
-  ) : (
-    <ChatMessages messages={messages} />
-  )}
-</>
+          <div className="absolute bottom-[-220px] left-1/2 h-[440px] w-[440px] -translate-x-1/2 rounded-full bg-indigo-200/20 blur-[140px]" />
         </div>
 
-      </div>
-    </main>
+        <div className="relative mx-auto max-w-[1440px] px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+          <section className="rounded-[28px] border border-white/80 bg-white/75 px-5 py-5 shadow-lg shadow-slate-200/50 backdrop-blur-xl sm:px-7 sm:py-6">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50/80 px-3.5 py-1.5 text-xs font-bold text-blue-700 sm:text-sm">
+                  <Sparkles
+                    size={15}
+                    aria-hidden="true"
+                  />
+
+                  <span>AI Travel Planner</span>
+                </div>
+
+                <h1 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+                  AI旅行プランナー
+                </h1>
+
+                <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                  行き先や日数、興味を入力すると、AIがあなた専用の旅行プランを作成します。
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-white/80 bg-white/85 px-4 py-3 shadow-sm">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <Bot
+                      size={19}
+                      aria-hidden="true"
+                    />
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Planner
+                    </p>
+
+                    <p className="text-sm font-bold text-slate-800">
+                      AIが自動作成
+                    </p>
+                  </div>
+                </div>
+
+                <div className="inline-flex items-center gap-2 rounded-2xl border border-white/80 bg-white/85 px-4 py-3 shadow-sm">
+                  <div
+                    className={`
+                      flex
+                      h-9
+                      w-9
+                      items-center
+                      justify-center
+                      rounded-xl
+                      ${
+                        currentLocation
+                          ? "bg-emerald-50 text-emerald-600"
+                          : "bg-amber-50 text-amber-600"
+                      }
+                    `}
+                  >
+                    {currentLocation ? (
+                      <CheckCircle2
+                        size={19}
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <MapPin
+                        size={19}
+                        aria-hidden="true"
+                      />
+                    )}
+                  </div>
+
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                      Location
+                    </p>
+
+                    <p className="text-sm font-bold text-slate-800">
+                      {currentLocation
+                        ? "現在地を取得済み"
+                        : "現在地を確認中"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="mt-5 rounded-[30px] border border-white/80 bg-white/88 p-4 shadow-xl shadow-slate-200/60 backdrop-blur-xl sm:p-6 lg:p-8">
+            <div className="mb-6 flex items-start gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-lg shadow-blue-500/20">
+                <Sparkles
+                  size={21}
+                  aria-hidden="true"
+                />
+              </div>
+
+              <div>
+                <h2 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
+                  旅行条件を入力
+                </h2>
+
+                <p className="mt-1 text-sm leading-6 text-slate-500">
+                  分かる範囲だけ入力すれば、残りはAIが提案します。
+                </p>
+              </div>
+            </div>
+
+            <TravelForm
+              destination={destination}
+              setDestination={setDestination}
+              days={days}
+              setDays={setDays}
+              travelers={travelers}
+              setTravelers={setTravelers}
+              budget={budget}
+              setBudget={setBudget}
+              interests={interests}
+              setInterests={setInterests}
+              specialRequest={specialRequest}
+              setSpecialRequest={setSpecialRequest}
+              onSubmit={sendMessage}
+              loading={loading}
+            />
+          </section>
+
+          <section
+            aria-live="polite"
+            aria-busy={loading}
+            className="mt-8"
+          >
+            {loading ? (
+              <TravelPlanSkeleton />
+            ) : (
+              <ChatMessages messages={messages} />
+            )}
+          </section>
+        </div>
+      </main>
+    </>
   );
 }

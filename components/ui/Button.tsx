@@ -1,13 +1,22 @@
 "use client";
 
-import { ButtonHTMLAttributes, ReactNode } from "react";
+import {
+  ButtonHTMLAttributes,
+  ReactNode,
+} from "react";
 
-type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
-  children: ReactNode;
-  loading?: boolean;
-  variant?: "primary" | "secondary" | "danger";
-  size?: "default" | "icon";
-};
+import { LoaderCircle } from "lucide-react";
+
+type Props =
+  ButtonHTMLAttributes<HTMLButtonElement> & {
+    children: ReactNode;
+    loading?: boolean;
+    variant?:
+      | "primary"
+      | "secondary"
+      | "danger";
+    size?: "default" | "icon";
+  };
 
 export default function Button({
   children,
@@ -16,67 +25,109 @@ export default function Button({
   size = "default",
   className = "",
   disabled,
+  type = "button",
   ...props
 }: Props) {
   const variants = {
-    primary:
-      "bg-blue-600 text-white hover:bg-blue-700",
-    secondary:
-      "bg-gray-100 text-gray-800 hover:bg-gray-200",
-    danger:
-      "bg-red-600 text-white hover:bg-red-700",
+    primary: `
+      border
+      border-blue-600
+      bg-blue-600
+      text-white
+      shadow-sm
+      shadow-blue-600/20
+      hover:-translate-y-0.5
+      hover:border-blue-700
+      hover:bg-blue-700
+      hover:shadow-md
+      hover:shadow-blue-600/25
+      active:translate-y-0
+    `,
+
+    secondary: `
+      border
+      border-slate-200
+      bg-white
+      text-slate-700
+      shadow-sm
+      hover:-translate-y-0.5
+      hover:border-slate-300
+      hover:bg-slate-50
+      hover:text-slate-900
+      hover:shadow-md
+      active:translate-y-0
+    `,
+
+    danger: `
+      border
+      border-red-600
+      bg-red-600
+      text-white
+      shadow-sm
+      shadow-red-600/20
+      hover:-translate-y-0.5
+      hover:border-red-700
+      hover:bg-red-700
+      hover:shadow-md
+      hover:shadow-red-600/25
+      active:translate-y-0
+    `,
   };
 
   const sizes = {
-    default: "px-5 py-2.5 text-sm",
-    icon: "h-11 w-11 p-0",
+    default: `
+      min-h-11
+      rounded-xl
+      px-5
+      py-2.5
+      text-sm
+    `,
+
+    icon: `
+      h-12
+      w-12
+      shrink-0
+      rounded-2xl
+      p-0
+    `,
   };
+
+  const isDisabled = disabled || loading;
 
   return (
     <button
-  type={props.type ?? "button"}
-  {...props}
-      disabled={disabled || loading}
+      {...props}
+      type={type}
+      disabled={isDisabled}
       aria-busy={loading}
       className={`
         inline-flex
         items-center
         justify-center
         gap-2
-        rounded-xl
+        whitespace-nowrap
         font-semibold
         transition-all
-        duration-200
+        duration-300
+        focus:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-blue-500
+        focus-visible:ring-offset-2
+        disabled:pointer-events-none
         disabled:cursor-not-allowed
-        disabled:opacity-60
+        disabled:opacity-50
         ${variants[variant]}
         ${sizes[size]}
         ${className}
       `}
     >
       {loading && (
-        <svg
-  className="h-4 w-4 animate-spin"
-  aria-hidden="true"
-          viewBox="0 0 24 24"
-          fill="none"
-        >
-          <circle
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-            opacity=".25"
-          />
-
-          <path
-            d="M22 12A10 10 0 0012 2"
-            stroke="currentColor"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
-        </svg>
+        <LoaderCircle
+          size={17}
+          strokeWidth={2.2}
+          className="shrink-0 animate-spin"
+          aria-hidden="true"
+        />
       )}
 
       {children}

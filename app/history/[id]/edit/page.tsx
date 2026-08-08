@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getTravelPlan, updateTravelPlan } from "@/lib/firestore";
-import { TravelPlan } from "@/types/travel";
 
 export default function EditTravelPlanPage() {
 

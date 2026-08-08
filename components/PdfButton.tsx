@@ -2,13 +2,17 @@
 
 import { useState } from "react";
 import jsPDF from "jspdf";
+import { Check, FileDown, LoaderCircle } from "lucide-react";
 
 type Props = {
   text: string;
 };
 
-export default function PdfButton({ text }: Props) {
+export default function PdfButton({
+  text,
+}: Props) {
   const [creating, setCreating] = useState(false);
+  const [completed, setCompleted] = useState(false);
 
   const downloadPdf = async () => {
     const trimmedText = text.trim();
@@ -16,6 +20,7 @@ export default function PdfButton({ text }: Props) {
     if (!trimmedText || creating) return;
 
     setCreating(true);
+    setCompleted(false);
 
     try {
       const pdf = new jsPDF();
@@ -25,13 +30,24 @@ export default function PdfButton({ text }: Props) {
 
       pdf.setFontSize(10);
 
-      const lines = pdf.splitTextToSize(trimmedText, 180);
+      const lines = pdf.splitTextToSize(
+        trimmedText,
+        180
+      );
 
       pdf.text(lines, 10, 30);
-
       pdf.save("travel-plan.pdf");
+
+      setCompleted(true);
+
+      window.setTimeout(() => {
+        setCompleted(false);
+      }, 2000);
     } catch (error) {
-      console.error("PDFの作成に失敗しました。", error);
+      console.error(
+        "PDFの作成に失敗しました。",
+        error
+      );
     } finally {
       setCreating(false);
     }
@@ -42,10 +58,80 @@ export default function PdfButton({ text }: Props) {
       type="button"
       onClick={downloadPdf}
       disabled={creating}
-      aria-label="旅行プランをPDFで保存"
-      className="rounded-lg bg-red-500 px-4 py-2 font-semibold text-white transition-colors hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-red-300"
+      aria-label={
+        creating
+          ? "旅行プランのPDFを作成中"
+          : completed
+            ? "旅行プランをPDFで保存しました"
+            : "旅行プランをPDFで保存"
+      }
+      title={
+        creating
+          ? "PDF作成中"
+          : completed
+            ? "保存しました"
+            : "PDF保存"
+      }
+      className="
+        group
+        relative
+        flex
+        h-12
+        w-12
+        shrink-0
+        items-center
+        justify-center
+        rounded-full
+        border
+        border-white/25
+        bg-white/15
+        text-white
+        shadow-sm
+        backdrop-blur-md
+        transition-all
+        duration-300
+        hover:-translate-y-0.5
+        hover:border-white/40
+        hover:bg-white/25
+        hover:shadow-lg
+        focus:outline-none
+        focus-visible:ring-2
+        focus-visible:ring-white/70
+        active:translate-y-0
+        disabled:cursor-not-allowed
+        disabled:opacity-60
+        disabled:hover:translate-y-0
+      "
     >
-      {creating ? "📄 作成中..." : "📄 PDF保存"}
+      {creating ? (
+        <LoaderCircle
+          size={20}
+          strokeWidth={2.2}
+          className="animate-spin"
+          aria-hidden="true"
+        />
+      ) : completed ? (
+        <Check
+          size={20}
+          strokeWidth={2.4}
+          aria-hidden="true"
+        />
+      ) : (
+        <FileDown
+          size={20}
+          strokeWidth={2.2}
+          className="transition-transform duration-300 group-hover:scale-110"
+          aria-hidden="true"
+        />
+      )}
+
+      <span className="sr-only">
+        {creating
+          ? "PDF作成中"
+          : completed
+            ? "PDF保存完了"
+            : "旅行プランをPDFで保存"}
+      </span>
     </button>
   );
 }

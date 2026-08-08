@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { spots } from "@/data/spots";
+import { getSpotById } from "@/lib/spotService";
 
 type Props = {
   params: Promise<{
@@ -12,7 +12,7 @@ type Props = {
 export default async function SpotDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const spot = spots.find((s) => s.id === id);
+  const spot = getSpotById(id);
 
   if (!spot) {
     notFound();

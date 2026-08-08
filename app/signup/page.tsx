@@ -20,10 +20,6 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
-  alert("ボタンが押されました");
-
-  console.log("ボタンが押されました");
-
   setError("");
   setLoading(true);
 
@@ -40,11 +36,13 @@ export default function SignupPage() {
       });
 
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    } catch (err: unknown) {
+  if (err instanceof Error) {
+    setError(err.message);
+  } else {
+    setError("An unexpected error occurred.");
+  }
+}
   };
 
   return (

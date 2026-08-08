@@ -14,7 +14,7 @@ export default function TravelMap({
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     return (
       <div
-        className="mt-5 rounded-2xl border border-gray-200 p-6 text-center text-gray-500"
+        className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-gray-500 shadow-sm"
         role="status"
       >
         地図を表示できません。
@@ -25,16 +25,16 @@ export default function TravelMap({
   const src = `https://www.google.com/maps?q=${latitude},${longitude}&z=15&output=embed`;
 
   return (
-    <div className="mt-5 overflow-hidden rounded-2xl border border-gray-200">
+    <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
       <iframe
         title={`${name}の地図`}
         src={src}
         width="100%"
-        height="300"
+        height="360"
         loading="lazy"
         allowFullScreen
         referrerPolicy="no-referrer-when-downgrade"
-        className="h-[300px] w-full border-0"
+        className="h-[360px] w-full border-0"
       />
     </div>
   );
