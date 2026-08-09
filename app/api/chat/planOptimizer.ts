@@ -53,9 +53,10 @@ export function optimizeGeneratedPlan({
     );
 
   optimizedPlan =
-    optimizeDayImbalance(
-      optimizedPlan
-    );
+  optimizeDayImbalance(
+    optimizedPlan,
+    startSpotName
+  );
 
   if (normalizeDescriptions) {
     optimizedPlan =

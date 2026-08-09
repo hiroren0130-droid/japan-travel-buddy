@@ -42,6 +42,10 @@ import {
   buildPlanResponse,
 } from "./planResponseBuilder";
 
+import {
+  normalizePlanSummary,
+} from "./planSummaryNormalizer";
+
 type RequestBody = {
   message?: string;
   days?: number;
@@ -367,10 +371,15 @@ ${specialRequest}
       );
     }
 
-    const plan =
-      buildPlanResponse(
-        generatedPlan
-      );
+    const normalizedPlan =
+  normalizePlanSummary(
+    generatedPlan
+  );
+
+const plan =
+  buildPlanResponse(
+    normalizedPlan
+  );
 
     console.log(
       "===== Performance: total ====="

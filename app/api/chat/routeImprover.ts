@@ -77,7 +77,7 @@ export async function improveTravelPlan({
   }
 
   const shouldImproveRoute =
-    initialRouteScore < 90 ||
+    initialRouteScore < 85 ||
     lunchBreakMissingCount > 0 ||
     businessHoursViolationCount > 0;
 
@@ -126,6 +126,8 @@ export async function improveTravelPlan({
 ・説明文に「昼食」と書くだけでは不可とすること
 ・前のスポットの観光終了から次の移動開始まで、45分以上の自由時間を確保すること
 ・旅行日数は必ず${requestedDays}日とすること
+・同じスポットを旅程内に2回以上入れないこと
+・同一名称のスポットを重複させないこと
 ・次の指定スポットは必ず含めること
 
 ${requiredSpotText}`,

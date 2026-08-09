@@ -7,6 +7,7 @@ import {
   calculateFirstItemDurationErrorCount,
   calculateInvalidTimeCount,
   calculateLateEndCount,
+  calculateLongDistanceMoveCount,
   calculateLongWalkCount,
   calculateLunchBreakMissingCount,
   calculateOverloadedDayCount,
@@ -71,9 +72,14 @@ export function logPlanEvaluation(
       ),
 
     longWalkCount:
-      calculateLongWalkCount(plan),
+  calculateLongWalkCount(plan),
 
-    overloadedDayCount:
+longDistanceMoveCount:
+  calculateLongDistanceMoveCount(
+    plan
+  ),
+
+overloadedDayCount:
       calculateOverloadedDayCount(
         plan
       ),

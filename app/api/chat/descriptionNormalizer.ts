@@ -78,7 +78,7 @@ function removeLateLunchExpressions(
       ""
     )
     .replace(
-      /ここで昼食を取るのに便利です。?/g,
+      /(?:周辺|近隣)で昼食を取るのに便利です。?/g,
       ""
     )
     .replace(
@@ -154,13 +154,21 @@ function removeLateLunchExpressions(
       ""
     )
     .replace(
+      /(?:周辺|近隣)で昼食と休憩をとりやすい(?:立地|場所|エリア)?です。?/g,
+      ""
+    )
+    .replace(
       /近隣で昼食と休憩を取りやすい(?:立地|場所|エリア)?です。?/g,
       ""
     )
     .replace(
-      /周辺で昼食や[^。]*。?/g,
-      ""
-    );
+  /周辺で昼食や[^。]*。?/g,
+  ""
+)
+.replace(
+  /[^。]*周辺[^。]*昼食に便利です。?/g,
+  ""
+);
 }
 
 function removeMorningExpressions(
@@ -184,13 +192,17 @@ function removeMorningExpressions(
       ""
     )
     .replace(
-      /早朝に?/g,
+      /早朝(?:に|の)?/g,
       ""
     )
     .replace(
       /朝にゆっくり/g,
       "ゆっくり"
-    );
+    )
+.replace(
+  /朝に/g,
+  ""
+);
 }
 
 function removeEveningExpressions(
@@ -245,6 +257,37 @@ function removeCrowdExpressions(
     );
 }
 
+function cleanDanglingDescriptionEnding(
+  description: string
+): string {
+  return description
+    .replace(
+      /[、,]\s*(?:周辺|近隣)で\s*$/g,
+      ""
+    )
+    .replace(
+      /[、,]\s*(?:周辺|近隣)の\s*$/g,
+      ""
+    )
+    .replace(
+      /[、,]\s*$/g,
+      ""
+    )
+    .replace(
+      /(?:周辺|近隣)で\s*$/g,
+      ""
+    )
+    .replace(
+      /(?:周辺|近隣)の\s*$/g,
+      ""
+    )
+    .replace(
+      /\s+/g,
+      " "
+    )
+    .trim();
+}
+
 function createFallbackDescription(
   item: AIPlanItem
 ): string {
@@ -271,6 +314,11 @@ function normalizeItemDescription(
     normalizeWhitespace(
       item.description
     );
+
+    description = description.replace(
+  /早朝の(?=神社|寺院|寺|スポット|名所|場所|境内)/g,
+  ""
+);
 
   description =
     removeCrowdExpressions(
@@ -324,6 +372,11 @@ function normalizeItemDescription(
         .replace(/。。+/g, "。")
         .replace(/、。/g, "。")
         .replace(/^。+/, "")
+    );
+
+  description =
+    cleanDanglingDescriptionEnding(
+      description
     );
 
   if (

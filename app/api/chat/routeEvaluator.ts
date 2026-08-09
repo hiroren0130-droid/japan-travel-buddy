@@ -194,6 +194,7 @@ function rangesOverlap(
 }
 
 const EARTH_RADIUS_KM = 6371;
+const LONG_DISTANCE_MOVE_KM = 8;
 
 function degreesToRadians(
   degrees: number
@@ -246,9 +247,63 @@ function calculateDistanceKm(
     );
 
   return (
-    EARTH_RADIUS_KM *
-    centralAngle
-  );
+  EARTH_RADIUS_KM *
+  centralAngle
+);
+}
+
+export function calculateLongDistanceMoveCount(
+  plan: AITravelPlan
+): number {
+  let longDistanceMoveCount = 0;
+
+  for (const day of plan.days) {
+    for (
+      let index = 1;
+      index < day.items.length;
+      index += 1
+    ) {
+      const previousItem =
+        day.items[index - 1];
+
+      const currentItem =
+        day.items[index];
+
+      const previousSpot =
+        getSpotByName(
+          previousItem.spot
+        );
+
+      const currentSpot =
+        getSpotByName(
+          currentItem.spot
+        );
+
+      if (
+        !previousSpot ||
+        !currentSpot
+      ) {
+        continue;
+      }
+
+      const distanceKm =
+        calculateDistanceKm(
+          previousSpot.latitude,
+          previousSpot.longitude,
+          currentSpot.latitude,
+          currentSpot.longitude
+        );
+
+      if (
+        distanceKm >=
+        LONG_DISTANCE_MOVE_KM
+      ) {
+        longDistanceMoveCount += 1;
+      }
+    }
+  }
+
+  return longDistanceMoveCount;
 }
 
 export function calculateAreaSwitches(
@@ -257,46 +312,69 @@ export function calculateAreaSwitches(
   let areaSwitches = 0;
 
   for (const day of plan.days) {
-    let previousArea:
-      string | null = null;
+    let previousSpot:
+  ReturnType<typeof getSpotByName> =
+  undefined;
 
     for (const item of day.items) {
-      const spot =
+      const currentSpot =
         getSpotByName(
           item.spot
         );
 
-      if (!spot) {
+      if (!currentSpot) {
         continue;
       }
 
       /*
        * 駅や空港は出発・到着拠点なので、
-       * 観光エリアの切り替え回数には含めません。
+       * 観光エリアの切り替え判定には含めません。
        */
       if (
-        spot.category === "駅" ||
-        spot.category === "空港"
+        currentSpot.category === "駅" ||
+        currentSpot.category === "空港"
       ) {
         continue;
       }
+
+      if (!previousSpot) {
+        previousSpot =
+          currentSpot;
+
+        continue;
+      }
+
+      const previousArea =
+        previousSpot.area.trim();
 
       const currentArea =
-        spot.area.trim();
-
-      if (!currentArea) {
-        continue;
-      }
+        currentSpot.area.trim();
 
       if (
-        previousArea !== null &&
+        previousArea &&
+        currentArea &&
         previousArea !== currentArea
       ) {
-        areaSwitches += 1;
+        const distanceKm =
+          calculateDistanceKm(
+            previousSpot.latitude,
+            previousSpot.longitude,
+            currentSpot.latitude,
+            currentSpot.longitude
+          );
+
+        /*
+         * routeOptimizer と同じ4kmを基準にし、
+         * エリア名が違うだけの近距離移動は
+         * areaSwitchとして減点しません。
+         */
+        if (distanceKm > 4) {
+          areaSwitches += 1;
+        }
       }
 
-      previousArea =
-        currentArea;
+      previousSpot =
+        currentSpot;
     }
   }
 
@@ -1172,6 +1250,10 @@ export function calculateRouteScore(
     calculateTransportMismatchCount(
       plan
     );
+    const longDistanceMoveCount =
+  calculateLongDistanceMoveCount(
+    plan
+  );
 
   const score =
     100 -
@@ -1189,7 +1271,8 @@ export function calculateRouteScore(
     firstItemDurationErrorCount * 5 -
     dayImbalanceCount * 5 -
     unknownSpotCount * 20 -
-    transportMismatchCount * 8;
+    transportMismatchCount * 8 -
+    longDistanceMoveCount * 4;
 
   return Math.min(
     Math.max(

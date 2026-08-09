@@ -4,6 +4,7 @@ import {
   calculateBusinessHoursViolationCount,
   calculateDayImbalanceCount,
   calculateLateEndCount,
+  calculateLongDistanceMoveCount,
   calculateRouteScore,
   calculateScheduleConflictCount,
 } from "./routeEvaluator";
@@ -25,6 +26,7 @@ type PlanQuality = {
   businessHoursViolationCount: number;
   scheduleConflictCount: number;
   lateEndCount: number;
+  longDistanceMoveCount: number;
   dayImbalanceCount: number;
   score: number;
 };
@@ -33,6 +35,13 @@ type MoveCandidate = {
   fromDayIndex: number;
   itemIndex: number;
   toDayIndex: number;
+};
+
+type SwapCandidate = {
+  firstDayIndex: number;
+  firstItemIndex: number;
+  secondDayIndex: number;
+  secondItemIndex: number;
 };
 
 const MAXIMUM_MOVE_COUNT = 3;
@@ -52,11 +61,16 @@ function evaluatePlan(
       ),
 
     lateEndCount:
-      calculateLateEndCount(
-        plan
-      ),
+  calculateLateEndCount(
+    plan
+  ),
 
-    dayImbalanceCount:
+longDistanceMoveCount:
+  calculateLongDistanceMoveCount(
+    plan
+  ),
+
+dayImbalanceCount:
       calculateDayImbalanceCount(
         plan
       ),
@@ -107,30 +121,44 @@ function isBetterQuality(
   }
 
   /*
-   * 18時以降まで長引く日を減らします。
-   */
-  if (
-    candidate.lateEndCount !==
+ * 18時以降まで長引く日を減らします。
+ */
+if (
+  candidate.lateEndCount !==
+  current.lateEndCount
+) {
+  return (
+    candidate.lateEndCount <
     current.lateEndCount
-  ) {
-    return (
-      candidate.lateEndCount <
-      current.lateEndCount
-    );
-  }
+  );
+}
 
-  /*
-   * 日程の極端な偏りも評価します。
-   */
-  if (
-    candidate.dayImbalanceCount !==
+/*
+ * 日程の極端な偏りを減らします。
+ */
+if (
+  candidate.dayImbalanceCount !==
+  current.dayImbalanceCount
+) {
+  return (
+    candidate.dayImbalanceCount <
     current.dayImbalanceCount
-  ) {
-    return (
-      candidate.dayImbalanceCount <
-      current.dayImbalanceCount
-    );
-  }
+  );
+}
+
+/*
+ * 京都市内を大きく横断する
+ * 長距離移動を減らします。
+ */
+if (
+  candidate.longDistanceMoveCount !==
+  current.longDistanceMoveCount
+) {
+  return (
+    candidate.longDistanceMoveCount <
+    current.longDistanceMoveCount
+  );
+}
 
   /*
    * 上記が同じなら総合Route Scoreを比較します。
@@ -143,15 +171,15 @@ function isBetterQuality(
 
 function isMovableItem(
   item: AIPlanItem,
-  itemIndex: number
+  protectedStartSpotName: string | null
 ): boolean {
   /*
-   * 各日の先頭地点は、
-   * その日の出発地点として扱われるため
-   * 移動対象にしません。
+   * ユーザーが明示した出発地点だけは
+   * 別の日へ移動させません。
    */
   if (
-    itemIndex === 0
+    protectedStartSpotName &&
+    item.spot === protectedStartSpotName
   ) {
     return false;
   }
@@ -290,8 +318,172 @@ function moveItem({
   );
 }
 
+function swapItems({
+  plan,
+  firstDayIndex,
+  firstItemIndex,
+  secondDayIndex,
+  secondItemIndex,
+}: {
+  plan: AITravelPlan;
+  firstDayIndex: number;
+  firstItemIndex: number;
+  secondDayIndex: number;
+  secondItemIndex: number;
+}): AITravelPlan | null {
+  if (
+    firstDayIndex === secondDayIndex
+  ) {
+    return null;
+  }
+
+  const swappedPlan =
+    clonePlan(plan);
+
+  const firstDay =
+    swappedPlan.days[
+      firstDayIndex
+    ];
+
+  const secondDay =
+    swappedPlan.days[
+      secondDayIndex
+    ];
+
+  if (
+    !firstDay ||
+    !secondDay
+  ) {
+    return null;
+  }
+
+  const firstItem =
+    firstDay.items[
+      firstItemIndex
+    ];
+
+  const secondItem =
+    secondDay.items[
+      secondItemIndex
+    ];
+
+  if (
+    !firstItem ||
+    !secondItem
+  ) {
+    return null;
+  }
+
+  firstDay.items[
+    firstItemIndex
+  ] = {
+    ...secondItem,
+  };
+
+  secondDay.items[
+    secondItemIndex
+  ] = {
+    ...firstItem,
+  };
+
+  return optimizeMovedPlan(
+    swappedPlan
+  );
+}
+
+function createSwapCandidates(
+  plan: AITravelPlan,
+  protectedStartSpotName: string | null
+): SwapCandidate[] {
+  const candidates:
+    SwapCandidate[] = [];
+
+  if (
+    plan.days.length <= 1
+  ) {
+    return candidates;
+  }
+
+  for (
+    let firstDayIndex = 0;
+    firstDayIndex <
+    plan.days.length;
+    firstDayIndex += 1
+  ) {
+    const firstDay =
+      plan.days[
+        firstDayIndex
+      ];
+
+    for (
+      let secondDayIndex =
+        firstDayIndex + 1;
+      secondDayIndex <
+      plan.days.length;
+      secondDayIndex += 1
+    ) {
+      const secondDay =
+        plan.days[
+          secondDayIndex
+        ];
+
+      for (
+        let firstItemIndex = 0;
+        firstItemIndex <
+        firstDay.items.length;
+        firstItemIndex += 1
+      ) {
+        const firstItem =
+          firstDay.items[
+            firstItemIndex
+          ];
+
+        if (
+          !isMovableItem(
+            firstItem,
+            protectedStartSpotName
+          )
+        ) {
+          continue;
+        }
+
+        for (
+          let secondItemIndex = 0;
+          secondItemIndex <
+          secondDay.items.length;
+          secondItemIndex += 1
+        ) {
+          const secondItem =
+            secondDay.items[
+              secondItemIndex
+            ];
+
+          if (
+            !isMovableItem(
+              secondItem,
+              protectedStartSpotName
+            )
+          ) {
+            continue;
+          }
+
+          candidates.push({
+            firstDayIndex,
+            firstItemIndex,
+            secondDayIndex,
+            secondItemIndex,
+          });
+        }
+      }
+    }
+  }
+
+  return candidates;
+}
+
 function createMoveCandidates(
-  plan: AITravelPlan
+  plan: AITravelPlan,
+  protectedStartSpotName: string | null
 ): MoveCandidate[] {
   const candidates:
     MoveCandidate[] = [];
@@ -339,13 +531,13 @@ function createMoveCandidates(
         ];
 
       if (
-        !isMovableItem(
-          item,
-          itemIndex
-        )
-      ) {
-        continue;
-      }
+  !isMovableItem(
+    item,
+    protectedStartSpotName
+  )
+) {
+  continue;
+}
 
       for (
         let toDayIndex = 0;
@@ -373,7 +565,8 @@ function createMoveCandidates(
 }
 
 export function optimizeDayImbalance(
-  plan: AITravelPlan
+  plan: AITravelPlan,
+  protectedStartSpotName: string | null = null
 ): AITravelPlan {
   if (
     plan.days.length <= 1
@@ -403,9 +596,10 @@ export function optimizeDayImbalance(
     moveCount += 1
   ) {
     const candidates =
-      createMoveCandidates(
-        currentPlan
-      );
+  createMoveCandidates(
+    currentPlan,
+    protectedStartSpotName
+  );
 
     let bestCandidatePlan:
       AITravelPlan | null = null;
@@ -444,6 +638,12 @@ export function optimizeDayImbalance(
           candidatePlan
         );
 
+        
+
+/*
+ * 現在より悪くなる移動は採用しません。
+ */
+
       /*
        * 現在より悪くなる移動は採用しません。
        */
@@ -459,6 +659,81 @@ export function optimizeDayImbalance(
       /*
        * 改善候補の中から、
        * 最も品質が高いものを選びます。
+       */
+      if (
+        !bestCandidateQuality ||
+        isBetterQuality(
+          candidateQuality,
+          bestCandidateQuality
+        )
+      ) {
+        bestCandidatePlan =
+          candidatePlan;
+
+        bestCandidateQuality =
+          candidateQuality;
+      }
+    }
+
+        const swapCandidates =
+      createSwapCandidates(
+        currentPlan,
+        protectedStartSpotName
+      );
+
+    for (
+      const swapCandidate
+      of swapCandidates
+    ) {
+      const candidatePlan =
+        swapItems({
+          plan:
+            currentPlan,
+
+          firstDayIndex:
+            swapCandidate
+              .firstDayIndex,
+
+          firstItemIndex:
+            swapCandidate
+              .firstItemIndex,
+
+          secondDayIndex:
+            swapCandidate
+              .secondDayIndex,
+
+          secondItemIndex:
+            swapCandidate
+              .secondItemIndex,
+        });
+
+      if (!candidatePlan) {
+        continue;
+      }
+
+      const candidateQuality =
+        evaluatePlan(
+          candidatePlan
+        );
+
+      
+
+      /*
+       * 現在より悪くなる交換は
+       * 採用しません。
+       */
+      if (
+        !isBetterQuality(
+          candidateQuality,
+          currentQuality
+        )
+      ) {
+        continue;
+      }
+
+      /*
+       * 移動候補も含め、
+       * 最も品質が高い候補を採用します。
        */
       if (
         !bestCandidateQuality ||
