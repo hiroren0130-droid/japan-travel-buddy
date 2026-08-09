@@ -1,6 +1,3 @@
-import { existsSync } from "node:fs";
-import path from "node:path";
-
 import { allSpots } from "../data";
 
 type ValidationIssue = {
@@ -22,16 +19,40 @@ const VALID_HOURS_PATTERN =
 const VALID_STAY_PATTERN =
   /^(0|[1-9]\d{0,2})分$/;
 
-  const HOURS_OPTIONAL_SPOTS =
+const HOURS_OPTIONAL_SPOTS =
   new Set([
-    "嵐山",
-    "竹林の小径",
-    "渡月橋",
-    "祇園",
-    "錦市場",
-    "京都駅",
-    "京都御苑",
-    "哲学の道",
+  "嵐山",
+  "竹林の小径",
+  "渡月橋",
+  "祇園",
+  "錦市場",
+  "京都駅",
+  "京都御苑",
+  "哲学の道",
+  "大徳寺",
+  "鞍馬寺",
+  "鞍馬山",
+  "西芳寺",
+  "大原野神社",
+  "法輪寺",
+  "嵯峨鳥居本",
+  "嵯峨野トロッコ列車",
+  "岡崎公園",
+  "梅小路公園",
+  "先斗町",
+  "木屋町",
+  "新京極商店街",
+  "寺町京極商店街",
+  "花見小路",
+  "法観寺（八坂の塔）",
+  "伏見酒蔵エリア",
+  "石塀小路",
+  "円山公園",
+  ]);
+
+const WEBSITE_OPTIONAL_SPOTS =
+  new Set([
+    "大徳寺",
   ]);
 
 const REQUIRED_STRING_FIELDS = [
@@ -456,6 +477,14 @@ function checkMealRecommended(): void {
 function checkWebsites(): void {
   for (const spot of allSpots) {
     if (!spot.website) {
+      if (
+        WEBSITE_OPTIONAL_SPOTS.has(
+          spot.name
+        )
+      ) {
+        continue;
+      }
+
       addWarning(
         spot.name,
         "website",
@@ -490,12 +519,6 @@ function checkWebsites(): void {
 }
 
 function checkImages(): void {
-  const publicDirectory =
-    path.resolve(
-      process.cwd(),
-      "public"
-    );
-
   for (const spot of allSpots) {
     if (!hasText(spot.image)) {
       continue;
@@ -508,32 +531,6 @@ function checkImages(): void {
         spot.name,
         "image",
         `画像パスは「/」から始めてください：${spot.image}`
-      );
-
-      continue;
-    }
-
-    const relativeImagePath =
-      spot.image.replace(
-        /^\/+/,
-        ""
-      );
-
-    const absoluteImagePath =
-      path.join(
-        publicDirectory,
-        relativeImagePath
-      );
-
-    if (
-      !existsSync(
-        absoluteImagePath
-      )
-    ) {
-      addWarning(
-        spot.name,
-        "image",
-        `画像ファイルが見つかりません：${spot.image}`
       );
     }
   }

@@ -10,10 +10,19 @@ const TARGET_FILE = path.resolve(
   "kyoto.ts"
 );
 
-const SPOT_WEBSITES: Record<
-  string,
-  string
-> = {
+const SPOT_WEBSITES: Record<string, string> = {
+  清水寺:
+    "https://www.kiyomizudera.or.jp/",
+
+  伏見稲荷大社:
+    "https://inari.jp/",
+
+  金閣寺:
+    "https://www.shokoku-ji.jp/kinkakuji/",
+
+  銀閣寺:
+    "https://www.shokoku-ji.jp/ginkakuji/",
+
   嵐山:
     "https://ja.kyoto.travel/area/area09.php",
 
@@ -23,14 +32,80 @@ const SPOT_WEBSITES: Record<
   渡月橋:
     "https://ja.kyoto.travel/tourism/single01.php?category_id=8&tourism_id=2682",
 
+  天龍寺:
+    "https://www.tenryuji.com/",
+
+  八坂神社:
+    "https://www.yasaka-jinja.or.jp/",
+
   祇園:
     "https://ja.kyoto.travel/tourism/single01.php?category_id=8&tourism_id=689",
+
+  二条城:
+    "https://nijo-jocastle.city.kyoto.lg.jp/",
+
+  錦市場:
+    "https://www.kyoto-nishiki.or.jp/",
+
+  平安神宮:
+    "https://www.heianjingu.or.jp/",
+
+  南禅寺:
+    "https://nanzenji.or.jp/",
+
+  永観堂:
+    "https://www.eikando.or.jp/",
+
+  高台寺:
+    "https://www.kodaiji.com/",
+
+  建仁寺:
+    "https://www.kenninji.jp/",
+
+  三十三間堂:
+    "https://www.sanjusangendo.jp/",
+
+  東寺:
+    "https://toji.or.jp/",
 
   京都駅:
     "https://www.kyoto-station-building.co.jp/",
 
+  東福寺:
+    "https://tofukuji.jp/",
+
+  下鴨神社:
+    "https://www.shimogamo-jinja.or.jp/",
+
+  上賀茂神社:
+    "https://www.kamigamojinja.jp/",
+
+  京都御苑:
+    "https://www.env.go.jp/garden/kyotogyoen/",
+
+  北野天満宮:
+    "https://kitanotenmangu.or.jp/",
+
+  龍安寺:
+    "https://www.ryoanji.jp/",
+
+  仁和寺:
+    "https://ninnaji.jp/",
+
+  知恩院:
+    "https://www.chion-in.or.jp/",
+
+  青蓮院:
+    "https://www.shorenin.com/",
+
   哲学の道:
     "https://ja.kyoto.travel/tourism/single01.php?category_id=8&tourism_id=2684",
+
+  東本願寺:
+    "https://www.higashihonganji.or.jp/",
+
+  西本願寺:
+    "https://www.hongwanji.kyoto/",
 };
 
 type SpotObjectRange = {
@@ -141,9 +216,7 @@ function addOrUpdateWebsite(
     /(\n\s*website:\s*")([^"]+)(",)/;
 
   const existingWebsiteMatch =
-    block.match(
-      existingWebsitePattern
-    );
+    block.match(existingWebsitePattern);
 
   if (existingWebsiteMatch) {
     const currentWebsite =
@@ -174,7 +247,7 @@ function addOrUpdateWebsite(
     return {
       block: block.replace(
         addressPattern,
-        `$1\n    website: "${website}",`
+        `$1\nwebsite: "${website}",`
       ),
       updated: true,
       unchanged: false,
@@ -185,14 +258,12 @@ function addOrUpdateWebsite(
     /(\n\s*recommendedStay:\s*"[^"]+",)/;
 
   if (
-    recommendedStayPattern.test(
-      block
-    )
+    recommendedStayPattern.test(block)
   ) {
     return {
       block: block.replace(
         recommendedStayPattern,
-        `\n    website: "${website}",$1`
+        `\nwebsite: "${website}",$1`
       ),
       updated: true,
       unchanged: false,
@@ -217,10 +288,7 @@ function run(): void {
     );
 
   const blocksByName =
-    new Map<
-      string,
-      SpotObjectRange
-    >();
+    new Map<string, SpotObjectRange>();
 
   for (const range of objectRanges) {
     const spotName =
@@ -236,8 +304,7 @@ function run(): void {
     );
   }
 
-  const replacements: Replacement[] =
-    [];
+  const replacements: Replacement[] = [];
 
   let updatedCount = 0;
   let unchangedCount = 0;
@@ -261,9 +328,7 @@ function run(): void {
     )
   ) {
     const range =
-      blocksByName.get(
-        spotName
-      );
+      blocksByName.get(spotName);
 
     if (!range) {
       throw new Error(
@@ -312,7 +377,7 @@ function run(): void {
 
   for (
     const replacement of
-    sortedReplacements
+      sortedReplacements
   ) {
     updatedSource =
       updatedSource.slice(

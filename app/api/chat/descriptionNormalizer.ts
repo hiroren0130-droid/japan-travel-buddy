@@ -78,6 +78,10 @@ function removeLateLunchExpressions(
       ""
     )
     .replace(
+      /ここで昼食を取るのに便利です。?/g,
+      ""
+    )
+    .replace(
       /昼食と(?:街歩き|散策)に最適なエリアです。?/g,
       ""
     )
@@ -91,6 +95,10 @@ function removeLateLunchExpressions(
     )
     .replace(
       /(?:周辺|近隣)?で?\d{1,2}:\d{2}頃に昼食を取り[^。]*。?/g,
+      ""
+    )
+    .replace(
+      /(?:周辺|近隣)?で?\d{1,2}:\d{2}前後に昼食を取[^。]*。?/g,
       ""
     )
     .replace(
@@ -268,6 +276,17 @@ function normalizeItemDescription(
     removeCrowdExpressions(
       description
     );
+
+  description =
+  description
+    .replace(
+      /\d{1,2}:\d{2}(?:頃|前後)?に昼食を取[^。]*。?/g,
+      ""
+    )
+    .replace(
+      /\d{1,2}:\d{2}(?:頃|前後)?から昼食[^。]*。?/g,
+      ""
+    );  
 
   if (
     arrivalMinutes >=

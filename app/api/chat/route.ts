@@ -53,6 +53,9 @@ export async function POST(
   request: Request
 ) {
   try {
+    const requestStartedAt =
+      performance.now();
+
     const body =
       (await request.json()) as RequestBody;
 
@@ -167,6 +170,9 @@ ${specialRequest}
      * 問題がある場合の
      * 1回だけの再生成を行います。
      */
+    const generateStartedAt =
+      performance.now();
+
     const {
       generatedPlan:
         generatedPlanResult,
@@ -181,6 +187,17 @@ ${specialRequest}
         mentionedSpots,
       requestedStartSpotName,
     });
+
+    console.log(
+      "===== Performance: generateTravelPlan ====="
+    );
+
+    console.log(
+      `${Math.round(
+        performance.now() -
+          generateStartedAt
+      )}ms`
+    );
 
     let generatedPlan =
       generatedPlanResult;
@@ -268,6 +285,9 @@ ${specialRequest}
      * Route Scoreなどに問題が残る場合だけ、
      * AI改善生成を試します。
      */
+    const improveStartedAt =
+      performance.now();
+
     generatedPlan =
       await improveTravelPlan({
         plan:
@@ -285,6 +305,17 @@ ${specialRequest}
 
         requestedStartSpotName,
       });
+
+    console.log(
+      "===== Performance: improveTravelPlan ====="
+    );
+
+    console.log(
+      `${Math.round(
+        performance.now() -
+          improveStartedAt
+      )}ms`
+    );
 
     /*
      * AI改善を行った場合も含め、
@@ -340,6 +371,17 @@ ${specialRequest}
       buildPlanResponse(
         generatedPlan
       );
+
+    console.log(
+      "===== Performance: total ====="
+    );
+
+    console.log(
+      `${Math.round(
+        performance.now() -
+          requestStartedAt
+      )}ms`
+    );
 
     return NextResponse.json({
       plan,

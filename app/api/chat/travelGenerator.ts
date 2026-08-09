@@ -74,6 +74,33 @@ export async function generateAITravelPlan({
   }
 
   try {
+    
+    const prompt =
+  createTravelPlannerPrompt({
+    spotList:
+      normalizedSpotList,
+    message:
+      normalizedMessage,
+    days:
+      normalizedDays,
+    specialRequest:
+      normalizedSpecialRequest,
+    currentLocation,
+  });
+
+if (
+  process.env.NODE_ENV ===
+  "development"
+) {
+  console.log(
+    "===== Travel Prompt Size ====="
+  );
+
+  console.log(
+    `${prompt.length} characters`
+  );
+}
+    
     const response =
       await openai.responses.create({
         model: "gpt-5-mini",
@@ -91,17 +118,7 @@ export async function generateAITravelPlan({
           },
         },
 
-        input: createTravelPlannerPrompt({
-          spotList:
-            normalizedSpotList,
-          message:
-            normalizedMessage,
-          days:
-            normalizedDays,
-          specialRequest:
-            normalizedSpecialRequest,
-          currentLocation,
-        }),
+        input: prompt,
       });
 
     const outputText =
