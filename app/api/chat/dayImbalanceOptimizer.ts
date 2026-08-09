@@ -2,6 +2,7 @@ import { getSpotByName } from "@/lib/spotService";
 
 import {
   calculateBusinessHoursViolationCount,
+  calculateCrossDayAreaSplitCount,
   calculateDayImbalanceCount,
   calculateLateEndCount,
   calculateLongDistanceMoveCount,
@@ -26,8 +27,9 @@ type PlanQuality = {
   businessHoursViolationCount: number;
   scheduleConflictCount: number;
   lateEndCount: number;
-  longDistanceMoveCount: number;
   dayImbalanceCount: number;
+  crossDayAreaSplitCount: number;
+  longDistanceMoveCount: number;
   score: number;
 };
 
@@ -61,17 +63,22 @@ function evaluatePlan(
       ),
 
     lateEndCount:
-  calculateLateEndCount(
-    plan
-  ),
+      calculateLateEndCount(
+        plan
+      ),
 
-longDistanceMoveCount:
-  calculateLongDistanceMoveCount(
-    plan
-  ),
-
-dayImbalanceCount:
+    dayImbalanceCount:
       calculateDayImbalanceCount(
+        plan
+      ),
+
+    crossDayAreaSplitCount:
+      calculateCrossDayAreaSplitCount(
+        plan
+      ),
+
+    longDistanceMoveCount:
+      calculateLongDistanceMoveCount(
         plan
       ),
 
@@ -121,44 +128,58 @@ function isBetterQuality(
   }
 
   /*
- * 18時以降まで長引く日を減らします。
- */
-if (
-  candidate.lateEndCount !==
-  current.lateEndCount
-) {
-  return (
-    candidate.lateEndCount <
+   * 18時以降まで長引く日を減らします。
+   */
+  if (
+    candidate.lateEndCount !==
     current.lateEndCount
-  );
-}
+  ) {
+    return (
+      candidate.lateEndCount <
+      current.lateEndCount
+    );
+  }
 
-/*
- * 日程の極端な偏りを減らします。
- */
-if (
-  candidate.dayImbalanceCount !==
-  current.dayImbalanceCount
-) {
-  return (
-    candidate.dayImbalanceCount <
+  /*
+   * 日程の極端な偏りを減らします。
+   */
+  if (
+    candidate.dayImbalanceCount !==
     current.dayImbalanceCount
-  );
-}
+  ) {
+    return (
+      candidate.dayImbalanceCount <
+      current.dayImbalanceCount
+    );
+  }
 
-/*
- * 京都市内を大きく横断する
- * 長距離移動を減らします。
- */
-if (
-  candidate.longDistanceMoveCount !==
-  current.longDistanceMoveCount
-) {
-  return (
-    candidate.longDistanceMoveCount <
+  /*
+   * 同じ観光エリアが複数日に分散する状態を
+   * できるだけ減らします。
+   */
+  if (
+    candidate.crossDayAreaSplitCount !==
+    current.crossDayAreaSplitCount
+  ) {
+    return (
+      candidate.crossDayAreaSplitCount <
+      current.crossDayAreaSplitCount
+    );
+  }
+
+  /*
+   * 京都市内を大きく横断する
+   * 長距離移動を減らします。
+   */
+  if (
+    candidate.longDistanceMoveCount !==
     current.longDistanceMoveCount
-  );
-}
+  ) {
+    return (
+      candidate.longDistanceMoveCount <
+      current.longDistanceMoveCount
+    );
+  }
 
   /*
    * 上記が同じなら総合Route Scoreを比較します。
@@ -335,7 +356,8 @@ function swapItems({
   secondItemIndex: number;
 }): AITravelPlan | null {
   if (
-    firstDayIndex === secondDayIndex
+    firstDayIndex ===
+    secondDayIndex
   ) {
     return null;
   }
@@ -534,13 +556,13 @@ function createMoveCandidates(
         ];
 
       if (
-  !isMovableItem(
-    item,
-    protectedStartSpotName
-  )
-) {
-  continue;
-}
+        !isMovableItem(
+          item,
+          protectedStartSpotName
+        )
+      ) {
+        continue;
+      }
 
       for (
         let toDayIndex = 0;
@@ -599,10 +621,10 @@ export function optimizeDayImbalance(
     moveCount += 1
   ) {
     const candidates =
-  createMoveCandidates(
-    currentPlan,
-    protectedStartSpotName
-  );
+      createMoveCandidates(
+        currentPlan,
+        protectedStartSpotName
+      );
 
     let bestCandidatePlan:
       AITravelPlan | null = null;
@@ -641,12 +663,6 @@ export function optimizeDayImbalance(
           candidatePlan
         );
 
-      
-
-/*
- * 現在より悪くなる移動は採用しません。
- */
-
       /*
        * 現在より悪くなる移動は採用しません。
        */
@@ -678,7 +694,7 @@ export function optimizeDayImbalance(
       }
     }
 
-        const swapCandidates =
+    const swapCandidates =
       createSwapCandidates(
         currentPlan,
         protectedStartSpotName
@@ -718,8 +734,6 @@ export function optimizeDayImbalance(
         evaluatePlan(
           candidatePlan
         );
-
-      
 
       /*
        * 現在より悪くなる交換は

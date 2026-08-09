@@ -437,6 +437,94 @@ export function calculateAreaRevisitCount(
   return revisitCount;
 }
 
+export function calculateCrossDayAreaSplitCount(
+  plan: AITravelPlan
+): number {
+  const areaDayIndexes =
+    new Map<string, Set<number>>();
+
+  for (
+    let dayIndex = 0;
+    dayIndex < plan.days.length;
+    dayIndex += 1
+  ) {
+    const day =
+      plan.days[dayIndex];
+
+    const areasInDay =
+      new Set<string>();
+
+    for (const item of day.items) {
+      const spot =
+        getSpotByName(
+          item.spot
+        );
+
+      if (!spot) {
+        continue;
+      }
+
+      /*
+       * 駅や空港は出発・到着拠点なので、
+       * 観光エリアの日またぎ判定には含めません。
+       */
+      if (
+        spot.category === "駅" ||
+        spot.category === "空港"
+      ) {
+        continue;
+      }
+
+      const area =
+        spot.area.trim();
+
+      if (!area) {
+        continue;
+      }
+
+      areasInDay.add(
+        area
+      );
+    }
+
+    for (
+      const area
+      of areasInDay
+    ) {
+      const dayIndexes =
+        areaDayIndexes.get(
+          area
+        ) ??
+        new Set<number>();
+
+      dayIndexes.add(
+        dayIndex
+      );
+
+      areaDayIndexes.set(
+        area,
+        dayIndexes
+      );
+    }
+  }
+
+  let splitCount = 0;
+
+  for (
+    const dayIndexes
+    of areaDayIndexes.values()
+  ) {
+    if (
+      dayIndexes.size > 1
+    ) {
+      splitCount +=
+        dayIndexes.size - 1;
+    }
+  }
+
+  return splitCount;
+}
+
 export function calculateShortStayCount(
   plan: AITravelPlan
 ): number {
