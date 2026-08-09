@@ -162,13 +162,13 @@ function removeLateLunchExpressions(
       ""
     )
     .replace(
-  /周辺で昼食や[^。]*。?/g,
-  ""
-)
-.replace(
-  /[^。]*周辺[^。]*昼食に便利です。?/g,
-  ""
-);
+      /周辺で昼食や[^。]*。?/g,
+      ""
+    )
+    .replace(
+      /[^。]*周辺[^。]*昼食に便利です。?/g,
+      ""
+    );
 }
 
 function removeMorningExpressions(
@@ -199,10 +199,10 @@ function removeMorningExpressions(
       /朝にゆっくり/g,
       "ゆっくり"
     )
-.replace(
-  /朝に/g,
-  ""
-);
+    .replace(
+      /朝に/g,
+      ""
+    );
 }
 
 function removeEveningExpressions(
@@ -253,6 +253,28 @@ function removeCrowdExpressions(
     )
     .replace(
       /空いている/g,
+      ""
+    );
+}
+
+function removeRouteReferenceExpressions(
+  description: string
+): string {
+  return description
+    .replace(
+      /[^。]*から(?:徒歩|バス|電車|地下鉄|JR|タクシー)で移動[^。]*。?/g,
+      ""
+    )
+    .replace(
+      /[^。]*から(?:徒歩|バス|電車|地下鉄|JR|タクシー)でアクセス[^。]*。?/g,
+      ""
+    )
+    .replace(
+      /[^。]*から短時間で移動できます。?/g,
+      ""
+    )
+    .replace(
+      /[^。]*から近く移動負担が小さいです。?/g,
       ""
     );
 }
@@ -315,10 +337,11 @@ function normalizeItemDescription(
       item.description
     );
 
-    description = description.replace(
-  /早朝の(?=神社|寺院|寺|スポット|名所|場所|境内)/g,
-  ""
-);
+  description =
+    description.replace(
+      /早朝の(?=神社|寺院|寺|スポット|名所|場所|境内)/g,
+      ""
+    );
 
   description =
     removeCrowdExpressions(
@@ -326,15 +349,20 @@ function normalizeItemDescription(
     );
 
   description =
-  description
-    .replace(
-      /\d{1,2}:\d{2}(?:頃|前後)?に昼食を取[^。]*。?/g,
-      ""
-    )
-    .replace(
-      /\d{1,2}:\d{2}(?:頃|前後)?から昼食[^。]*。?/g,
-      ""
-    );  
+    removeRouteReferenceExpressions(
+      description
+    );
+
+  description =
+    description
+      .replace(
+        /\d{1,2}:\d{2}(?:頃|前後)?に昼食を取[^。]*。?/g,
+        ""
+      )
+      .replace(
+        /\d{1,2}:\d{2}(?:頃|前後)?から昼食[^。]*。?/g,
+        ""
+      );
 
   if (
     arrivalMinutes >=
