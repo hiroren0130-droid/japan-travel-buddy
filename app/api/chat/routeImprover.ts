@@ -77,9 +77,9 @@ export async function improveTravelPlan({
   }
 
   const shouldImproveRoute =
-    initialRouteScore < 85 ||
-    lunchBreakMissingCount > 0 ||
-    businessHoursViolationCount > 0;
+  initialRouteScore < 84 ||
+  lunchBreakMissingCount > 0 ||
+  businessHoursViolationCount > 0;
 
   if (
     !shouldImproveRoute ||
