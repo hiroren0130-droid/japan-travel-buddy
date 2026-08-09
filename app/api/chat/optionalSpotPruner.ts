@@ -1,9 +1,14 @@
 import {
   calculateBusinessHoursViolationCount,
   calculateLateEndCount,
+  calculateLongDistanceMoveCount,
   calculateRouteScore,
   calculateScheduleConflictCount,
 } from "./routeEvaluator";
+
+import {
+  optimizeDayImbalance,
+} from "./dayImbalanceOptimizer";
 
 import {
   optimizeTravelPlanRoute,
@@ -23,12 +28,14 @@ type PlanQuality = {
   businessHoursViolationCount: number;
   scheduleConflictCount: number;
   lateEndCount: number;
+  longDistanceMoveCount: number;
   score: number;
 };
 
 type PruneOptionalSpotsParams = {
   plan: AITravelPlan;
   requiredSpotNames: string[];
+  protectedStartSpotName?: string | null;
 };
 
 function normalizeSpotName(
@@ -60,6 +67,11 @@ function evaluatePlan(
         plan
       ),
 
+    longDistanceMoveCount:
+      calculateLongDistanceMoveCount(
+        plan
+      ),
+
     score:
       calculateRouteScore(
         plan
@@ -76,6 +88,8 @@ function hasCriticalIssue(
     quality.scheduleConflictCount >
       0 ||
     quality.lateEndCount >
+      0 ||
+    quality.longDistanceMoveCount >
       0
   );
 }
@@ -134,6 +148,16 @@ function isBetterQuality(
     );
   }
 
+  if (
+    candidate.longDistanceMoveCount !==
+    current.longDistanceMoveCount
+  ) {
+    return (
+      candidate.longDistanceMoveCount <
+      current.longDistanceMoveCount
+    );
+  }
+
   return (
     candidate.score >
     current.score
@@ -184,18 +208,29 @@ function removeSpotFromPlan({
 }
 
 function optimizeAfterRemoval(
-  plan: AITravelPlan
+  plan: AITravelPlan,
+  protectedStartSpotName: string | null
 ): AITravelPlan {
-  return optimizeTravelPlanTimes(
+  const routeOptimizedPlan =
     optimizeTravelPlanRoute(
       plan
-    )
+    );
+
+  const timeOptimizedPlan =
+    optimizeTravelPlanTimes(
+      routeOptimizedPlan
+    );
+
+  return optimizeDayImbalance(
+    timeOptimizedPlan,
+    protectedStartSpotName
   );
 }
 
 export function pruneOptionalSpots({
   plan,
   requiredSpotNames,
+  protectedStartSpotName = null,
 }: PruneOptionalSpotsParams): AITravelPlan {
   const requiredSpotNameSet =
     new Set(
@@ -287,13 +322,59 @@ export function pruneOptionalSpots({
                 currentPlan,
               dayIndex,
               itemIndex,
-            })
+            }),
+            protectedStartSpotName
           );
 
         const candidateQuality =
           evaluatePlan(
             candidatePlan
           );
+
+        if (
+          process.env.NODE_ENV ===
+          "development"
+        ) {
+          console.log(
+            "===== Optional Spot Prune Candidate ====="
+          );
+
+          console.log(
+            JSON.stringify(
+              {
+                removedSpot:
+                  item.spot,
+
+                currentQuality,
+
+                candidateQuality,
+
+                candidateDays:
+                  candidatePlan.days.map(
+                    (candidateDay) => ({
+                      day:
+                        candidateDay.day,
+
+                      items:
+                        candidateDay.items.map(
+                          (
+                            candidateItem
+                          ) => ({
+                            time:
+                              candidateItem.time,
+
+                            spot:
+                              candidateItem.spot,
+                          })
+                        ),
+                    })
+                  ),
+              },
+              null,
+              2
+            )
+          );
+        }
 
         if (
           !isBetterQuality(

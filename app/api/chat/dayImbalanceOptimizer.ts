@@ -234,7 +234,10 @@ function optimizeMovedPlan(
 ): AITravelPlan {
   return optimizeTravelPlanTimes(
     optimizeTravelPlanRoute(
-      plan
+      plan,
+      {
+        preserveFirstItem: false,
+      }
     )
   );
 }
@@ -638,7 +641,7 @@ export function optimizeDayImbalance(
           candidatePlan
         );
 
-        
+      
 
 /*
  * 現在より悪くなる移動は採用しません。

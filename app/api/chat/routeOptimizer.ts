@@ -932,38 +932,97 @@ function evaluateRouteOrder({
 }
 
 function optimizeItemOrderExhaustively(
-  items: AIPlanItem[]
+  items: AIPlanItem[],
+  preserveFirstItem: boolean
 ): AIPlanItem[] {
-  if (
-    items.length <= 1
-  ) {
+  if (items.length <= 1) {
     return [
       ...items,
     ];
   }
 
-  const firstItem =
-    items[0];
+  /*
+   * 通常処理では、
+   * これまで通り1件目を固定します。
+   */
+  if (preserveFirstItem) {
+    const firstItem =
+      items[0];
 
-  const remainingItems =
-    items.slice(1);
+    const remainingItems =
+      items.slice(1);
 
+    const permutations =
+      createPermutations(
+        remainingItems
+      );
+
+    let bestEvaluation:
+      RouteEvaluation | null = null;
+
+    for (
+      const permutation
+      of permutations
+    ) {
+      const evaluation =
+        evaluateRouteOrder({
+          firstItem,
+          orderedItems:
+            permutation,
+        });
+
+      if (
+        !bestEvaluation ||
+        evaluation.score <
+          bestEvaluation.score
+      ) {
+        bestEvaluation =
+          evaluation;
+      }
+    }
+
+    if (!bestEvaluation) {
+      return [
+        {
+          ...firstItem,
+          duration: "0分",
+        },
+        ...remainingItems,
+      ];
+    }
+
+    return bestEvaluation.items;
+  }
+
+  /*
+   * 先頭固定を解除する場合は、
+   * 全スポットを含めた並び順を評価します。
+   */
   const permutations =
     createPermutations(
-      remainingItems
+      items
     );
 
   let bestEvaluation:
     RouteEvaluation | null = null;
 
   for (
-    const permutation of permutations
+    const permutation
+    of permutations
   ) {
+    const [
+      firstItem,
+      ...orderedItems
+    ] = permutation;
+
+    if (!firstItem) {
+      continue;
+    }
+
     const evaluation =
       evaluateRouteOrder({
         firstItem,
-        orderedItems:
-          permutation,
+        orderedItems,
       });
 
     if (
@@ -978,11 +1037,7 @@ function optimizeItemOrderExhaustively(
 
   if (!bestEvaluation) {
     return [
-      {
-        ...firstItem,
-        duration: "0分",
-      },
-      ...remainingItems,
+      ...items,
     ];
   }
 
@@ -1086,24 +1141,35 @@ function optimizeItemOrderGreedy(
 }
 
 function optimizeItemOrder(
-  items: AIPlanItem[]
+  items: AIPlanItem[],
+  preserveFirstItem: boolean
 ): AIPlanItem[] {
   if (
     items.length <=
     MAX_EXHAUSTIVE_ROUTE_ITEMS
   ) {
     return optimizeItemOrderExhaustively(
-      items
+      items,
+      preserveFirstItem
     );
   }
 
+  /*
+   * 大量スポット時は処理量を抑えるため、
+   * 現時点では既存Greedy処理を使用します。
+   */
   return optimizeItemOrderGreedy(
     items
   );
 }
 
+type OptimizeTravelPlanRouteOptions = {
+  preserveFirstItem?: boolean;
+};
+
 function optimizeDayRoute(
-  day: AIPlanDay
+  day: AIPlanDay,
+  preserveFirstItem: boolean
 ): AIPlanDay {
   if (
     day.items.length <= 1
@@ -1116,20 +1182,31 @@ function optimizeDayRoute(
 
     items:
       optimizeItemOrder(
-        day.items
+        day.items,
+        preserveFirstItem
       ),
   };
 }
 
 export function optimizeTravelPlanRoute(
-  plan: AITravelPlan
+  plan: AITravelPlan,
+  options:
+    OptimizeTravelPlanRouteOptions = {}
 ): AITravelPlan {
+  const {
+    preserveFirstItem = true,
+  } = options;
+
   return {
     ...plan,
 
     days:
       plan.days.map(
-        optimizeDayRoute
+        (day) =>
+          optimizeDayRoute(
+            day,
+            preserveFirstItem
+          )
       ),
   };
 }

@@ -264,16 +264,19 @@ ${specialRequest}
      * 追加のAI呼び出しを避けます。
      */
     generatedPlan =
-      pruneOptionalSpots({
-        plan:
-          generatedPlan,
+  pruneOptionalSpots({
+    plan:
+      generatedPlan,
 
-        requiredSpotNames:
-          mentionedSpots.map(
-            (spot) =>
-              spot.name
-          ),
-      });
+    requiredSpotNames:
+      mentionedSpots.map(
+        (spot) =>
+          spot.name
+      ),
+
+    protectedStartSpotName:
+      requestedStartSpotName,
+  });
 
     generatedPlan =
       optimizeGeneratedPlan({
@@ -326,16 +329,19 @@ ${specialRequest}
      * 最後にもう一度ローカル最適化します。
      */
     generatedPlan =
-      pruneOptionalSpots({
-        plan:
-          generatedPlan,
+  pruneOptionalSpots({
+    plan:
+      generatedPlan,
 
-        requiredSpotNames:
-          mentionedSpots.map(
-            (spot) =>
-              spot.name
-          ),
-      });
+    requiredSpotNames:
+      mentionedSpots.map(
+        (spot) =>
+          spot.name
+      ),
+
+    protectedStartSpotName:
+      requestedStartSpotName,
+  });
 
     generatedPlan =
       optimizeGeneratedPlan({
