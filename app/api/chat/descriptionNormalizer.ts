@@ -184,6 +184,14 @@ function removeMorningExpressions(
       ""
     )
     .replace(
+      /朝の時間(?:帯)?に?/g,
+      ""
+    )
+    .replace(
+      /朝の(?=見学|参拝|散策|観光|訪問)/g,
+      ""
+    )
+    .replace(
       /朝のうちに?/g,
       ""
     )
