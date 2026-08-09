@@ -1,4 +1,4 @@
-import type { Spot } from "./types";
+﻿import type { Spot } from "./types";
 
 export const spots: Spot[] = [
   {
@@ -348,7 +348,7 @@ export const spots: Spot[] = [
     website: "https://www.kodaiji.com/",
     hours: "09:00〜17:30",
     recommendedStay: "60分",
-    bestVisitTime: "夕方",
+    bestVisitTime: "昼",
     mealRecommended: true,
     nearby: [
       "八坂神社",
