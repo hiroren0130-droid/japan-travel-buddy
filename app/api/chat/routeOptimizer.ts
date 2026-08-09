@@ -24,6 +24,31 @@ const AREA_REVISIT_PENALTY = 120;
 const UNKNOWN_SPOT_PENALTY = 500;
 const UNKNOWN_HOURS_PENALTY = 40;
 
+const NO_BUSINESS_HOURS_REQUIRED_CATEGORIES =
+  new Set([
+    "駅",
+    "街並み",
+    "街歩き",
+    "街歩き・グルメ",
+    "橋",
+    "景勝地",
+    "公園",
+    "散策路",
+    "市場",
+    "自然",
+    "商店街",
+  ]);
+
+const UNKNOWN_HOURS_PENALTY_EXCLUDED_SPOT_IDS =
+  new Set([
+    "daitokuji",
+    "saihoji",
+    "oharano-shrine",
+    "horinji-arashiyama",
+    "sagano-scenic-railway",
+    "hokanji-yasaka-pagoda",
+  ]);  
+
 const BUSINESS_HOURS_VIOLATION_PENALTY = 1000;
 
 const CLOSING_PRIORITY_DIVISOR = 15;
@@ -53,6 +78,37 @@ type RouteEvaluation = {
   score: number;
   items: AIPlanItem[];
 };
+
+function shouldPenalizeUnknownHours(
+  item: AIPlanItem
+): boolean {
+  const spot =
+    getSpotByName(
+      item.spot
+    );
+
+  if (!spot) {
+    return false;
+  }
+
+  if (
+    NO_BUSINESS_HOURS_REQUIRED_CATEGORIES.has(
+      spot.category
+    )
+  ) {
+    return false;
+  }
+
+  if (
+    UNKNOWN_HOURS_PENALTY_EXCLUDED_SPOT_IDS.has(
+      spot.id
+    )
+  ) {
+    return false;
+  }
+
+  return true;
+}
 
 function degreesToRadians(
   degrees: number
@@ -790,15 +846,21 @@ function evaluateRouteOrder({
       );
 
     if (!businessHours) {
-      routeScore +=
-        UNKNOWN_HOURS_PENALTY;
-    } else if (
-      arrivalMinutes <
-      businessHours.open
-    ) {
-      arrivalMinutes =
-        businessHours.open;
-    }
+  if (
+    shouldPenalizeUnknownHours(
+      candidate
+    )
+  ) {
+    routeScore +=
+      UNKNOWN_HOURS_PENALTY;
+  }
+} else if (
+  arrivalMinutes <
+  businessHours.open
+) {
+  arrivalMinutes =
+    businessHours.open;
+}
 
     const stayMinutes =
       getRecommendedStayMinutes(
