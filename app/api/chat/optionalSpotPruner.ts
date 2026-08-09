@@ -331,50 +331,7 @@ export function pruneOptionalSpots({
             candidatePlan
           );
 
-        if (
-          process.env.NODE_ENV ===
-          "development"
-        ) {
-          console.log(
-            "===== Optional Spot Prune Candidate ====="
-          );
-
-          console.log(
-            JSON.stringify(
-              {
-                removedSpot:
-                  item.spot,
-
-                currentQuality,
-
-                candidateQuality,
-
-                candidateDays:
-                  candidatePlan.days.map(
-                    (candidateDay) => ({
-                      day:
-                        candidateDay.day,
-
-                      items:
-                        candidateDay.items.map(
-                          (
-                            candidateItem
-                          ) => ({
-                            time:
-                              candidateItem.time,
-
-                            spot:
-                              candidateItem.spot,
-                          })
-                        ),
-                    })
-                  ),
-              },
-              null,
-              2
-            )
-          );
-        }
+        
 
         if (
           !isBetterQuality(
