@@ -94,7 +94,7 @@ export const spots: Spot[] = [
   {
     id: "arashiyama",
     name: "嵐山",
-    area: "嵐山",
+    area: "嵯峨・嵐山",
     category: "景勝地",
     description:
       "四季折々の自然と歴史的な名所が集まる京都屈指の観光エリア。",
@@ -115,7 +115,7 @@ export const spots: Spot[] = [
   {
     id: "bamboo-grove",
     name: "竹林の小径",
-    area: "嵐山",
+    area: "嵯峨・嵐山",
     category: "自然",
     description:
       "高く伸びた竹に囲まれた、嵐山を代表する幻想的な散策路。",
@@ -136,7 +136,7 @@ export const spots: Spot[] = [
   {
     id: "togetsukyo",
     name: "渡月橋",
-    area: "嵐山",
+    area: "嵯峨・嵐山",
     category: "橋",
     description:
       "桂川と嵐山の山並みを望める、嵐山を象徴する景観スポット。",
@@ -157,7 +157,7 @@ export const spots: Spot[] = [
   {
     id: "tenryuji",
     name: "天龍寺",
-    area: "嵐山",
+    area: "嵯峨・嵐山",
     category: "寺院",
     description:
       "曹源池庭園と借景の美しさで知られる、嵐山の世界遺産。",
@@ -717,7 +717,7 @@ export const spots: Spot[] = [
   {
 id: "kyoto-imperial-palace",
 name: "京都御所",
-area: "京都御所・下鴨",
+area: "市内中心部",
 category: "歴史施設",
 description:
 "京都御苑内に位置し、明治維新まで天皇の住まいとして使われた京都を代表する歴史施設。",
@@ -740,7 +740,7 @@ nearby: [
 {
 id: "seimei-shrine",
 name: "晴明神社",
-area: "二条城・西陣",
+area: "市内中心部",
 category: "神社",
 description:
 "平安時代の陰陽師・安倍晴明を祀り、五芒星の社紋でも知られる神社。",
@@ -1870,7 +1870,7 @@ nearby: [
   {
   id: "museum-of-kyoto",
   name: "京都文化博物館",
-  area: "烏丸・三条",
+  area: "市内中心部",
   category: "博物館",
   description:
     "京都の歴史と文化を紹介する総合文化施設。重要文化財の別館や総合展示、特別展などを楽しめる。",
@@ -1893,7 +1893,7 @@ nearby: [
 {
   id: "kyoto-international-manga-museum",
   name: "京都国際マンガミュージアム",
-  area: "烏丸御池",
+  area: "市内中心部",
   category: "博物館",
   description:
     "京都市と京都精華大学が共同運営するマンガ文化の博物館。国内外のマンガ資料を収集・保存し、展示やイベントも開催している。",
@@ -1916,7 +1916,7 @@ nearby: [
 {
   id: "pontocho",
   name: "先斗町",
-  area: "河原町・木屋町",
+  area: "市内中心部",
   category: "街歩き",
   description:
     "鴨川沿いに延びる京都を代表する花街の一つ。細い路地に京料理店や飲食店が並び、夜の京都らしい風情を楽しめる。",
@@ -1938,7 +1938,7 @@ nearby: [
 {
   id: "kiyamachi",
   name: "木屋町",
-  area: "河原町・木屋町",
+  area: "市内中心部",
   category: "街歩き",
   description:
     "高瀬川沿いに続く京都中心部の街歩きエリア。飲食店が多く、先斗町や河原町と合わせて散策しやすい。",
