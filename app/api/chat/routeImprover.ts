@@ -1,10 +1,11 @@
-import type {
+﻿import type {
   Spot,
 } from "@/data/types";
 
 import {
   calculateBusinessHoursViolationCount,
   calculateLunchBreakMissingCount,
+  calculateLongDistanceMoveCount,
   calculateRouteScore,
 } from "./routeEvaluator";
 
@@ -66,6 +67,11 @@ export async function improveTravelPlan({
       plan
     );
 
+    const longDistanceMoveCount =
+  calculateLongDistanceMoveCount(
+    plan
+  );
+
   if (
     process.env.NODE_ENV ===
     "development"
@@ -78,6 +84,7 @@ export async function improveTravelPlan({
 
   const shouldImproveRoute =
   initialRouteScore < 84 ||
+  longDistanceMoveCount > 0 ||
   lunchBreakMissingCount > 0 ||
   businessHoursViolationCount > 0;
 
