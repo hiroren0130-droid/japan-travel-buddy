@@ -194,7 +194,7 @@ function rangesOverlap(
 }
 
 const EARTH_RADIUS_KM = 6371;
-const LONG_DISTANCE_MOVE_KM = 8;
+const LONG_DISTANCE_MOVE_KM = 7;
 
 function degreesToRadians(
   degrees: number
