@@ -1,5 +1,9 @@
 import { getSpotByName } from "@/lib/spotService";
 
+import {
+  getKyotoAreaGroup,
+} from "./kyotoAreaGroups";
+
 import type { AITravelPlan } from "./travelValidator";
 
 const MAX_RECOMMENDED_SPOTS_PER_DAY = 6;
@@ -381,6 +385,134 @@ export function calculateAreaSwitches(
   return areaSwitches;
 }
 
+export function calculateBroadAreaSwitchCount(
+  plan: AITravelPlan
+): number {
+  let broadAreaSwitchCount = 0;
+
+  for (const day of plan.days) {
+    let previousAreaGroup:
+      ReturnType<
+        typeof getKyotoAreaGroup
+      > = null;
+
+    for (const item of day.items) {
+      const spot =
+        getSpotByName(
+          item.spot
+        );
+
+      if (!spot) {
+        continue;
+      }
+
+      if (
+        spot.category === "駅" ||
+        spot.category === "空港"
+      ) {
+        continue;
+      }
+
+      const currentAreaGroup =
+        getKyotoAreaGroup(
+          spot.area
+        );
+
+      if (!currentAreaGroup) {
+        continue;
+      }
+
+      if (!previousAreaGroup) {
+        previousAreaGroup =
+          currentAreaGroup;
+
+        continue;
+      }
+
+      if (
+        previousAreaGroup !==
+        currentAreaGroup
+      ) {
+        broadAreaSwitchCount += 1;
+      }
+
+      previousAreaGroup =
+        currentAreaGroup;
+    }
+  }
+
+  return broadAreaSwitchCount;
+}
+export function calculateBroadAreaOverloadCount(
+  plan: AITravelPlan
+): number {
+  let overloadCount = 0;
+
+  for (const day of plan.days) {
+    let previousAreaGroup:
+      ReturnType<
+        typeof getKyotoAreaGroup
+      > = null;
+
+    let switchCountToday = 0;
+
+    for (const item of day.items) {
+      const spot =
+        getSpotByName(
+          item.spot
+        );
+
+      if (!spot) {
+        continue;
+      }
+
+      if (
+        spot.category === "駅" ||
+        spot.category === "空港"
+      ) {
+        continue;
+      }
+
+      const currentAreaGroup =
+        getKyotoAreaGroup(
+          spot.area
+        );
+
+      if (!currentAreaGroup) {
+        continue;
+      }
+
+      if (!previousAreaGroup) {
+        previousAreaGroup =
+          currentAreaGroup;
+
+        continue;
+      }
+
+      if (
+        previousAreaGroup !==
+        currentAreaGroup
+      ) {
+        switchCountToday += 1;
+      }
+
+      previousAreaGroup =
+        currentAreaGroup;
+    }
+
+    /*
+     * 1日の広域エリア切替が
+     * 2回以上なら過剰移動として数えます。
+     */
+    if (
+      switchCountToday >= 2
+    ) {
+      overloadCount += 1;
+    }
+  }
+
+  return overloadCount;
+}
 export function calculateAreaRevisitCount(
   plan: AITravelPlan
 ): number {

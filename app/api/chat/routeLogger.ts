@@ -1,7 +1,9 @@
 import {
   calculateAreaRevisitCount,
   calculateAreaSwitches,
-  calculateBusinessHoursViolationCount,
+  calculateBroadAreaOverloadCount,
+calculateBroadAreaSwitchCount,
+calculateBusinessHoursViolationCount,
   calculateDayImbalanceCount,
   calculateDuplicateSpotCount,
   calculateFirstItemDurationErrorCount,
@@ -38,7 +40,17 @@ export function logPlanEvaluation(
 
   console.log({
     areaSwitches:
-      calculateAreaSwitches(plan),
+  calculateAreaSwitches(plan),
+
+broadAreaSwitchCount:
+  calculateBroadAreaSwitchCount(
+    plan
+  ),
+
+broadAreaOverloadCount:
+  calculateBroadAreaOverloadCount(
+    plan
+  ),
 
     areaRevisitCount:
       calculateAreaRevisitCount(plan),
