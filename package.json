@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-  "dev": "next dev",
-  "build": "next build",
-  "start": "next start",
-  "lint": "eslint",
-  "check:spots": "tsx scripts/validateSpotDatabase.ts",
-  "update:meals": "tsx scripts/updateMealRecommended.ts",
-  "update:hours": "tsx scripts/updateSpotHours.ts",
-  "update:websites": "tsx scripts/updateSpotWebsites.ts"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "check:spots": "tsx scripts/validateSpotDatabase.ts",
+    "update:meals": "tsx scripts/updateMealRecommended.ts",
+    "update:hours": "tsx scripts/updateSpotHours.ts",
+    "update:websites": "tsx scripts/updateSpotWebsites.ts"
   },
   "dependencies": {
     "@vis.gl/react-google-maps": "^1.9.0",
@@ -24,6 +24,7 @@
     "react-markdown": "^10.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@tailwindcss/postcss": "^4",
     "@types/google.maps": "^3.65.2",
     "@types/node": "^20",
