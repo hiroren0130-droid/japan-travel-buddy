@@ -17,7 +17,12 @@ jobs:
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps chromium
     - name: Run Playwright tests
-      run: npx playwright test
+      run: |
+        if [ "${{ github.event_name }}" = "push" ]; then
+          npx playwright test --grep "京都1日 定番ルート"
+        else
+          npx playwright test
+        fi
       env:
         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
