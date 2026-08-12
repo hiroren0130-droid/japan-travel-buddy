@@ -1,7 +1,8 @@
 import { getSpotByName } from "@/lib/spotService";
 
 import {
-  calculateBusinessHoursViolationCount,
+  calculateBroadAreaOverloadCount,
+calculateBusinessHoursViolationCount,
   calculateCrossDayAreaSplitCount,
   calculateDayImbalanceCount,
   calculateLateEndCount,
@@ -30,7 +31,8 @@ type PlanQuality = {
   dayImbalanceCount: number;
   crossDayAreaSplitCount: number;
   longDistanceMoveCount: number;
-  score: number;
+broadAreaOverloadCount: number;
+score: number;
 };
 
 type MoveCandidate = {
@@ -81,6 +83,11 @@ function evaluatePlan(
       calculateLongDistanceMoveCount(
         plan
       ),
+
+broadAreaOverloadCount:
+calculateBroadAreaOverloadCount(
+plan
+),
 
     score:
       calculateRouteScore(
@@ -180,6 +187,21 @@ function isBetterQuality(
       current.longDistanceMoveCount
     );
   }
+
+    /*
+   * 長距離移動が同じなら、
+   * 1日の広域エリア過剰横断を減らします。
+   */
+  if (
+    candidate.broadAreaOverloadCount !==
+    current.broadAreaOverloadCount
+  ) {
+    return (
+      candidate.broadAreaOverloadCount <
+      current.broadAreaOverloadCount
+    );
+  }
+
 
   /*
    * 上記が同じなら総合Route Scoreを比較します。
@@ -663,7 +685,7 @@ export function optimizeDayImbalance(
           candidatePlan
         );
 
-      /*
+        /*
        * 現在より悪くなる移動は採用しません。
        */
       if (
