@@ -304,7 +304,7 @@ return (
             ref={loadingSectionRef}
             aria-live="polite"
             aria-busy={loading}
-            className="mt-8 scroll-mt-24"
+            className="mt-8 scroll-mt-24 [overflow-anchor:none]"
           >
             {loading ? (
               <TravelPlanSkeleton />
