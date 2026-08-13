@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import {
   CalendarDays,
@@ -39,12 +39,74 @@ type Props = {
   plan: TravelPlan;
 };
 
+function isValidTravelPlan(value: unknown): value is TravelPlan {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  if (
+    typeof candidate.title !== "string" ||
+    typeof candidate.summary !== "string" ||
+    !candidate.title.trim() ||
+    !candidate.summary.trim() ||
+    Array.from(candidate.title.trim()).length > 120 ||
+    Array.from(candidate.summary.trim()).length > 2000 ||
+    !Array.isArray(candidate.days) ||
+    candidate.days.length < 1 ||
+    candidate.days.length > 14
+  ) {
+    return false;
+  }
+
+  return candidate.days.every((day) => {
+    if (typeof day !== "object" || day === null) {
+      return false;
+    }
+
+    return Array.isArray(
+      (day as Record<string, unknown>).items
+    );
+  });
+}
+
+function createCopyablePlan(plan: TravelPlan) {
+  return {
+    title: plan.title,
+    summary: plan.summary,
+    days: plan.days,
+  };
+}
+
+function logClientError(
+  message: string,
+  error: unknown
+) {
+  if (process.env.NODE_ENV === "development") {
+    console.error(message, error);
+  } else {
+    console.error(message);
+  }
+}
+
+function isAbortError(error: unknown) {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    error.name === "AbortError"
+  );
+}
+
 export default function TravelPlanCard({
   plan,
 }: Props) {
   const [favorite, setFavorite] = useState(() =>
     isFavorite(plan.title)
   );
+  const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
 
   function handleFavorite() {
     if (favorite) {
@@ -60,12 +122,16 @@ export default function TravelPlanCard({
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(
-        JSON.stringify(plan, null, 2)
+        JSON.stringify(
+          createCopyablePlan(plan),
+          null,
+          2
+        )
       );
 
       alert("旅行プランをコピーしました。");
     } catch (error) {
-      console.error(
+      logClientError(
         "旅行プランのコピーに失敗しました。",
         error
       );
@@ -74,11 +140,22 @@ export default function TravelPlanCard({
     }
   }
 
-  function handlePdf() {
-    downloadTravelPlanPdf(plan);
+  async function handlePdf() {
+    try {
+      await downloadTravelPlanPdf(plan);
+    } catch (error) {
+      logClientError(
+        "旅行プランPDFの作成に失敗しました。",
+        error
+      );
+
+      alert("PDFを作成できませんでした。");
+    }
   }
 
   async function handleSave() {
+    if (savingRef.current) return;
+
     const user = auth.currentUser;
 
     if (!user) {
@@ -86,17 +163,41 @@ export default function TravelPlanCard({
       return;
     }
 
+    if (!isValidTravelPlan(plan)) {
+      alert("旅行プランの内容が不正なため保存できませんでした。");
+      return;
+    }
+
+    const uid = user.uid;
+    const normalizedPlan: TravelPlan = {
+      title: plan.title.trim(),
+      summary: plan.summary.trim(),
+      days: plan.days,
+      favorite: plan.favorite,
+    };
+
+    savingRef.current = true;
+    setSaving(true);
+
     try {
-      await saveTravelPlan(user.uid, plan);
-      alert("旅行プランを保存しました。");
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message);
-      } else {
-        alert("保存に失敗しました。");
+      await saveTravelPlan(uid, normalizedPlan);
+
+      if (auth.currentUser?.uid !== uid) {
+        alert("認証状態が変更されました。もう一度ログインしてください。");
+        return;
       }
 
-      console.error(error);
+      alert("旅行プランを保存しました。");
+    } catch (error) {
+      logClientError(
+        "旅行プランの保存に失敗しました。",
+        error
+      );
+
+      alert("旅行プランを保存できませんでした。");
+    } finally {
+      savingRef.current = false;
+      setSaving(false);
     }
   }
 
@@ -113,18 +214,33 @@ Japan Travel Buddyで作成した旅行プラン`;
           title: plan.title,
           text: shareText,
         });
-      } catch {
-        // 共有画面を閉じた場合は何もしない
+      } catch (error) {
+        if (isAbortError(error)) {
+          return;
+        }
+
+        logClientError(
+          "旅行プランの共有に失敗しました。",
+          error
+        );
+
+        alert("共有できませんでした。");
       }
 
       return;
     }
 
     try {
-      await navigator.clipboard.writeText(shareText);
+      await navigator.clipboard.writeText(
+        JSON.stringify(
+          createCopyablePlan(plan),
+          null,
+          2
+        )
+      );
       alert("共有用の旅行プランをコピーしました。");
     } catch (error) {
-      console.error(
+      logClientError(
         "共有用テキストのコピーに失敗しました。",
         error
       );
@@ -134,31 +250,44 @@ Japan Travel Buddyで作成した旅行プラン`;
   }
 
   function handleRoute() {
-    const spotNames = plan.days
-      .flatMap((day) => day.items)
-      .map((item) => getSpotById(item.spotId))
-      .filter(
-        (
-          spot
-        ): spot is NonNullable<typeof spot> =>
-          spot != null
-      )
-      .map((spot) => spot.name);
+    try {
+      const spotNames = plan.days
+        .flatMap((day) => day.items)
+        .map((item) => getSpotById(item.spotId))
+        .filter(
+          (
+            spot
+          ): spot is NonNullable<typeof spot> =>
+            spot != null
+        )
+        .map((spot) => spot.name);
 
-    if (spotNames.length === 0) {
-      alert(
-        "ルートを作成できるスポットがありません。"
+      if (spotNames.length === 0) {
+        alert(
+          "ルートを作成できるスポットがありません。"
+        );
+        return;
+      }
+
+      const url = createGoogleMapsRoute(spotNames);
+
+      const openedWindow = window.open(
+        url,
+        "_blank",
+        "noopener,noreferrer"
       );
-      return;
+
+      if (openedWindow === null) {
+        throw new Error("Google Maps window was blocked.");
+      }
+    } catch (error) {
+      logClientError(
+        "Google Mapsを開けませんでした。",
+        error
+      );
+
+      alert("Googleマップを開けませんでした。");
     }
-
-    const url = createGoogleMapsRoute(spotNames);
-
-    window.open(
-      url,
-      "_blank",
-      "noopener,noreferrer"
-    );
   }
 
   const allSpots = plan.days
@@ -184,8 +313,6 @@ Japan Travel Buddyで作成した旅行プラン`;
     }));
 
   const firstSpot = allSpots[0];
-
-  console.log(firstSpot);
 
   const totalDays = plan.days.length;
 
@@ -328,9 +455,10 @@ Japan Travel Buddyで作成した旅行プラン`;
                 <Button
                   size="icon"
                   onClick={handleSave}
+                  disabled={saving}
                   variant="secondary"
-                  aria-label="旅行プランを保存"
-                  title="保存"
+                  aria-label={saving ? "保存中..." : "旅行プランを保存"}
+                  title={saving ? "保存中..." : "保存"}
                   className={actionButtonClass}
                 >
                   <Save
