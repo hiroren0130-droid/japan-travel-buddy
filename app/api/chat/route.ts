@@ -1,4 +1,7 @@
-import { NextResponse } from "next/server";
+import {
+  NextRequest,
+  NextResponse,
+} from "next/server";
 
 import {
   getAllSpots,
@@ -47,39 +50,297 @@ import {
 } from "./planSummaryNormalizer";
 
 type RequestBody = {
-  message?: string;
-  days?: number;
+  message: string;
+  days: number;
   specialRequest?: string;
   currentLocation?: CurrentLocation;
 };
 
-export async function POST(
-  request: Request
+const MAX_REQUEST_BODY_BYTES =
+  16 * 1024;
+
+const MAX_MESSAGE_LENGTH = 2_000;
+const MAX_SPECIAL_REQUEST_LENGTH = 500;
+
+function jsonResponse(
+  body: object,
+  status: number
 ) {
+  return NextResponse.json(body, {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+    },
+  });
+}
+
+function isRecord(
+  value: unknown
+): value is Record<string, unknown> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value)
+  );
+}
+
+function isValidCurrentLocation(
+  value: unknown
+): value is Exclude<CurrentLocation, null> {
+  if (!isRecord(value)) {
+    return false;
+  }
+
+  const { latitude, longitude } = value;
+
+  return (
+    typeof latitude === "number" &&
+    Number.isFinite(latitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    typeof longitude === "number" &&
+    Number.isFinite(longitude) &&
+    longitude >= -180 &&
+    longitude <= 180
+  );
+}
+
+function validateRequestBody(
+  value: unknown
+):
+  | {
+      body: RequestBody;
+    }
+  | {
+      error: string;
+    } {
+  if (!isRecord(value)) {
+    return {
+      error:
+        "リクエスト本文はJSONオブジェクトで送信してください。",
+    };
+  }
+
+  if (typeof value.message !== "string") {
+    return {
+      error: "messageは必須の文字列です。",
+    };
+  }
+
+  const message = value.message.trim();
+
+  if (!message) {
+    return {
+      error: "messageを入力してください。",
+    };
+  }
+
+  if (message.length > MAX_MESSAGE_LENGTH) {
+    return {
+      error: `messageは${MAX_MESSAGE_LENGTH}文字以内で入力してください。`,
+    };
+  }
+
+  if (
+    value.specialRequest !== undefined &&
+    typeof value.specialRequest !== "string"
+  ) {
+    return {
+      error: "specialRequestは文字列で送信してください。",
+    };
+  }
+
+  const specialRequest =
+    typeof value.specialRequest === "string"
+      ? value.specialRequest.trim()
+      : "";
+
+  if (
+    specialRequest.length >
+    MAX_SPECIAL_REQUEST_LENGTH
+  ) {
+    return {
+      error: `specialRequestは${MAX_SPECIAL_REQUEST_LENGTH}文字以内で入力してください。`,
+    };
+  }
+
+  if (
+    typeof value.days !== "number" ||
+    !Number.isInteger(value.days) ||
+    value.days < 1 ||
+    value.days > 14
+  ) {
+    return {
+      error: "daysは1から14までの整数で指定してください。",
+    };
+  }
+
+  if (
+    value.currentLocation !== undefined &&
+    value.currentLocation !== null &&
+    !isValidCurrentLocation(
+      value.currentLocation
+    )
+  ) {
+    return {
+      error:
+        "currentLocationの緯度経度が不正です。",
+    };
+  }
+
+  return {
+    body: {
+      message,
+      days: value.days,
+      specialRequest,
+      currentLocation:
+        value.currentLocation == null
+          ? null
+          : value.currentLocation,
+    },
+  };
+}
+
+export async function POST(
+  request: NextRequest
+) {
+  const contentType =
+    request.headers.get("content-type") ?? "";
+
+  if (
+    contentType
+      .split(";", 1)[0]
+      .trim()
+      .toLowerCase() !== "application/json"
+  ) {
+    return jsonResponse(
+      {
+        error:
+          "Content-Typeはapplication/jsonを指定してください。",
+      },
+      415
+    );
+  }
+
+  const contentLengthHeader =
+    request.headers.get("content-length");
+
+  if (contentLengthHeader) {
+    const contentLength =
+      Number(contentLengthHeader);
+
+    if (
+      Number.isFinite(contentLength) &&
+      contentLength > MAX_REQUEST_BODY_BYTES
+    ) {
+      return jsonResponse(
+        {
+          error:
+            "リクエスト本文のサイズが上限を超えています。",
+        },
+        413
+      );
+    }
+  }
+
+  if (
+    process.env.NODE_ENV === "production"
+  ) {
+    const origin =
+      request.headers.get("origin");
+
+    if (origin) {
+      let requestOrigin: string;
+
+      try {
+        requestOrigin = new URL(origin).origin;
+      } catch {
+        return jsonResponse(
+          {
+            error:
+              "許可されていないリクエストです。",
+          },
+          403
+        );
+      }
+
+      if (
+        requestOrigin !==
+        request.nextUrl.origin
+      ) {
+        return jsonResponse(
+          {
+            error:
+              "許可されていないリクエストです。",
+          },
+          403
+        );
+      }
+    }
+  }
+
+  let rawBody: string;
+
+  try {
+    rawBody = await request.text();
+  } catch {
+    return jsonResponse(
+      {
+        error:
+          "リクエスト本文を読み取れませんでした。",
+      },
+      400
+    );
+  }
+
+  if (
+    new TextEncoder().encode(rawBody).byteLength >
+    MAX_REQUEST_BODY_BYTES
+  ) {
+    return jsonResponse(
+      {
+        error:
+          "リクエスト本文のサイズが上限を超えています。",
+      },
+      413
+    );
+  }
+
+  let parsedBody: unknown;
+
+  try {
+    parsedBody = JSON.parse(rawBody) as unknown;
+  } catch {
+    return jsonResponse(
+      {
+        error: "JSONの形式が不正です。",
+      },
+      400
+    );
+  }
+
+  const validation =
+    validateRequestBody(parsedBody);
+
+  if ("error" in validation) {
+    return jsonResponse(
+      {
+        error: validation.error,
+      },
+      400
+    );
+  }
+
   try {
     const requestStartedAt =
       performance.now();
 
-    const body =
-      (await request.json()) as RequestBody;
-
-    const message =
-      body.message?.trim() ?? "";
-
-    const specialRequest =
-      body.specialRequest?.trim() ??
-      "";
-
-    const currentLocation =
-      body.currentLocation ?? null;
-
-    const requestedDays =
-      Number.isInteger(body.days) &&
-      body.days != null &&
-      body.days >= 1 &&
-      body.days <= 14
-        ? body.days
-        : 2;
+    const {
+      message,
+      days: requestedDays,
+      specialRequest = "",
+      currentLocation = null,
+    } = validation.body;
 
     const spots =
       getAllSpots();
@@ -219,14 +480,12 @@ ${specialRequest}
         generatedPlan
       );
 
-      return NextResponse.json(
+      return jsonResponse(
         {
           error:
             "AIが不正な旅行プランを返しました。",
         },
-        {
-          status: 500,
-        }
+        500
       );
     }
 
@@ -243,14 +502,12 @@ ${specialRequest}
         }
       );
 
-      return NextResponse.json(
+      return jsonResponse(
         {
           error:
             "指定された旅行日数でプランを生成できませんでした。",
         },
-        {
-          status: 500,
-        }
+        500
       );
     }
 
@@ -398,30 +655,24 @@ const plan =
       )}ms`
     );
 
-    return NextResponse.json({
-      plan,
-    });
+    return jsonResponse(
+      {
+        plan,
+      },
+      200
+    );
   } catch (error) {
     console.error(
       "Travel plan generation error:",
       error
     );
 
-    return NextResponse.json(
+    return jsonResponse(
       {
         error:
           "旅行プランの生成に失敗しました。",
-
-        detail:
-          error instanceof Error
-            ? error.message
-            : JSON.stringify(
-                error
-              ),
       },
-      {
-        status: 500,
-      }
+      500
     );
   }
 }
