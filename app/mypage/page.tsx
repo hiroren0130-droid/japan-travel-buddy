@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import MyPageHeader from "@/components/mypage/MyPageHeader";
 import MyPageEmpty from "@/components/mypage/MyPageEmpty";
 import MyPageGrid from "@/components/mypage/MyPageGrid";
@@ -19,45 +20,150 @@ type SavedPlan = SavedTravelPlan & {
   createdAt?: Timestamp;
 };
 
+const CONTROL_CHARACTER_PATTERN =
+  /[\u0000-\u001f\u007f-\u009f]/;
+
+function isValidPlanId(id: unknown): id is string {
+  return (
+    typeof id === "string" &&
+    id.length > 0 &&
+    id.length <= 200 &&
+    !id.includes("/") &&
+    !CONTROL_CHARACTER_PATTERN.test(id) &&
+    id !== "." &&
+    id !== ".."
+  );
+}
+
 export default function MyPage() {
+  const router = useRouter();
+
   const [plans, setPlans] = useState<SavedPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const deletingIdsRef = useRef(new Set<string>());
 
   useEffect(() => {
+    let active = true;
+    let requestGeneration = 0;
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!active) return;
+
+      const generation = ++requestGeneration;
+      setPlans([]);
+      setLoading(true);
+
       if (!user) {
-        setPlans([]);
         setLoading(false);
+        router.replace("/login");
         return;
       }
 
+      const uid = user.uid;
+
       try {
-        const result = await getTravelPlans(user.uid);
-        setPlans(result as SavedPlan[]);
+        const result = await getTravelPlans(uid);
+
+        if (
+          active &&
+          generation === requestGeneration &&
+          auth.currentUser?.uid === uid
+        ) {
+          setPlans(result as SavedPlan[]);
+        }
       } catch (error) {
-        console.error(error);
+        if (
+          !active ||
+          generation !== requestGeneration ||
+          auth.currentUser?.uid !== uid
+        ) {
+          return;
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.error("保存済み旅行プラン取得エラー:", error);
+        } else {
+          console.error("Saved travel plan loading failed.");
+        }
+
+        alert("保存済み旅行プランを読み込めませんでした。");
       } finally {
-        setLoading(false);
+        if (
+          active &&
+          generation === requestGeneration &&
+          auth.currentUser?.uid === uid
+        ) {
+          setLoading(false);
+        }
       }
+    }, (error) => {
+      if (!active) return;
+
+      requestGeneration++;
+      setPlans([]);
+      setLoading(false);
+
+      if (process.env.NODE_ENV === "development") {
+        console.error("認証状態確認エラー:", error);
+      } else {
+        console.error("Authentication state check failed.");
+      }
+
+      alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => {
+      active = false;
+      requestGeneration++;
+      unsubscribe();
+    };
+  }, [router]);
 
   async function handleDelete(id: string) {
+    if (deletingIdsRef.current.has(id)) return;
+
     const ok = confirm("この旅行プランを削除しますか？");
 
     if (!ok) return;
 
+    if (!isValidPlanId(id)) {
+      alert("旅行プランを削除できませんでした。");
+      return;
+    }
+
+    const user = auth.currentUser;
+
+    if (!user) {
+      setPlans([]);
+      router.replace("/login");
+      return;
+    }
+
+    const uid = user.uid;
+    deletingIdsRef.current.add(id);
+
     try {
       await deleteTravelPlan(id);
+
+      if (auth.currentUser?.uid !== uid) {
+        setPlans([]);
+        router.replace("/login");
+        return;
+      }
 
       setPlans((prev) => prev.filter((plan) => plan.id !== id));
 
       alert("削除しました。");
     } catch (error) {
-      console.error(error);
-      alert("削除に失敗しました。");
+      if (process.env.NODE_ENV === "development") {
+        console.error("旅行プラン削除エラー:", error);
+      } else {
+        console.error("Travel plan deletion failed.");
+      }
+
+      alert("旅行プランを削除できませんでした。");
+    } finally {
+      deletingIdsRef.current.delete(id);
     }
   }
 
