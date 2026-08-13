@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
 
 import HistoryHeader from "@/components/history/HistoryHeader";
 import HistoryEmpty from "@/components/history/HistoryEmpty";
@@ -17,6 +19,8 @@ import {
 import { SavedTravelPlan } from "@/types/travel";
 
 export default function HistoryPage() {
+  const router = useRouter();
+
   const [plans, setPlans] = useState<SavedTravelPlan[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -25,26 +29,81 @@ export default function HistoryPage() {
   const [view, setView] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
-    async function loadPlans() {
-      const user = auth.currentUser;
+    let active = true;
+    let requestGeneration = 0;
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!active) return;
+
+      const generation = ++requestGeneration;
+      setPlans([]);
+      setLoading(true);
 
       if (!user) {
         setLoading(false);
+        router.replace("/login");
         return;
       }
 
-      try {
-        const result = await getTravelPlans(user.uid);
-        setPlans(result);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    }
+      const uid = user.uid;
 
-    loadPlans();
-  }, []);
+      try {
+        const result = await getTravelPlans(uid);
+
+        if (
+          active &&
+          generation === requestGeneration &&
+          auth.currentUser?.uid === uid
+        ) {
+          setPlans(result);
+        }
+      } catch (error) {
+        if (
+          !active ||
+          generation !== requestGeneration ||
+          auth.currentUser?.uid !== uid
+        ) {
+          return;
+        }
+
+        if (process.env.NODE_ENV === "development") {
+          console.error("旅行履歴取得エラー:", error);
+        } else {
+          console.error("Travel history loading failed.");
+        }
+
+        alert("旅行履歴を読み込めませんでした。");
+      } finally {
+        if (
+          active &&
+          generation === requestGeneration &&
+          auth.currentUser?.uid === uid
+        ) {
+          setLoading(false);
+        }
+      }
+    }, (error) => {
+      if (!active) return;
+
+      requestGeneration++;
+      setPlans([]);
+      setLoading(false);
+
+      if (process.env.NODE_ENV === "development") {
+        console.error("認証状態確認エラー:", error);
+      } else {
+        console.error("Authentication state check failed.");
+      }
+
+      alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
+    });
+
+    return () => {
+      active = false;
+      requestGeneration++;
+      unsubscribe();
+    };
+  }, [router]);
 
   async function handleDelete(id: string) {
     if (!confirm("この旅行プランを削除しますか？")) {
@@ -56,8 +115,13 @@ export default function HistoryPage() {
 
       setPlans((prev) => prev.filter((plan) => plan.id !== id));
     } catch (error) {
-      console.error(error);
-      alert("削除に失敗しました。");
+      if (process.env.NODE_ENV === "development") {
+        console.error("旅行プラン削除エラー:", error);
+      } else {
+        console.error("Travel plan deletion failed.");
+      }
+
+      alert("旅行プランを削除できませんでした。");
     }
   }
 
