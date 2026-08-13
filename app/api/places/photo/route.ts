@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { getSpotById } from "@/lib/spotService";
+
 const PLACES_TEXT_SEARCH_URL =
   "https://places.googleapis.com/v1/places:searchText";
 
 type PlacesSearchResponse = {
   places?: Array<{
+    id?: string;
+    displayName?: {
+      text?: string;
+    };
+    formattedAddress?: string;
+    location?: {
+      latitude?: number;
+      longitude?: number;
+    };
     photos?: Array<{
       name?: string;
     }>;
@@ -21,7 +32,159 @@ const CONTROL_CHARACTER_PATTERN =
 const PHOTO_RESOURCE_NAME_PATTERN =
   /^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$/;
 
+const SPOT_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
+const EARTH_RADIUS_KM = 6371;
+const MAX_CANDIDATE_DISTANCE_KM = 5;
+
 class GoogleApiTimeoutError extends Error {}
+
+type PlaceCandidate = NonNullable<
+  PlacesSearchResponse["places"]
+>[number];
+
+type SearchTarget = {
+  name: string;
+  latitude: number | null;
+  longitude: number | null;
+};
+
+function normalizePlaceName(
+  value: string
+): string {
+  return value
+    .normalize("NFKC")
+    .replace(/[\s\u3000]+/g, "")
+    .replace(/[（）()【】\[\]]/g, "")
+    .toLowerCase();
+}
+
+function degreesToRadians(
+  degrees: number
+): number {
+  return degrees * (Math.PI / 180);
+}
+
+function calculateDistanceKm(
+  latitudeA: number,
+  longitudeA: number,
+  latitudeB: number,
+  longitudeB: number
+): number {
+  const latitudeDifference =
+    degreesToRadians(latitudeB - latitudeA);
+  const longitudeDifference =
+    degreesToRadians(longitudeB - longitudeA);
+  const firstLatitude =
+    degreesToRadians(latitudeA);
+  const secondLatitude =
+    degreesToRadians(latitudeB);
+  const haversine =
+    Math.sin(latitudeDifference / 2) ** 2 +
+    Math.cos(firstLatitude) *
+      Math.cos(secondLatitude) *
+      Math.sin(longitudeDifference / 2) ** 2;
+
+  return (
+    EARTH_RADIUS_KM *
+    2 *
+    Math.atan2(
+      Math.sqrt(haversine),
+      Math.sqrt(1 - haversine)
+    )
+  );
+}
+
+function getCandidateScore(
+  candidate: PlaceCandidate,
+  target: SearchTarget
+): number | null {
+  const candidateName = normalizePlaceName(
+    candidate.displayName?.text ?? ""
+  );
+  const targetName = normalizePlaceName(target.name);
+
+  if (!candidateName || !targetName) {
+    return null;
+  }
+
+  const exactNameMatch =
+    candidateName === targetName;
+  const partialNameMatch =
+    candidateName.includes(targetName) ||
+    targetName.includes(candidateName);
+
+  if (!exactNameMatch && !partialNameMatch) {
+    return null;
+  }
+
+  let score = exactNameMatch ? 100 : 60;
+  const candidateLatitude =
+    candidate.location?.latitude;
+  const candidateLongitude =
+    candidate.location?.longitude;
+
+  if (
+    target.latitude !== null &&
+    target.longitude !== null
+  ) {
+    if (
+      typeof candidateLatitude !== "number" ||
+      typeof candidateLongitude !== "number"
+    ) {
+      return null;
+    }
+
+    const distanceKm = calculateDistanceKm(
+      target.latitude,
+      target.longitude,
+      candidateLatitude,
+      candidateLongitude
+    );
+
+    if (distanceKm > MAX_CANDIDATE_DISTANCE_KM) {
+      return null;
+    }
+
+    score += Math.max(
+      0,
+      40 - distanceKm * 8
+    );
+  }
+
+  if (
+    candidate.formattedAddress?.includes("京都")
+  ) {
+    score += 10;
+  }
+
+  return score;
+}
+
+function selectBestCandidate(
+  candidates: PlaceCandidate[],
+  target: SearchTarget
+): PlaceCandidate | null {
+  let bestCandidate: PlaceCandidate | null = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  for (const candidate of candidates) {
+    if (!candidate.photos?.[0]?.name) {
+      continue;
+    }
+
+    const score = getCandidateScore(
+      candidate,
+      target
+    );
+
+    if (score !== null && score > bestScore) {
+      bestCandidate = candidate;
+      bestScore = score;
+    }
+  }
+
+  return bestCandidate;
+}
 
 function jsonError(
   error: string,
@@ -109,6 +272,58 @@ export async function GET(request: NextRequest) {
     );
   }
 
+  const spotId =
+    request.nextUrl.searchParams.get("spotId");
+  const databaseSpot = spotId
+    ? SPOT_ID_PATTERN.test(spotId)
+      ? getSpotById(spotId)
+      : undefined
+    : undefined;
+
+  if (spotId && !databaseSpot) {
+    return jsonError(
+      "スポット情報が不正です。",
+      400
+    );
+  }
+
+  const rawLatitude =
+    request.nextUrl.searchParams.get("latitude");
+  const rawLongitude =
+    request.nextUrl.searchParams.get("longitude");
+  const suppliedLatitude =
+    rawLatitude === null ? null : Number(rawLatitude);
+  const suppliedLongitude =
+    rawLongitude === null ? null : Number(rawLongitude);
+
+  if (
+    (rawLatitude !== null &&
+      (!Number.isFinite(suppliedLatitude) ||
+        suppliedLatitude! < -90 ||
+        suppliedLatitude! > 90)) ||
+    (rawLongitude !== null &&
+      (!Number.isFinite(suppliedLongitude) ||
+        suppliedLongitude! < -180 ||
+        suppliedLongitude! > 180))
+  ) {
+    return jsonError(
+      "位置情報が不正です。",
+      400
+    );
+  }
+
+  const target: SearchTarget = {
+    name: databaseSpot?.name ?? query.replace(/\s+京都$/, ""),
+    latitude:
+      databaseSpot?.latitude ?? suppliedLatitude,
+    longitude:
+      databaseSpot?.longitude ?? suppliedLongitude,
+  };
+
+  const searchQuery = databaseSpot
+    ? `${databaseSpot.name} ${databaseSpot.address}`
+    : query;
+
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
 
   if (!apiKey) {
@@ -131,13 +346,14 @@ export async function GET(request: NextRequest) {
             headers: {
               "Content-Type": "application/json",
               "X-Goog-Api-Key": apiKey,
-              "X-Goog-FieldMask": "places.photos",
+              "X-Goog-FieldMask":
+                "places.id,places.displayName,places.formattedAddress,places.location,places.photos",
             },
             body: JSON.stringify({
-              textQuery: query,
+              textQuery: searchQuery,
               languageCode: "ja",
               regionCode: "JP",
-              maxResultCount: 1,
+              maxResultCount: 5,
             }),
             cache: "no-store",
             signal,
@@ -161,8 +377,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const matchedCandidate = selectBestCandidate(
+      searchData.places ?? [],
+      target
+    );
     const resourceName =
-      searchData.places?.[0]?.photos?.[0]?.name;
+      matchedCandidate?.photos?.[0]?.name;
 
     if (!resourceName) {
       return jsonError(

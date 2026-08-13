@@ -352,6 +352,9 @@ Japan Travel Buddyで作成した旅行プラン`;
   <SpotImage
   src={firstSpot.image}
   alt={firstSpot.name}
+  spotId={firstSpot.id}
+  latitude={firstSpot.latitude}
+  longitude={firstSpot.longitude}
 />
 ) : (
   <div className="absolute inset-0 bg-gradient-to-br from-blue-200 via-cyan-100 to-indigo-200" />

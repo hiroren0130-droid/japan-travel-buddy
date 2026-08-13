@@ -10,6 +10,7 @@ const MAX_RECOMMENDED_SPOTS_PER_DAY = 6;
 const LATE_END_MINUTES = 18 * 60;
 const LONG_WALK_MINUTES = 20;
 const MAX_DAY_ITEM_DIFFERENCE = 2;
+const BROAD_AREA_OVERLOAD_PENALTY = 10;
 
 const LUNCH_START_MINUTES = 12 * 60;
 const LUNCH_END_MINUTES = 13 * 60 + 30;
@@ -1470,10 +1471,15 @@ export function calculateRouteScore(
     calculateTransportMismatchCount(
       plan
     );
-    const longDistanceMoveCount =
+  const longDistanceMoveCount =
   calculateLongDistanceMoveCount(
     plan
   );
+
+  const broadAreaOverloadCount =
+    calculateBroadAreaOverloadCount(
+      plan
+    );
 
   const score =
     100 -
@@ -1492,7 +1498,9 @@ export function calculateRouteScore(
     dayImbalanceCount * 5 -
     unknownSpotCount * 20 -
     transportMismatchCount * 8 -
-    longDistanceMoveCount * 4;
+    longDistanceMoveCount * 4 -
+    broadAreaOverloadCount *
+      BROAD_AREA_OVERLOAD_PENALTY;
 
   return Math.min(
     Math.max(

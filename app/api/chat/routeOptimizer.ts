@@ -1,5 +1,7 @@
 import { getSpotByName } from "@/lib/spotService";
 
+import { getKyotoAreaGroup } from "./kyotoAreaGroups";
+
 import type {
   AIPlanDay,
   AIPlanItem,
@@ -20,6 +22,7 @@ const DISTANCE_WEIGHT = 10;
 
 const AREA_SWITCH_PENALTY = 18;
 const AREA_REVISIT_PENALTY = 120;
+const BROAD_AREA_SWITCH_PENALTY = 24;
 
 const UNKNOWN_SPOT_PENALTY = 500;
 const UNKNOWN_HOURS_PENALTY = 40;
@@ -763,6 +766,11 @@ function evaluateRouteOrder({
       optimizedFirstItem
     );
 
+  let previousAreaGroup =
+    firstArea
+      ? getKyotoAreaGroup(firstArea)
+      : null;
+
   if (firstArea) {
     visitedAreas.add(
       firstArea
@@ -833,6 +841,18 @@ function evaluateRouteOrder({
         routeScore +=
           AREA_SWITCH_PENALTY;
       }
+    }
+
+    const candidateAreaGroup = candidateArea
+      ? getKyotoAreaGroup(candidateArea)
+      : null;
+
+    if (
+      previousAreaGroup &&
+      candidateAreaGroup &&
+      previousAreaGroup !== candidateAreaGroup
+    ) {
+      routeScore += BROAD_AREA_SWITCH_PENALTY;
     }
 
     let arrivalMinutes =
@@ -917,6 +937,10 @@ function evaluateRouteOrder({
       visitedAreas.add(
         candidateArea
       );
+    }
+
+    if (candidateAreaGroup) {
+      previousAreaGroup = candidateAreaGroup;
     }
   }
 

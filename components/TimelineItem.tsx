@@ -144,6 +144,9 @@ export default function TimelineItem({
               <SpotImage
                 src={spotData.image}
                 alt={spotData.name}
+                spotId={spotData.id}
+                latitude={spotData.latitude}
+                longitude={spotData.longitude}
                 className="block h-full w-full object-cover"
               />
             </div>

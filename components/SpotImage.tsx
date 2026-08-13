@@ -6,6 +6,9 @@ import { useMemo, useState } from "react";
 type Props = {
   src: string;
   alt: string;
+  spotId?: string;
+  latitude?: number;
+  longitude?: number;
   className?: string;
 };
 
@@ -17,27 +20,69 @@ type ImageSource =
 const FALLBACK_IMAGE =
   "/spots/placeholder.jpg";
 
+const KNOWN_PLACEHOLDER_IMAGES =
+  new Set([
+    "/spots/yasaka-shrine.jpg",
+  ]);
+
 function createPlacesPhotoUrl(
-  spotName: string
+  spotName: string,
+  spotId?: string,
+  latitude?: number,
+  longitude?: number
 ): string {
   const query = `${spotName.trim()} 京都`;
+  const searchParams = new URLSearchParams({
+    query,
+  });
 
-  return `/api/places/photo?query=${encodeURIComponent(
-    query
-  )}`;
+  if (spotId) {
+    searchParams.set("spotId", spotId);
+  }
+
+  if (
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude)
+  ) {
+    searchParams.set(
+      "latitude",
+      String(latitude)
+    );
+    searchParams.set(
+      "longitude",
+      String(longitude)
+    );
+  }
+
+  return `/api/places/photo?${searchParams.toString()}`;
 }
 
 export default function SpotImage({
   src,
   alt,
+  spotId,
+  latitude,
+  longitude,
   className = "",
 }: Props) {
+  const requestedLocalImage = src.trim();
   const localImage =
-    src.trim() || FALLBACK_IMAGE;
+    requestedLocalImage &&
+    !KNOWN_PLACEHOLDER_IMAGES.has(
+      requestedLocalImage
+    )
+      ? requestedLocalImage
+      : FALLBACK_IMAGE;
 
   const placesPhotoUrl = useMemo(
-    () => createPlacesPhotoUrl(alt),
-    [alt]
+    () =>
+      createPlacesPhotoUrl(
+        alt,
+        spotId,
+        latitude,
+        longitude
+      ),
+    [alt, latitude, longitude, spotId]
   );
 
   const [failedPlacesUrl, setFailedPlacesUrl] =

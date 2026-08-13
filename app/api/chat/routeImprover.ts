@@ -3,6 +3,7 @@
 } from "@/data/types";
 
 import {
+  calculateBroadAreaOverloadCount,
   calculateBusinessHoursViolationCount,
   calculateLunchBreakMissingCount,
   calculateLongDistanceMoveCount,
@@ -67,6 +68,11 @@ export async function improveTravelPlan({
       plan
     );
 
+  const broadAreaOverloadCount =
+    calculateBroadAreaOverloadCount(
+      plan
+    );
+
     const longDistanceMoveCount =
   calculateLongDistanceMoveCount(
     plan
@@ -85,6 +91,7 @@ export async function improveTravelPlan({
   const shouldImproveRoute =
   initialRouteScore < 84 ||
   longDistanceMoveCount > 0 ||
+  broadAreaOverloadCount > 0 ||
   lunchBreakMissingCount > 0 ||
   businessHoursViolationCount > 0;
 
@@ -127,6 +134,7 @@ export async function improveTravelPlan({
 ・同じエリアのスポットを連続して配置すること
 ・一度離れたエリアへ戻る順番を避けること
 ・長距離の往復を避けること
+・1日に複数の広域エリアを何度も跨がないこと
 ・各スポットのrecommendedStayを確保すること
 ・移動時間を滞在時間として扱わないこと
 ・昼食は12:00〜13:30頃に確保すること
