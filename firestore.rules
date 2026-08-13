@@ -23,6 +23,10 @@ service cloud.firestore {
       return request.resource.data.uid == resource.data.uid;
     }
 
+    function keepsCreatedAt() {
+      return request.resource.data.createdAt == resource.data.createdAt;
+    }
+
     function hasAllowedFields() {
       return request.resource.data.keys().hasOnly([
         "uid",
@@ -54,19 +58,63 @@ service cloud.firestore {
         && request.resource.data.favorite is bool;
     }
 
+    function hasValidCreateValues() {
+      return request.resource.data.uid.size() > 0
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 120
+        && request.resource.data.summary.size() >= 1
+        && request.resource.data.summary.size() <= 2000
+        && request.resource.data.days.size() >= 1
+        && request.resource.data.days.size() <= 14
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAt == request.time;
+    }
+
+    function onlyUpdatesEditableFields() {
+      return request.resource.data
+        .diff(resource.data)
+        .affectedKeys()
+        .hasOnly([
+          "title",
+          "summary",
+          "favorite"
+        ]);
+    }
+
+    function hasValidUpdatedFields() {
+      let affectedKeys = request.resource.data
+        .diff(resource.data)
+        .affectedKeys();
+
+      return (!affectedKeys.hasAny(["title"])
+          || (request.resource.data.title is string
+            && request.resource.data.title.size() >= 1
+            && request.resource.data.title.size() <= 120))
+        && (!affectedKeys.hasAny(["summary"])
+          || (request.resource.data.summary is string
+            && request.resource.data.summary.size() >= 1
+            && request.resource.data.summary.size() <= 2000))
+        && (!affectedKeys.hasAny(["favorite"])
+          || request.resource.data.favorite is bool);
+    }
+
     match /travelPlans/{planId} {
       allow create: if isCreatingOwnDocument()
         && hasAllowedFields()
         && hasRequiredFields()
-        && hasValidTopLevelTypes();
+        && hasValidTopLevelTypes()
+        && hasValidCreateValues();
 
       allow get, list: if isOwner();
 
       allow update: if isOwner()
         && keepsOwnerUid()
+        && keepsCreatedAt()
         && hasAllowedFields()
         && hasRequiredFields()
-        && hasValidTopLevelTypes();
+        && hasValidTopLevelTypes()
+        && onlyUpdatesEditableFields()
+        && hasValidUpdatedFields();
 
       allow delete: if isOwner();
     }
