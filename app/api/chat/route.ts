@@ -62,16 +62,169 @@ const MAX_REQUEST_BODY_BYTES =
 const MAX_MESSAGE_LENGTH = 2_000;
 const MAX_SPECIAL_REQUEST_LENGTH = 500;
 
+const RATE_LIMIT_WINDOW_MS =
+  10 * 60 * 1_000;
+
+const RATE_LIMIT_MAX_REQUESTS = 5;
+const RATE_LIMIT_MAX_ENTRIES = 10_000;
+const RATE_LIMIT_CLEANUP_INTERVAL_MS = 60_000;
+
+const MAX_CONCURRENT_GENERATIONS = 3;
+const CONCURRENCY_RETRY_AFTER_SECONDS = 10;
+
+type RateLimitEntry = {
+  count: number;
+  resetAt: number;
+};
+
+type RateLimitResult =
+  | {
+      allowed: true;
+    }
+  | {
+      allowed: false;
+      retryAfterSeconds: number;
+    };
+
+/*
+ * 補助防御です。Serverlessではインスタンス間で共有されず、
+ * コールドスタートや再デプロイで状態が失われます。
+ */
+const rateLimitEntries =
+  new Map<string, RateLimitEntry>();
+
+let lastRateLimitCleanupAt = 0;
+let activeGenerationCount = 0;
+
 function jsonResponse(
   body: object,
-  status: number
+  status: number,
+  additionalHeaders: Record<
+    string,
+    string
+  > = {}
 ) {
   return NextResponse.json(body, {
     status,
     headers: {
       "Cache-Control": "no-store",
+      ...additionalHeaders,
     },
   });
+}
+
+function getClientIdentifier(
+  request: NextRequest
+): string {
+  const forwardedFor =
+    request.headers.get(
+      "x-forwarded-for"
+    );
+
+  const forwardedClient =
+    forwardedFor
+      ?.split(",", 1)[0]
+      ?.trim();
+
+  if (forwardedClient) {
+    return forwardedClient;
+  }
+
+  const realIp =
+    request.headers
+      .get("x-real-ip")
+      ?.trim();
+
+  return realIp || "unknown-client";
+}
+
+function cleanupRateLimitEntries(
+  now: number
+) {
+  const cleanupIsDue =
+    now - lastRateLimitCleanupAt >=
+    RATE_LIMIT_CLEANUP_INTERVAL_MS;
+
+  if (
+    !cleanupIsDue &&
+    rateLimitEntries.size <
+      RATE_LIMIT_MAX_ENTRIES
+  ) {
+    return;
+  }
+
+  for (
+    const [clientId, entry]
+    of rateLimitEntries
+  ) {
+    if (entry.resetAt <= now) {
+      rateLimitEntries.delete(clientId);
+    }
+  }
+
+  while (
+    rateLimitEntries.size >=
+    RATE_LIMIT_MAX_ENTRIES
+  ) {
+    const oldestClientId =
+      rateLimitEntries.keys().next()
+        .value;
+
+    if (typeof oldestClientId !== "string") {
+      break;
+    }
+
+    rateLimitEntries.delete(
+      oldestClientId
+    );
+  }
+
+  lastRateLimitCleanupAt = now;
+}
+
+function checkRateLimit(
+  clientId: string,
+  now = Date.now()
+): RateLimitResult {
+  cleanupRateLimitEntries(now);
+
+  const entry =
+    rateLimitEntries.get(clientId);
+
+  if (!entry || entry.resetAt <= now) {
+    rateLimitEntries.set(clientId, {
+      count: 1,
+      resetAt:
+        now + RATE_LIMIT_WINDOW_MS,
+    });
+
+    return {
+      allowed: true,
+    };
+  }
+
+  if (
+    entry.count >=
+    RATE_LIMIT_MAX_REQUESTS
+  ) {
+    return {
+      allowed: false,
+      retryAfterSeconds: Math.max(
+        Math.ceil(
+          (entry.resetAt - now) /
+            1_000
+        ),
+        1
+      ),
+    };
+  }
+
+  entry.count += 1;
+  rateLimitEntries.set(clientId, entry);
+
+  return {
+    allowed: true,
+  };
 }
 
 function isRecord(
@@ -331,6 +484,33 @@ export async function POST(
     );
   }
 
+  if (
+    process.env.NODE_ENV === "production"
+  ) {
+    const rateLimitResult =
+      checkRateLimit(
+        getClientIdentifier(request)
+      );
+
+    if (!rateLimitResult.allowed) {
+      return jsonResponse(
+        {
+          error:
+            "リクエストが多すぎます。しばらく待ってから再度お試しください。",
+        },
+        429,
+        {
+          "Retry-After": String(
+            rateLimitResult
+              .retryAfterSeconds
+          ),
+        }
+      );
+    }
+  }
+
+  let hasGenerationSlot = false;
+
   try {
     const requestStartedAt =
       performance.now();
@@ -429,6 +609,27 @@ ${specialRequest}
       createSpotList(
         candidateSpots
       );
+
+    if (
+      activeGenerationCount >=
+      MAX_CONCURRENT_GENERATIONS
+    ) {
+      return jsonResponse(
+        {
+          error:
+            "現在リクエストが集中しています。しばらく待ってから再度お試しください。",
+        },
+        429,
+        {
+          "Retry-After": String(
+            CONCURRENCY_RETRY_AFTER_SECONDS
+          ),
+        }
+      );
+    }
+
+    activeGenerationCount += 1;
+    hasGenerationSlot = true;
 
     /*
      * 初回生成と、
@@ -674,5 +875,13 @@ const plan =
       },
       500
     );
+  } finally {
+    if (hasGenerationSlot) {
+      activeGenerationCount =
+        Math.max(
+          activeGenerationCount - 1,
+          0
+        );
+    }
   }
 }
