@@ -9,10 +9,10 @@ type PlacesSearchResponse = {
       name?: string;
     }>;
   }>;
-  error?: {
-    message?: string;
-  };
 };
+
+const PHOTO_CACHE_CONTROL =
+  "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400";
 
 export async function GET(request: NextRequest) {
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;
@@ -61,12 +61,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            searchData.error?.message ??
-            "スポット検索に失敗しました。",
+          error: "スポット検索に失敗しました。",
         },
         {
-          status: searchResponse.status,
+          status: 502,
         }
       );
     }
@@ -89,20 +87,59 @@ export async function GET(request: NextRequest) {
     const photoUrl =
       `https://places.googleapis.com/v1/${resourceName}/media` +
       `?maxWidthPx=1200` +
-      `&skipHttpRedirect=false` +
-      `&key=${encodeURIComponent(apiKey)}`;
+      `&skipHttpRedirect=false`;
 
-    return NextResponse.redirect(photoUrl);
-  } catch (error) {
-    console.error("Place Photo API error:", error);
+    const photoResponse = await fetch(photoUrl, {
+      headers: {
+        "X-Goog-Api-Key": apiKey,
+      },
+      cache: "no-store",
+      redirect: "follow",
+    });
+
+    if (!photoResponse.ok) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "写真の取得に失敗しました。",
+        },
+        {
+          status: 502,
+        }
+      );
+    }
+
+    const contentType =
+      photoResponse.headers.get("content-type") ?? "";
+
+    if (!contentType.toLowerCase().startsWith("image/")) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "写真の取得に失敗しました。",
+        },
+        {
+          status: 502,
+        }
+      );
+    }
+
+    const photoData = await photoResponse.arrayBuffer();
+
+    return new NextResponse(photoData, {
+      status: 200,
+      headers: {
+        "Content-Type": contentType,
+        "Cache-Control": PHOTO_CACHE_CONTROL,
+      },
+    });
+  } catch {
+    console.error("Place Photo API request failed.");
 
     return NextResponse.json(
       {
         success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "写真の取得中にエラーが発生しました。",
+        error: "写真の取得中にエラーが発生しました。",
       },
       {
         status: 500,
