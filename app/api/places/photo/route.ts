@@ -14,58 +14,149 @@ type PlacesSearchResponse = {
 const PHOTO_CACHE_CONTROL =
   "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400";
 
-export async function GET(request: NextRequest) {
-  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+const ERROR_CACHE_CONTROL = "no-store";
+const MAX_QUERY_LENGTH = 120;
+const GOOGLE_API_TIMEOUT_MS = 10_000;
 
-  if (!apiKey) {
-    return NextResponse.json(
-      {
-        success: false,
-        error:
-          "GOOGLE_PLACES_API_KEY が .env.local に設定されていません。",
+const CONTROL_CHARACTER_PATTERN =
+  /[\u0000-\u001f\u007f-\u009f]/;
+
+class GoogleApiTimeoutError extends Error {}
+
+function jsonError(
+  error: string,
+  status: number
+) {
+  return NextResponse.json(
+    {
+      success: false,
+      error,
+    },
+    {
+      status,
+      headers: {
+        "Cache-Control": ERROR_CACHE_CONTROL,
       },
-      {
-        status: 500,
-      }
+    }
+  );
+}
+
+async function runWithTimeout<T>(
+  operation: (
+    signal: AbortSignal
+  ) => Promise<T>
+): Promise<T> {
+  const controller = new AbortController();
+  let didTimeout = false;
+
+  const timeoutId = setTimeout(() => {
+    didTimeout = true;
+    controller.abort();
+  }, GOOGLE_API_TIMEOUT_MS);
+
+  try {
+    return await operation(controller.signal);
+  } catch (error) {
+    if (didTimeout) {
+      throw new GoogleApiTimeoutError();
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+export async function GET(request: NextRequest) {
+  const rawQuery =
+    request.nextUrl.searchParams.get("query");
+
+  if (rawQuery === null) {
+    return jsonError(
+      "queryを指定してください。",
+      400
     );
   }
 
-  const query =
-    request.nextUrl.searchParams.get("query")?.trim() ||
-    "清水寺 京都";
+  if (
+    CONTROL_CHARACTER_PATTERN.test(
+      rawQuery
+    )
+  ) {
+    return jsonError(
+      "queryに使用できない文字が含まれています。",
+      400
+    );
+  }
+
+  const query = rawQuery.trim();
+
+  if (!query) {
+    return jsonError(
+      "queryを入力してください。",
+      400
+    );
+  }
+
+  if (
+    Array.from(query).length >
+    MAX_QUERY_LENGTH
+  ) {
+    return jsonError(
+      `queryは${MAX_QUERY_LENGTH}文字以内で入力してください。`,
+      400
+    );
+  }
+
+  const apiKey = process.env.GOOGLE_PLACES_API_KEY;
+
+  if (!apiKey) {
+    return jsonError(
+      "写真サービスを利用できません。",
+      500
+    );
+  }
 
   try {
-    const searchResponse = await fetch(
-      PLACES_TEXT_SEARCH_URL,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Goog-Api-Key": apiKey,
-          "X-Goog-FieldMask": "places.photos",
-        },
-        body: JSON.stringify({
-          textQuery: query,
-          languageCode: "ja",
-          regionCode: "JP",
-          maxResultCount: 1,
-        }),
-        cache: "no-store",
+    const {
+      response: searchResponse,
+      data: searchData,
+    } = await runWithTimeout(
+      async (signal) => {
+        const response = await fetch(
+          PLACES_TEXT_SEARCH_URL,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Goog-Api-Key": apiKey,
+              "X-Goog-FieldMask": "places.photos",
+            },
+            body: JSON.stringify({
+              textQuery: query,
+              languageCode: "ja",
+              regionCode: "JP",
+              maxResultCount: 1,
+            }),
+            cache: "no-store",
+            signal,
+          }
+        );
+
+        const data =
+          (await response.json()) as PlacesSearchResponse;
+
+        return {
+          response,
+          data,
+        };
       }
     );
 
-    const searchData =
-      (await searchResponse.json()) as PlacesSearchResponse;
-
     if (!searchResponse.ok) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "スポット検索に失敗しました。",
-        },
-        {
-          status: 502,
-        }
+      return jsonError(
+        "スポット検索に失敗しました。",
+        502
       );
     }
 
@@ -73,14 +164,9 @@ export async function GET(request: NextRequest) {
       searchData.places?.[0]?.photos?.[0]?.name;
 
     if (!resourceName) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: `「${query}」の写真が見つかりませんでした。`,
-        },
-        {
-          status: 404,
-        }
+      return jsonError(
+        `「${query}」の写真が見つかりませんでした。`,
+        404
       );
     }
 
@@ -89,42 +175,60 @@ export async function GET(request: NextRequest) {
       `?maxWidthPx=1200` +
       `&skipHttpRedirect=false`;
 
-    const photoResponse = await fetch(photoUrl, {
-      headers: {
-        "X-Goog-Api-Key": apiKey,
-      },
-      cache: "no-store",
-      redirect: "follow",
-    });
+    const {
+      response: photoResponse,
+      contentType,
+      data: photoData,
+    } = await runWithTimeout(
+      async (signal) => {
+        const response = await fetch(
+          photoUrl,
+          {
+            headers: {
+              "X-Goog-Api-Key": apiKey,
+            },
+            cache: "no-store",
+            redirect: "follow",
+            signal,
+          }
+        );
+
+        const responseContentType =
+          response.headers.get(
+            "content-type"
+          ) ?? "";
+
+        const data = response.ok
+          ? await response.arrayBuffer()
+          : null;
+
+        return {
+          response,
+          contentType:
+            responseContentType,
+          data,
+        };
+      }
+    );
 
     if (!photoResponse.ok) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "写真の取得に失敗しました。",
-        },
-        {
-          status: 502,
-        }
+      return jsonError(
+        "写真の取得に失敗しました。",
+        502
       );
     }
 
-    const contentType =
-      photoResponse.headers.get("content-type") ?? "";
-
-    if (!contentType.toLowerCase().startsWith("image/")) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "写真の取得に失敗しました。",
-        },
-        {
-          status: 502,
-        }
+    if (
+      !contentType
+        .toLowerCase()
+        .startsWith("image/") ||
+      photoData === null
+    ) {
+      return jsonError(
+        "写真の取得に失敗しました。",
+        502
       );
     }
-
-    const photoData = await photoResponse.arrayBuffer();
 
     return new NextResponse(photoData, {
       status: 200,
@@ -133,17 +237,22 @@ export async function GET(request: NextRequest) {
         "Cache-Control": PHOTO_CACHE_CONTROL,
       },
     });
-  } catch {
+  } catch (error) {
+    if (
+      error instanceof
+      GoogleApiTimeoutError
+    ) {
+      return jsonError(
+        "写真サービスからの応答がタイムアウトしました。",
+        504
+      );
+    }
+
     console.error("Place Photo API request failed.");
 
-    return NextResponse.json(
-      {
-        success: false,
-        error: "写真の取得中にエラーが発生しました。",
-      },
-      {
-        status: 500,
-      }
+    return jsonError(
+      "写真の取得中にエラーが発生しました。",
+      502
     );
   }
 }
