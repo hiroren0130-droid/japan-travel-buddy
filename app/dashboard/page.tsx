@@ -19,31 +19,92 @@ export default function DashboardPage() {
 
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
+  let active = true;
+  let requestGeneration = 0;
+
   const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    if (!active) return;
+
+    const generation = ++requestGeneration;
+    setPlans([]);
+
     if (!user) {
       router.replace("/login");
       return;
     }
 
+    const uid = user.uid;
+
     try {
-      const savedPlans = await getTravelPlans(user.uid);
-      setPlans(savedPlans);
+      const savedPlans = await getTravelPlans(uid);
+
+      if (
+        active &&
+        generation === requestGeneration &&
+        auth.currentUser?.uid === uid
+      ) {
+        setPlans(savedPlans);
+      }
     } catch (error) {
-      console.error("旅行プラン取得エラー:", error);
+      if (
+        !active ||
+        generation !== requestGeneration ||
+        auth.currentUser?.uid !== uid
+      ) {
+        return;
+      }
+
+      if (process.env.NODE_ENV === "development") {
+        console.error("旅行プラン取得エラー:", error);
+      } else {
+        console.error("Travel plan loading failed.");
+      }
+
+      alert("旅行プランを読み込めませんでした。");
     }
+  }, (error) => {
+    if (!active) return;
+
+    requestGeneration++;
+    setPlans([]);
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("認証状態確認エラー:", error);
+    } else {
+      console.error("Authentication state check failed.");
+    }
+
+    alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
   });
 
-  return () => unsubscribe();
+  return () => {
+    active = false;
+    requestGeneration++;
+    unsubscribe();
+  };
 }, [router]);
 
   const handleLogout = async () => {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+
     try {
       await signOut(auth);
       router.replace("/login");
     } catch (error) {
-      console.error("ログアウトエラー:", error);
+      if (process.env.NODE_ENV === "development") {
+        console.error("ログアウトエラー:", error);
+      } else {
+        console.error("Logout failed.");
+      }
+
+      alert("ログアウトできませんでした。もう一度お試しください。");
+    } finally {
+      setLoggingOut(false);
     }
   };
 
@@ -59,7 +120,13 @@ export default function DashboardPage() {
       prev.filter((plan) => plan.id !== id)
     );
   } catch (error) {
-    console.error("削除エラー:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("削除エラー:", error);
+    } else {
+      console.error("Travel plan deletion failed.");
+    }
+
+    alert("旅行プランを削除できませんでした。");
   }
 };
 
@@ -83,7 +150,13 @@ const handleFavorite = async (
       )
     );
   } catch (error) {
-    console.error("お気に入り更新エラー:", error);
+    if (process.env.NODE_ENV === "development") {
+      console.error("お気に入り更新エラー:", error);
+    } else {
+      console.error("Favorite update failed.");
+    }
+
+    alert("お気に入りを更新できませんでした。");
   }
 };
 
@@ -105,7 +178,17 @@ Japan Travel Buddyで作成した旅行プラン`;
       alert("旅行プランをコピーしました。");
     }
   } catch (error) {
-    console.error("共有エラー:", error);
+    if (error instanceof Error && error.name === "AbortError") {
+      return;
+    }
+
+    if (process.env.NODE_ENV === "development") {
+      console.error("共有エラー:", error);
+    } else {
+      console.error("Sharing failed.");
+    }
+
+    alert("共有できませんでした。");
   }
 }
 
@@ -119,9 +202,10 @@ Japan Travel Buddyで作成した旅行プラン`;
 
         <button
           onClick={handleLogout}
+          disabled={loggingOut}
           className="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
         >
-          ログアウト
+          {loggingOut ? "ログアウト中..." : "ログアウト"}
         </button>
       </div>
 
