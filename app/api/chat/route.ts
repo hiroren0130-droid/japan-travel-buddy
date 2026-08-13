@@ -34,6 +34,7 @@ import {
 } from "./routeImprover";
 
 import {
+  containsRequiredSpots,
   isValidAITravelPlan,
 } from "./travelValidator";
 
@@ -712,6 +713,24 @@ ${specialRequest}
       );
     }
 
+    if (
+      !containsRequiredSpots(
+        generatedPlan,
+        mentionedSpots
+      )
+    ) {
+      return jsonResponse(
+        {
+          error:
+            "指定されたスポットを含む旅行プランを生成できませんでした。",
+        },
+        500
+      );
+    }
+
+    const requiredCompletePlan =
+      generatedPlan;
+
     /*
      * まずローカル処理で、
      * 任意スポットの整理と
@@ -721,8 +740,8 @@ ${specialRequest}
      * TypeScript側だけで改善できる場合は
      * 追加のAI呼び出しを避けます。
      */
-    generatedPlan =
-  pruneOptionalSpots({
+    const locallyPrunedPlan =
+      pruneOptionalSpots({
     plan:
       generatedPlan,
 
@@ -734,7 +753,15 @@ ${specialRequest}
 
     protectedStartSpotName:
       requestedStartSpotName,
-  });
+      });
+
+    generatedPlan =
+      containsRequiredSpots(
+        locallyPrunedPlan,
+        mentionedSpots
+      )
+        ? locallyPrunedPlan
+        : requiredCompletePlan;
 
     generatedPlan =
       optimizeGeneratedPlan({
@@ -753,7 +780,10 @@ ${specialRequest}
     const improveStartedAt =
       performance.now();
 
-    generatedPlan =
+    const planBeforeAiImprovement =
+      generatedPlan;
+
+    const improvedPlan =
       await improveTravelPlan({
         plan:
           generatedPlan,
@@ -771,6 +801,14 @@ ${specialRequest}
         requestedStartSpotName,
       });
 
+    generatedPlan =
+      containsRequiredSpots(
+        improvedPlan,
+        mentionedSpots
+      )
+        ? improvedPlan
+        : planBeforeAiImprovement;
+
     console.log(
       "===== Performance: improveTravelPlan ====="
     );
@@ -786,8 +824,8 @@ ${specialRequest}
      * AI改善を行った場合も含め、
      * 最後にもう一度ローカル最適化します。
      */
-    generatedPlan =
-  pruneOptionalSpots({
+    const finalPrunedPlan =
+      pruneOptionalSpots({
     plan:
       generatedPlan,
 
@@ -799,7 +837,15 @@ ${specialRequest}
 
     protectedStartSpotName:
       requestedStartSpotName,
-  });
+      });
+
+    generatedPlan =
+      containsRequiredSpots(
+        finalPrunedPlan,
+        mentionedSpots
+      )
+        ? finalPrunedPlan
+        : generatedPlan;
 
     generatedPlan =
       optimizeGeneratedPlan({
@@ -809,6 +855,15 @@ ${specialRequest}
         startSpotName:
           requestedStartSpotName,
       });
+
+    if (
+      !containsRequiredSpots(
+        generatedPlan,
+        mentionedSpots
+      )
+    ) {
+      generatedPlan = requiredCompletePlan;
+    }
 
     /*
      * 採用する旅行プランと

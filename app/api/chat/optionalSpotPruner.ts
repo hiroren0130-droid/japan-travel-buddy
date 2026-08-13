@@ -48,6 +48,25 @@ function normalizeSpotName(
     .toLowerCase();
 }
 
+function containsRequiredSpotNames(
+  plan: AITravelPlan,
+  requiredSpotNameSet: Set<string>
+): boolean {
+  const planSpotNames = new Set(
+    plan.days.flatMap((day) =>
+      day.items.map((item) =>
+        normalizeSpotName(item.spot)
+      )
+    )
+  );
+
+  return Array.from(
+    requiredSpotNameSet
+  ).every((requiredSpotName) =>
+    planSpotNames.has(requiredSpotName)
+  );
+}
+
 function evaluatePlan(
   plan: AITravelPlan
 ): PlanQuality {
@@ -325,6 +344,15 @@ export function pruneOptionalSpots({
             }),
             protectedStartSpotName
           );
+
+        if (
+          !containsRequiredSpotNames(
+            candidatePlan,
+            requiredSpotNameSet
+          )
+        ) {
+          continue;
+        }
 
         const candidateQuality =
           evaluatePlan(
