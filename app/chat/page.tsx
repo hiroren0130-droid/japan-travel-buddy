@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bot,
   CheckCircle2,
@@ -29,6 +29,7 @@ type CurrentLocation = {
 export default function ChatPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
+  const loadingSectionRef = useRef<HTMLElement | null>(null);
 
   const [destination, setDestination] = useState("");
   const [days, setDays] = useState("");
@@ -57,6 +58,23 @@ export default function ChatPage() {
       }
     );
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      return;
+    }
+
+    const animationFrameId = requestAnimationFrame(() => {
+      loadingSectionRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [loading]);
 
   async function sendMessage() {
     if (loading) {
@@ -283,9 +301,10 @@ return (
           </section>
 
           <section
+            ref={loadingSectionRef}
             aria-live="polite"
             aria-busy={loading}
-            className="mt-8"
+            className="mt-8 scroll-mt-24"
           >
             {loading ? (
               <TravelPlanSkeleton />

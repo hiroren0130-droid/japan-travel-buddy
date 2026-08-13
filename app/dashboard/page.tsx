@@ -283,7 +283,17 @@ Japan Travel Buddyで作成した旅行プラン`;
       plan.favorite ?? false
     )
   }
-  className="w-full sm:min-w-[130px] sm:w-auto rounded-lg bg-yellow-500 px-4 py-2 text-white transition hover:bg-yellow-600"
+  aria-label={
+    plan.favorite
+      ? "お気に入りから削除"
+      : "お気に入りに追加"
+  }
+  aria-pressed={plan.favorite ?? false}
+  className={`w-full rounded-lg border px-4 py-2 font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto sm:min-w-[130px] ${
+    plan.favorite
+      ? "border-slate-900 bg-blue-900 text-amber-300 hover:bg-blue-800 focus:ring-slate-500"
+      : "border-amber-400 bg-white text-amber-600 hover:bg-amber-50 focus:ring-amber-400"
+  }`}
 >
   {plan.favorite ? "⭐" : "☆"}
 </button>
