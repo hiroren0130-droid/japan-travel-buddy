@@ -35,6 +35,7 @@ const PHOTO_RESOURCE_NAME_PATTERN =
 const SPOT_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const EARTH_RADIUS_KM = 6371;
 const MAX_CANDIDATE_DISTANCE_KM = 5;
+const MAX_LOCATION_ONLY_DISTANCE_KM = 1.5;
 
 class GoogleApiTimeoutError extends Error {}
 
@@ -113,15 +114,15 @@ function getCandidateScore(
     candidateName.includes(targetName) ||
     targetName.includes(candidateName);
 
-  if (!exactNameMatch && !partialNameMatch) {
-    return null;
-  }
-
-  let score = exactNameMatch ? 100 : 60;
   const candidateLatitude =
     candidate.location?.latitude;
   const candidateLongitude =
     candidate.location?.longitude;
+  const hasKyotoAddress =
+    candidate.formattedAddress?.includes(
+      "京都"
+    ) ?? false;
+  let distanceKm: number | null = null;
 
   if (
     target.latitude !== null &&
@@ -134,7 +135,7 @@ function getCandidateScore(
       return null;
     }
 
-    const distanceKm = calculateDistanceKm(
+    distanceKm = calculateDistanceKm(
       target.latitude,
       target.longitude,
       candidateLatitude,
@@ -144,17 +145,36 @@ function getCandidateScore(
     if (distanceKm > MAX_CANDIDATE_DISTANCE_KM) {
       return null;
     }
-
-    score += Math.max(
-      0,
-      40 - distanceKm * 8
-    );
   }
 
   if (
-    candidate.formattedAddress?.includes("京都")
+    !exactNameMatch &&
+    !partialNameMatch &&
+    !(
+      distanceKm !== null &&
+      distanceKm <=
+        MAX_LOCATION_ONLY_DISTANCE_KM &&
+      hasKyotoAddress
+    )
   ) {
-    score += 10;
+    return null;
+  }
+
+  let score = exactNameMatch
+    ? 200
+    : partialNameMatch
+      ? 120
+      : 20;
+
+  if (distanceKm !== null) {
+    score += Math.max(
+      0,
+      50 - distanceKm * 10
+    );
+  }
+
+  if (hasKyotoAddress) {
+    score += 20;
   }
 
   return score;
