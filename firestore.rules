@@ -1,0 +1,78 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner() {
+      return isSignedIn()
+        && resource.data.uid is string
+        && resource.data.uid == request.auth.uid;
+    }
+
+    function isCreatingOwnDocument() {
+      return isSignedIn()
+        && request.resource.data.uid is string
+        && request.resource.data.uid == request.auth.uid;
+    }
+
+    function keepsOwnerUid() {
+      return request.resource.data.uid == resource.data.uid;
+    }
+
+    function hasAllowedFields() {
+      return request.resource.data.keys().hasOnly([
+        "uid",
+        "destination",
+        "title",
+        "summary",
+        "days",
+        "favorite",
+        "createdAt"
+      ]);
+    }
+
+    function hasRequiredFields() {
+      return request.resource.data.keys().hasAll([
+        "uid",
+        "title",
+        "summary",
+        "days",
+        "favorite",
+        "createdAt"
+      ]);
+    }
+
+    function hasValidTopLevelTypes() {
+      return request.resource.data.uid is string
+        && request.resource.data.title is string
+        && request.resource.data.summary is string
+        && request.resource.data.days is list
+        && request.resource.data.favorite is bool;
+    }
+
+    match /travelPlans/{planId} {
+      allow create: if isCreatingOwnDocument()
+        && hasAllowedFields()
+        && hasRequiredFields()
+        && hasValidTopLevelTypes();
+
+      allow get, list: if isOwner();
+
+      allow update: if isOwner()
+        && keepsOwnerUid()
+        && hasAllowedFields()
+        && hasRequiredFields()
+        && hasValidTopLevelTypes();
+
+      allow delete: if isOwner();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
