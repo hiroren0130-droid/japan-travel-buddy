@@ -19,7 +19,7 @@ jobs:
     - name: Run Playwright tests
       run: |
         if [ "${{ github.event_name }}" = "push" ]; then
-          npx playwright test --grep "京都1日 定番ルート"
+          npx playwright test --grep "@smoke|@integration"
         else
           npx playwright test
         fi
