@@ -20,29 +20,45 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
+  if (loading) return;
+
   setError("");
+
+  const trimmedName = name.trim();
+  const trimmedEmail = email.trim();
+
+  if (!trimmedName || !trimmedEmail || !password) {
+    setError("表示名、メールアドレス、パスワードを入力してください。");
+    return;
+  }
+
   setLoading(true);
 
     try {
-      const userCredential =
-        await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
+      try {
+        const userCredential =
+          await createUserWithEmailAndPassword(
+            auth,
+            trimmedEmail,
+            password
+          );
 
-      await updateProfile(userCredential.user, {
-        displayName: name,
-      });
+        try {
+          await updateProfile(userCredential.user, {
+            displayName: trimmedName,
+          });
+        } catch {
+          alert("アカウントは作成されましたが、表示名を設定できませんでした。そのままサービスを利用できます。");
+        }
+      } catch {
+        setError("アカウントを作成できませんでした。入力内容を確認して、もう一度お試しください。");
+        return;
+      }
 
       router.push("/dashboard");
-    } catch (err: unknown) {
-  if (err instanceof Error) {
-    setError(err.message);
-  } else {
-    setError("An unexpected error occurred.");
-  }
-}
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
