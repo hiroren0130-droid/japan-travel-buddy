@@ -11,15 +11,15 @@ type PlacesSearchResponse = {
   }>;
 };
 
-const PHOTO_CACHE_CONTROL =
-  "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400";
-
-const ERROR_CACHE_CONTROL = "no-store";
+const CACHE_CONTROL = "no-store";
 const MAX_QUERY_LENGTH = 120;
 const GOOGLE_API_TIMEOUT_MS = 10_000;
 
 const CONTROL_CHARACTER_PATTERN =
   /[\u0000-\u001f\u007f-\u009f]/;
+
+const PHOTO_RESOURCE_NAME_PATTERN =
+  /^places\/[A-Za-z0-9_-]+\/photos\/[A-Za-z0-9_-]+$/;
 
 class GoogleApiTimeoutError extends Error {}
 
@@ -35,7 +35,8 @@ function jsonError(
     {
       status,
       headers: {
-        "Cache-Control": ERROR_CACHE_CONTROL,
+        "Cache-Control": CACHE_CONTROL,
+        "X-Content-Type-Options": "nosniff",
       },
     }
   );
@@ -170,6 +171,17 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    if (
+      !PHOTO_RESOURCE_NAME_PATTERN.test(
+        resourceName
+      )
+    ) {
+      return jsonError(
+        "写真情報の形式が不正です。",
+        502
+      );
+    }
+
     const photoUrl =
       `https://places.googleapis.com/v1/${resourceName}/media` +
       `?maxWidthPx=1200` +
@@ -234,7 +246,9 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": contentType,
-        "Cache-Control": PHOTO_CACHE_CONTROL,
+        "Cache-Control": CACHE_CONTROL,
+        "X-Content-Type-Options": "nosniff",
+        "Cross-Origin-Resource-Policy": "same-origin",
       },
     });
   } catch (error) {

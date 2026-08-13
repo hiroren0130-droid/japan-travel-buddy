@@ -105,6 +105,8 @@ if (
       await openai.responses.create({
         model: "gpt-5-mini",
 
+        store: false,
+
         reasoning: {
           effort: "low",
         },
@@ -140,13 +142,22 @@ if (
           outputText
         ) as unknown;
     } catch (error) {
-      console.error(
-        "Travel plan JSON parse error:",
-        {
-          outputText,
-          error,
-        }
-      );
+      if (
+        process.env.NODE_ENV ===
+        "development"
+      ) {
+        console.error(
+          "Travel plan JSON parse error:",
+          {
+            outputText,
+            error,
+          }
+        );
+      } else {
+        console.error(
+          "Travel plan JSON parse error."
+        );
+      }
 
       return null;
     }
@@ -156,27 +167,45 @@ if (
     parsedResponse
   )
 ) {
-  console.error(
-    "Invalid AI travel plan:",
-    {
-      errors:
-        getValidationErrors(
-          parsedResponse
-        ),
-      response:
-        parsedResponse,
-    }
-  );
+      if (
+        process.env.NODE_ENV ===
+        "development"
+      ) {
+        console.error(
+          "Invalid AI travel plan:",
+          {
+            errors:
+              getValidationErrors(
+                parsedResponse
+              ),
+            response:
+              parsedResponse,
+          }
+        );
+      } else {
+        console.error(
+          "Invalid AI travel plan."
+        );
+      }
 
   return null;
 }
 
     return parsedResponse;
   } catch (error) {
-    console.error(
-      "OpenAI travel generation error:",
-      error
-    );
+    if (
+      process.env.NODE_ENV ===
+      "development"
+    ) {
+      console.error(
+        "OpenAI travel generation error:",
+        error
+      );
+    } else {
+      console.error(
+        "OpenAI travel generation error."
+      );
+    }
 
     return null;
   }
