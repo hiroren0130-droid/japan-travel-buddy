@@ -140,6 +140,14 @@ export type AppMessages = {
   };
   timelineItem: {
     descriptionFallback: string;
+    transport: {
+      walking: string;
+      jr: string;
+      train: string;
+      subway: string;
+      bus: string;
+      taxi: string;
+    };
   };
   timelineMapButton: {
     label: string;
@@ -763,6 +771,14 @@ export const messages: LocaleRecord<AppMessages> = {
     },
     timelineItem: {
       descriptionFallback: "説明はありません。",
+      transport: {
+        walking: "徒歩",
+        jr: "JR",
+        train: "電車",
+        subway: "地下鉄",
+        bus: "バス",
+        taxi: "タクシー",
+      },
     },
     timelineMapButton: {
       label: "Google Maps",
@@ -1424,6 +1440,14 @@ export const messages: LocaleRecord<AppMessages> = {
     },
     timelineItem: {
       descriptionFallback: "No description is available.",
+      transport: {
+        walking: "Walk",
+        jr: "JR",
+        train: "Train",
+        subway: "Subway",
+        bus: "Bus",
+        taxi: "Taxi",
+      },
     },
     timelineMapButton: {
       label: "Google Maps",

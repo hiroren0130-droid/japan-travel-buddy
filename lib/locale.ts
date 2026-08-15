@@ -11,6 +11,11 @@ const LOCALE_LABELS: LocaleRecord<string> = {
   en: "English",
 };
 
+const INTL_LOCALES: LocaleRecord<string> = {
+  ja: "ja-JP",
+  en: "en-US",
+};
+
 export function isSupportedLocale(value: unknown): value is Locale {
   return (
     typeof value === "string" &&
@@ -27,4 +32,8 @@ export function normalizeLocale(
 
 export function getLocaleLabel(locale: Locale): string {
   return LOCALE_LABELS[locale];
+}
+
+export function getIntlLocale(locale: Locale): string {
+  return INTL_LOCALES[locale];
 }

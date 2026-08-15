@@ -18,6 +18,15 @@ import {
 
 const defaultMessages = getMessages(DEFAULT_LOCALE);
 
+const TRANSPORT_LABELS: Record<string, string> = {
+  徒歩: defaultMessages.timelineItem.transport.walking,
+  JR: defaultMessages.timelineItem.transport.jr,
+  電車: defaultMessages.timelineItem.transport.train,
+  地下鉄: defaultMessages.timelineItem.transport.subway,
+  バス: defaultMessages.timelineItem.transport.bus,
+  タクシー: defaultMessages.timelineItem.transport.taxi,
+};
+
 type Props = {
   time: string;
   spot: string;
@@ -196,7 +205,7 @@ export default function TimelineItem({
                       </span>
 
                       <span className="font-medium">
-                        {transport}
+                        {TRANSPORT_LABELS[transport] ?? transport}
                       </span>
                     </div>
                   )}

@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { Timestamp } from "firebase/firestore";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
+import { DEFAULT_LOCALE, getIntlLocale } from "@/lib/locale";
 import { getMessages } from "@/lib/messages";
 import { SavedTravelPlan } from "@/types/travel";
 
 const myPageCardMessages = getMessages(DEFAULT_LOCALE).myPageCard;
+const intlLocale = getIntlLocale(DEFAULT_LOCALE);
 
 type SavedPlan = SavedTravelPlan & {
   createdAt?: Timestamp;
@@ -37,7 +38,7 @@ export default function MyPageCard({
           {myPageCardMessages.createdAtLabel}
           {plan.createdAt
             .toDate()
-            .toLocaleDateString("ja-JP")}
+            .toLocaleDateString(intlLocale)}
         </p>
       )}
 

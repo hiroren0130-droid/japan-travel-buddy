@@ -10,12 +10,13 @@ import {
   deleteTravelPlan,
   updateTravelPlan,
 } from "@/lib/firestore";
-import { DEFAULT_LOCALE } from "@/lib/locale";
+import { DEFAULT_LOCALE, getIntlLocale } from "@/lib/locale";
 import { getMessages } from "@/lib/messages";
 import Link from "next/link";
 
 const messages = getMessages(DEFAULT_LOCALE);
 const dashboardMessages = messages.dashboard;
+const intlLocale = getIntlLocale(DEFAULT_LOCALE);
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -276,7 +277,7 @@ Japan Travel Buddyで作成した旅行プラン`;
     {plan.createdAt && (
   <p className="mt-3 text-sm text-gray-400">
     {dashboardMessages.createdAtLabel}
-    {plan.createdAt.toDate().toLocaleDateString("ja-JP")}
+    {plan.createdAt.toDate().toLocaleDateString(intlLocale)}
   </p>
 )}
   </Link>
