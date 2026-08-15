@@ -2,10 +2,7 @@
 
 import { LayoutGrid, List } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const historyViewToggleMessages = getMessages(DEFAULT_LOCALE).historyViewToggle;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   view: "grid" | "list";
@@ -16,6 +13,8 @@ export default function HistoryViewToggle({
   view,
   onChange,
 }: Props) {
+  const historyViewToggleMessages =
+    useLocale().messages.historyViewToggle;
   return (
     <div className="mb-6 flex justify-end gap-2">
       <button

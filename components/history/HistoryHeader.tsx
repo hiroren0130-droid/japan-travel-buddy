@@ -2,16 +2,15 @@
 
 import { BookOpen } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const historyHeaderMessages = getMessages(DEFAULT_LOCALE).historyHeader;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   count: number;
 };
 
 export default function HistoryHeader({ count }: Props) {
+  const historyHeaderMessages =
+    useLocale().messages.historyHeader;
   return (
     <div className="mb-8">
       <h1 className="flex items-center gap-2 text-3xl font-bold">

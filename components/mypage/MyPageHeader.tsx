@@ -1,10 +1,7 @@
 "use client";
 
 import { FolderOpen } from "lucide-react";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const myPageHeaderMessages = getMessages(DEFAULT_LOCALE).myPageHeader;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   count: number;
@@ -13,6 +10,8 @@ type Props = {
 export default function MyPageHeader({
   count,
 }: Props) {
+  const myPageHeaderMessages =
+    useLocale().messages.myPageHeader;
   return (
     <>
       <h1 className="flex items-center gap-2 text-3xl font-bold">

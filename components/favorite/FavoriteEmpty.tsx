@@ -1,12 +1,11 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const favoriteEmptyMessages = getMessages(DEFAULT_LOCALE).favoriteEmpty;
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function FavoriteEmpty() {
+  const favoriteEmptyMessages =
+    useLocale().messages.favoriteEmpty;
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 px-6 py-16 text-center">
       <Heart className="mb-4 h-16 w-16 fill-gray-300 text-gray-300" />

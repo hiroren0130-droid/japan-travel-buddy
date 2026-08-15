@@ -6,10 +6,7 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 
 import type { TravelPlan } from "@/types/travel";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const favoriteCardMessages = getMessages(DEFAULT_LOCALE).favoriteCard;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   plan: TravelPlan;
@@ -24,6 +21,8 @@ export default function FavoriteCard({
   onClick,
   onRemove,
 }: Props) {
+  const favoriteCardMessages =
+    useLocale().messages.favoriteCard;
   const dayCount = plan.days?.length ?? 0;
 
 const spotCount =

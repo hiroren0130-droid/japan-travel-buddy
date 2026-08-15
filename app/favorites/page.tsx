@@ -9,15 +9,19 @@ import FavoriteSearch from "@/components/favorite/FavoriteSearch";
 import FavoriteSort, {
   FavoriteSortType,
 } from "@/components/favorite/FavoriteSort";
+import { useLocale } from "@/components/LocaleProvider";
 
 import {
   getFavoriteItems,
   removeFavorite,
 } from "@/lib/favorites";
+import { getIntlLocale } from "@/lib/locale";
 
 import type { TravelPlan } from "@/types/travel";
 
 export default function FavoritesPage() {
+  const { locale } = useLocale();
+  const intlLocale = getIntlLocale(locale);
   const [favorites, setFavorites] = useState(getFavoriteItems());
   const [search, setSearch] = useState("");
   const [sort, setSort] =
@@ -55,7 +59,7 @@ export default function FavoritesPage() {
 
       case "title":
         list.sort((a, b) =>
-          a.plan.title.localeCompare(b.plan.title, "ja")
+          a.plan.title.localeCompare(b.plan.title, intlLocale)
         );
         break;
 
@@ -64,7 +68,7 @@ export default function FavoritesPage() {
     }
 
     return list.map((item) => item.plan);
-  }, [favorites, search, sort]);
+  }, [favorites, intlLocale, search, sort]);
 
   return (
     <main className="mx-auto max-w-6xl p-6">

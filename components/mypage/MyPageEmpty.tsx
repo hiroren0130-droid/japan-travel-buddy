@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const myPageEmptyMessages = getMessages(DEFAULT_LOCALE).myPageEmpty;
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function MyPageEmpty() {
+  const myPageEmptyMessages =
+    useLocale().messages.myPageEmpty;
   return (
     <div className="rounded-xl border bg-white p-10 text-center shadow-sm">
       <p className="mb-6 text-gray-600">

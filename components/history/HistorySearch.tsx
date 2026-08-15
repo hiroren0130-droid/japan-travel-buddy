@@ -2,10 +2,7 @@
 
 import { Search } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const historySearchMessages = getMessages(DEFAULT_LOCALE).historySearch;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   value: string;
@@ -16,6 +13,8 @@ export default function HistorySearch({
   value,
   onChange,
 }: Props) {
+  const historySearchMessages =
+    useLocale().messages.historySearch;
   return (
     <div className="relative mb-6">
       <Search

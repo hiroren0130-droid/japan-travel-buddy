@@ -1,10 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const favoriteSearchMessages = getMessages(DEFAULT_LOCALE).favoriteSearch;
+import { useLocale } from "@/components/LocaleProvider";
 
 export interface FavoriteSearchProps {
   value: string;
@@ -15,6 +12,8 @@ export default function FavoriteSearch({
   value,
   onChange,
 }: FavoriteSearchProps) {
+  const favoriteSearchMessages =
+    useLocale().messages.favoriteSearch;
   return (
     <div className="mb-6">
       <div className="relative">

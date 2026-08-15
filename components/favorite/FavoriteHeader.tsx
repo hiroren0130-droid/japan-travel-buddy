@@ -1,10 +1,7 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const favoriteHeaderMessages = getMessages(DEFAULT_LOCALE).favoriteHeader;
+import { useLocale } from "@/components/LocaleProvider";
 
 export interface FavoriteHeaderProps {
   count: number;
@@ -13,6 +10,8 @@ export interface FavoriteHeaderProps {
 export default function FavoriteHeader({
   count,
 }: FavoriteHeaderProps) {
+  const favoriteHeaderMessages =
+    useLocale().messages.favoriteHeader;
   return (
     <div className="mb-8 flex items-center justify-between">
       <div>

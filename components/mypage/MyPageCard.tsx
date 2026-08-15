@@ -3,12 +3,9 @@
 import Link from "next/link";
 import { Timestamp } from "firebase/firestore";
 
-import { DEFAULT_LOCALE, getIntlLocale } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
+import { getIntlLocale } from "@/lib/locale";
 import { SavedTravelPlan } from "@/types/travel";
-
-const myPageCardMessages = getMessages(DEFAULT_LOCALE).myPageCard;
-const intlLocale = getIntlLocale(DEFAULT_LOCALE);
 
 type SavedPlan = SavedTravelPlan & {
   createdAt?: Timestamp;
@@ -23,6 +20,9 @@ export default function MyPageCard({
   plan,
   onDelete,
 }: Props) {
+  const { locale, messages } = useLocale();
+  const myPageCardMessages = messages.myPageCard;
+  const intlLocale = getIntlLocale(locale);
   return (
     <div className="rounded-xl border bg-white p-5 shadow-sm transition hover:shadow-md">
       <h2 className="text-xl font-bold">

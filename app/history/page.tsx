@@ -16,13 +16,12 @@ import {
   deleteTravelPlan,
   getTravelPlans,
 } from "@/lib/firestore";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
 import { SavedTravelPlan } from "@/types/travel";
 
-const historyPageMessages = getMessages(DEFAULT_LOCALE).historyPage;
-
 export default function HistoryPage() {
+  const historyPageMessages =
+    useLocale().messages.historyPage;
   const router = useRouter();
 
   const [plans, setPlans] = useState<SavedTravelPlan[]>([]);
@@ -107,7 +106,11 @@ export default function HistoryPage() {
       requestGeneration++;
       unsubscribe();
     };
-  }, [router]);
+  }, [
+    historyPageMessages.authFailedAlert,
+    historyPageMessages.loadFailedAlert,
+    router,
+  ]);
 
   async function handleDelete(id: string) {
     if (!confirm(historyPageMessages.deleteConfirm)) {

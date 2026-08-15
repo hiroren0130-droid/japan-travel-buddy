@@ -7,12 +7,11 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const signupMessages = getMessages(DEFAULT_LOCALE).signup;
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function SignupPage() {
+  const signupMessages =
+    useLocale().messages.signup;
   const router = useRouter();
 
   const [name, setName] = useState("");

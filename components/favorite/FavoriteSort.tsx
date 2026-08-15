@@ -1,9 +1,6 @@
 "use client";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const favoriteSortMessages = getMessages(DEFAULT_LOCALE).favoriteSort;
+import { useLocale } from "@/components/LocaleProvider";
 
 export type FavoriteSortType =
   | "newest"
@@ -19,6 +16,8 @@ export default function FavoriteSort({
   value,
   onChange,
 }: FavoriteSortProps) {
+  const favoriteSortMessages =
+    useLocale().messages.favoriteSort;
   return (
     <div className="mb-6 flex justify-end">
       <select

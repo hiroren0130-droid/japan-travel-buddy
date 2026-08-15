@@ -4,8 +4,7 @@ import Link from "next/link";
 
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
 
 import type { SavedTravelPlan } from "@/types/travel";
 
@@ -18,7 +17,8 @@ export default function HistoryCard({
   plan,
   onDelete,
 }: Props) {
-  const historyCardMessages = getMessages(DEFAULT_LOCALE).historyCard;
+  const historyCardMessages =
+    useLocale().messages.historyCard;
 
   return (
     <Card>

@@ -5,10 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getTravelPlan, updateTravelPlan } from "@/lib/firestore";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const historyEditMessages = getMessages(DEFAULT_LOCALE).historyEdit;
+import { useLocale } from "@/components/LocaleProvider";
 
 const CONTROL_CHARACTER_PATTERN =
   /[\u0000-\u001f\u007f-\u009f]/;
@@ -53,6 +50,8 @@ function isOwnedEditablePlan(
 }
 
 export default function EditTravelPlanPage() {
+  const historyEditMessages =
+    useLocale().messages.historyEdit;
 
 const params = useParams();
 const router = useRouter();
@@ -173,7 +172,13 @@ useEffect(() => {
     requestGeneration++;
     unsubscribe();
   };
-}, [router, validatedId]);
+}, [
+  historyEditMessages.authFailedAlert,
+  historyEditMessages.invalidIdAlert,
+  historyEditMessages.loadFailedAlert,
+  router,
+  validatedId,
+]);
 
 async function handleSave() {
   if (saving) return;

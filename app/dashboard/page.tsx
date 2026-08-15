@@ -10,15 +10,14 @@ import {
   deleteTravelPlan,
   updateTravelPlan,
 } from "@/lib/firestore";
-import { DEFAULT_LOCALE, getIntlLocale } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
+import { getIntlLocale } from "@/lib/locale";
 import Link from "next/link";
 
-const messages = getMessages(DEFAULT_LOCALE);
-const dashboardMessages = messages.dashboard;
-const intlLocale = getIntlLocale(DEFAULT_LOCALE);
-
 export default function DashboardPage() {
+  const { locale, messages } = useLocale();
+  const dashboardMessages = messages.dashboard;
+  const intlLocale = getIntlLocale(locale);
   const router = useRouter();
 
   const [plans, setPlans] = useState<SavedTravelPlan[]>([]);
@@ -91,7 +90,11 @@ export default function DashboardPage() {
     requestGeneration++;
     unsubscribe();
   };
-}, [router]);
+}, [
+  dashboardMessages.alerts.authFailed,
+  dashboardMessages.alerts.loadFailed,
+  router,
+]);
 
   const handleLogout = async () => {
     if (loggingOut) return;

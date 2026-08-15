@@ -1,9 +1,6 @@
 "use client";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const historySortMessages = getMessages(DEFAULT_LOCALE).historySort;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   value: "newest" | "oldest";
@@ -14,6 +11,8 @@ export default function HistorySort({
   value,
   onChange,
 }: Props) {
+  const historySortMessages =
+    useLocale().messages.historySort;
   return (
     <div className="mb-6 flex justify-end">
       <select

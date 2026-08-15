@@ -8,11 +8,8 @@ import { onAuthStateChanged } from "firebase/auth";
 import TravelPlanCard from "@/components/TravelPlanCard";
 import { auth } from "@/lib/firebase";
 import { getTravelPlan } from "@/lib/firestore";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
 import { TravelPlan } from "@/types/travel";
-
-const historyDetailMessages = getMessages(DEFAULT_LOCALE).historyDetail;
 
 const CONTROL_CHARACTER_PATTERN =
   /[\u0000-\u001f\u007f-\u009f]/;
@@ -54,6 +51,8 @@ function isOwnedTravelPlan(
 }
 
 export default function HistoryDetailPage() {
+  const historyDetailMessages =
+    useLocale().messages.historyDetail;
   const params = useParams();
   const router = useRouter();
   const validatedId = validatePlanId(params.id);
@@ -159,7 +158,13 @@ export default function HistoryDetailPage() {
       requestGeneration++;
       unsubscribe();
     };
-  }, [router, validatedId]);
+  }, [
+    historyDetailMessages.authFailedAlert,
+    historyDetailMessages.invalidIdAlert,
+    historyDetailMessages.loadFailedAlert,
+    router,
+    validatedId,
+  ]);
 
   if (loading) {
     return (

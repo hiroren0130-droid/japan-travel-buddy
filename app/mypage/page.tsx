@@ -13,12 +13,9 @@ import {
   getTravelPlans,
   deleteTravelPlan,
 } from "@/lib/firestore";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
 
 import { SavedTravelPlan } from "@/types/travel";
-
-const myPageMessages = getMessages(DEFAULT_LOCALE).myPage;
 
 type SavedPlan = SavedTravelPlan & {
   createdAt?: Timestamp;
@@ -40,6 +37,8 @@ function isValidPlanId(id: unknown): id is string {
 }
 
 export default function MyPage() {
+  const myPageMessages =
+    useLocale().messages.myPage;
   const router = useRouter();
 
   const [plans, setPlans] = useState<SavedPlan[]>([]);
@@ -121,7 +120,11 @@ export default function MyPage() {
       requestGeneration++;
       unsubscribe();
     };
-  }, [router]);
+  }, [
+    myPageMessages.authFailedAlert,
+    myPageMessages.loadFailedAlert,
+    router,
+  ]);
 
   async function handleDelete(id: string) {
     if (deletingIdsRef.current.has(id)) return;

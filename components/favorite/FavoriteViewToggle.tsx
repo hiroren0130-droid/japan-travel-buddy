@@ -1,11 +1,7 @@
 "use client";
 
 import { LayoutGrid, List } from "lucide-react";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const favoriteViewToggleMessages =
-  getMessages(DEFAULT_LOCALE).favoriteViewToggle;
+import { useLocale } from "@/components/LocaleProvider";
 
 export type FavoriteViewType = "grid" | "list";
 
@@ -18,6 +14,8 @@ export default function FavoriteViewToggle({
   value,
   onChange,
 }: FavoriteViewToggleProps) {
+  const favoriteViewToggleMessages =
+    useLocale().messages.favoriteViewToggle;
   return (
     <div className="mb-6 flex justify-end gap-2">
       <button

@@ -4,12 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const loginMessages = getMessages(DEFAULT_LOCALE).login;
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function LoginPage() {
+  const loginMessages = useLocale().messages.login;
   const router = useRouter();
 
   const [email, setEmail] = useState("");
