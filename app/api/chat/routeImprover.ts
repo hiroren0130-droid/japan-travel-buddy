@@ -178,6 +178,7 @@ ${requiredSpotText}`,
       plan: improvedPlan,
       startSpotName:
         requestedStartSpotName,
+      locale,
     });
 
   if (

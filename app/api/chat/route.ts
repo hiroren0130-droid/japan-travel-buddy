@@ -780,6 +780,7 @@ ${specialRequest}
 
         startSpotName:
           requestedStartSpotName,
+        locale,
       });
 
     /*
@@ -865,6 +866,7 @@ ${specialRequest}
 
         startSpotName:
           requestedStartSpotName,
+        locale,
       });
 
     if (
@@ -903,7 +905,8 @@ ${specialRequest}
 
     const normalizedPlan =
   normalizePlanSummary(
-    generatedPlan
+    generatedPlan,
+    locale
   );
 
 const plan =

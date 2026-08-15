@@ -41,9 +41,11 @@ type GenerateTravelPlanOptions = {
 function repairAndOptimizePlan({
   plan,
   requestedStartSpotName,
+  locale,
 }: {
   plan: AITravelPlan | null;
   requestedStartSpotName: string | null;
+  locale: Locale;
 }): AITravelPlan | null {
   if (!plan) {
     return null;
@@ -66,6 +68,7 @@ function repairAndOptimizePlan({
     plan: repairedPlan,
     startSpotName:
       requestedStartSpotName,
+    locale,
   });
 }
 
@@ -98,6 +101,7 @@ export async function generateTravelPlan({
     repairAndOptimizePlan({
       plan: generatedPlan,
       requestedStartSpotName,
+      locale,
     });
 
   const missingSpotNames =
@@ -206,6 +210,7 @@ ${
     repairAndOptimizePlan({
       plan: generatedPlan,
       requestedStartSpotName,
+      locale,
     });
 
   return {

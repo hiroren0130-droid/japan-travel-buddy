@@ -1,4 +1,5 @@
 import type { Spot } from "@/data/types";
+import type { Locale } from "@/lib/locale";
 import { getSpotByName } from "@/lib/spotService";
 
 import type {
@@ -39,21 +40,26 @@ function clonePlan(
 }
 
 function createStartDescription(
-  spotName: string
+  spotName: string,
+  locale: Locale
 ): string {
-  return `${spotName}を旅の出発地点として、交通案内や持ち物を確認してから観光を開始します。`;
+  return locale === "en"
+    ? `Start the trip at ${spotName}, checking transport information and belongings before sightseeing.`
+    : `${spotName}を旅の出発地点として、交通案内や持ち物を確認してから観光を開始します。`;
 }
 
 function createStartItem(
   spotName: string,
-  startTime: string
+  startTime: string,
+  locale: Locale
 ): AIPlanItem {
   return {
     time: startTime,
     spot: spotName,
     description:
       createStartDescription(
-        spotName
+        spotName,
+        locale
       ),
     transport: "徒歩",
     duration: "0分",
@@ -119,15 +125,18 @@ function createOptimizedStartItem({
   existingItem,
   startSpotName,
   startTime,
+  locale,
 }: {
   existingItem: AIPlanItem | null;
   startSpotName: string;
   startTime: string;
+  locale: Locale;
 }): AIPlanItem {
   if (!existingItem) {
     return createStartItem(
       startSpotName,
-      startTime
+      startTime,
+      locale
     );
   }
 
@@ -141,7 +150,8 @@ function createOptimizedStartItem({
 
     description:
       createStartDescription(
-        startSpotName
+        startSpotName,
+        locale
       ),
   };
 }
@@ -219,10 +229,12 @@ export function optimizeStartPoint({
   plan,
   startSpotName,
   startTime = DEFAULT_START_TIME,
+  locale,
 }: {
   plan: AITravelPlan;
   startSpotName: string | null;
   startTime?: string;
+  locale: Locale;
 }): AITravelPlan {
   if (
     !startSpotName ||
@@ -262,6 +274,7 @@ export function optimizeStartPoint({
       startSpotName:
         startSpot.name,
       startTime,
+      locale,
     });
 
   firstDay.items.unshift(

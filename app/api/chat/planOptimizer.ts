@@ -21,10 +21,12 @@ import {
 import type {
   AITravelPlan,
 } from "./travelValidator";
+import type { Locale } from "@/lib/locale";
 
 type OptimizeGeneratedPlanOptions = {
   plan: AITravelPlan;
   startSpotName: string | null;
+  locale: Locale;
   startTime?: string;
   normalizeDescriptions?: boolean;
 };
@@ -32,6 +34,7 @@ type OptimizeGeneratedPlanOptions = {
 export function optimizeGeneratedPlan({
   plan,
   startSpotName,
+  locale,
   startTime = "09:00",
   normalizeDescriptions = true,
 }: OptimizeGeneratedPlanOptions): AITravelPlan {
@@ -40,6 +43,7 @@ export function optimizeGeneratedPlan({
       plan,
       startSpotName,
       startTime,
+      locale,
     });
 
   optimizedPlan =
