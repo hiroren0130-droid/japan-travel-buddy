@@ -23,11 +23,15 @@ import {
 import type {
   Spot,
 } from "@/data/types";
+import type {
+  Locale,
+} from "@/lib/locale";
 
 type GenerateTravelPlanOptions = {
   spotList: string;
   message: string;
   requestedDays: number;
+  locale: Locale;
   specialRequest: string;
   currentLocation: CurrentLocation | null;
   requiredSpots: Spot[];
@@ -69,6 +73,7 @@ export async function generateTravelPlan({
   spotList,
   message,
   requestedDays,
+  locale,
   specialRequest,
   currentLocation,
   requiredSpots,
@@ -79,6 +84,7 @@ export async function generateTravelPlan({
       spotList,
       message,
       days: requestedDays,
+      locale,
       specialRequest,
       currentLocation,
     });
@@ -186,6 +192,7 @@ ${
 }`,
 
       days: requestedDays,
+      locale,
       specialRequest,
       currentLocation,
     });

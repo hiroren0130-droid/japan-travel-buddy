@@ -114,6 +114,7 @@ ${specialRequest || "なし"}
     body: JSON.stringify({
       message: prompt,
       days: selectedDays,
+      locale: DEFAULT_LOCALE,
       specialRequest,
       currentLocation:
         shouldUseCurrentLocation

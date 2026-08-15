@@ -1,3 +1,5 @@
+import type { Locale } from "@/lib/locale";
+
 type CurrentLocation = {
   latitude: number;
   longitude: number;
@@ -9,6 +11,7 @@ type CreateTravelPlannerPromptParams = {
   specialRequest: string;
   currentLocation: CurrentLocation;
   days: number;
+  locale: Locale;
 };
 
 export function createTravelPlannerPrompt({
@@ -17,7 +20,16 @@ export function createTravelPlannerPrompt({
   specialRequest,
   currentLocation,
   days,
+  locale,
 }: CreateTravelPlannerPromptParams) {
+  const outputLanguageRule =
+    locale === "en"
+      ? `・title、summary、descriptionは自然な英語で書く
+・spotは日本語の正式名称をそのまま使用し、翻訳しない
+・transportとdurationは内部互換性のため、指定された日本語形式を維持する`
+      : `・title、summary、descriptionは自然な日本語で書く
+・spot、transport、durationは指定された日本語形式を維持する`;
+
   return `
 あなたは日本旅行専門のAI旅行プランナーです。
 
@@ -52,6 +64,7 @@ export function createTravelPlannerPrompt({
 【出力ルール】
 ────────────────────────
 
+${outputLanguageRule}
 ・JSON Schemaに準拠したJSONのみを返す
 ・コードブロック、前置き、補足説明は書かない
 ・spotは利用可能スポット一覧の正式名称だけを使用

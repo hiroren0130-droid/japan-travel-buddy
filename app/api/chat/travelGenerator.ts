@@ -1,4 +1,5 @@
 import { openai } from "@/lib/openai";
+import type { Locale } from "@/lib/locale";
 import {
   createTravelPlannerPrompt,
   travelPlanSchema,
@@ -15,6 +16,7 @@ type GenerateAITravelPlanParams = {
   spotList: string;
   message: string;
   days: number;
+  locale: Locale;
   specialRequest: string;
   currentLocation: CurrentLocation;
 };
@@ -42,6 +44,7 @@ export async function generateAITravelPlan({
   spotList,
   message,
   days,
+  locale,
   specialRequest,
   currentLocation,
 }: GenerateAITravelPlanParams): Promise<AITravelPlan | null> {
@@ -83,6 +86,7 @@ export async function generateAITravelPlan({
       normalizedMessage,
     days:
       normalizedDays,
+    locale,
     specialRequest:
       normalizedSpecialRequest,
     currentLocation,

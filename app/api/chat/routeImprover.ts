@@ -1,6 +1,7 @@
 ﻿import type {
   Spot,
 } from "@/data/types";
+import type { Locale } from "@/lib/locale";
 
 import {
   calculateBroadAreaOverloadCount,
@@ -38,6 +39,7 @@ type ImproveTravelPlanOptions = {
   spotList: string;
   message: string;
   requestedDays: number;
+  locale: Locale;
   specialRequest: string;
   currentLocation: CurrentLocation | null;
   requiredSpots: Spot[];
@@ -50,6 +52,7 @@ export async function improveTravelPlan({
   spotList,
   message,
   requestedDays,
+  locale,
   specialRequest,
   currentLocation,
   requiredSpots,
@@ -148,6 +151,7 @@ export async function improveTravelPlan({
 ${requiredSpotText}`,
 
       days: requestedDays,
+      locale,
       specialRequest,
       currentLocation,
     });

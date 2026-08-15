@@ -6,6 +6,10 @@ import {
 import {
   getAllSpots,
 } from "@/lib/spotService";
+import {
+  normalizeLocale,
+  type Locale,
+} from "@/lib/locale";
 
 import {
   buildCandidateSpots,
@@ -53,6 +57,7 @@ import {
 type RequestBody = {
   message: string;
   days: number;
+  locale: Locale;
   specialRequest?: string;
   currentLocation?: CurrentLocation;
 };
@@ -346,6 +351,9 @@ function validateRequestBody(
     body: {
       message,
       days: value.days,
+      locale: normalizeLocale(
+        value.locale
+      ),
       specialRequest,
       currentLocation:
         value.currentLocation == null
@@ -519,6 +527,7 @@ export async function POST(
     const {
       message,
       days: requestedDays,
+      locale,
       specialRequest = "",
       currentLocation = null,
     } = validation.body;
@@ -648,6 +657,7 @@ ${specialRequest}
       spotList,
       message,
       requestedDays,
+      locale,
       specialRequest,
       currentLocation,
       requiredSpots:
@@ -792,6 +802,7 @@ ${specialRequest}
         spotList,
         message,
         requestedDays,
+        locale,
         specialRequest,
         currentLocation,
 
