@@ -1,10 +1,11 @@
+"use client";
+
 import Card from "@/components/ui/Card";
+import { useLocale } from "@/components/LocaleProvider";
 import PlaceLink from "./PlaceLink";
 import SpotImage from "./SpotImage";
 import TimelineMapButton from "./TimelineMapButton";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
 import { getSpotByName } from "@/lib/spotService";
 
 import {
@@ -15,17 +16,6 @@ import {
   MapPin,
   Train,
 } from "lucide-react";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
-
-const TRANSPORT_LABELS: Record<string, string> = {
-  徒歩: defaultMessages.timelineItem.transport.walking,
-  JR: defaultMessages.timelineItem.transport.jr,
-  電車: defaultMessages.timelineItem.transport.train,
-  地下鉄: defaultMessages.timelineItem.transport.subway,
-  バス: defaultMessages.timelineItem.transport.bus,
-  タクシー: defaultMessages.timelineItem.transport.taxi,
-};
 
 type Props = {
   time: string;
@@ -92,6 +82,15 @@ export default function TimelineItem({
   transport,
   duration,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
+  const transportLabels: Record<string, string> = {
+    徒歩: defaultMessages.timelineItem.transport.walking,
+    JR: defaultMessages.timelineItem.transport.jr,
+    電車: defaultMessages.timelineItem.transport.train,
+    地下鉄: defaultMessages.timelineItem.transport.subway,
+    バス: defaultMessages.timelineItem.transport.bus,
+    タクシー: defaultMessages.timelineItem.transport.taxi,
+  };
   const spotData = getSpotByName(spot);
 
   return (
@@ -205,7 +204,7 @@ export default function TimelineItem({
                       </span>
 
                       <span className="font-medium">
-                        {TRANSPORT_LABELS[transport] ?? transport}
+                        {transportLabels[transport] ?? transport}
                       </span>
                     </div>
                   )}

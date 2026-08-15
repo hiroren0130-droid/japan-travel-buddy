@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Bot,
@@ -9,55 +11,53 @@ import {
 } from "lucide-react";
 
 import Header from "@/components/Header";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
-
-const featureItems = [
-  {
-    icon: Bot,
-    label: defaultMessages.home.features.aiPowered,
-  },
-  {
-    icon: MapPin,
-    label: defaultMessages.home.features.kyotoSpots,
-  },
-  {
-    icon: Map,
-    label: defaultMessages.home.features.googleMaps,
-  },
-  {
-    icon: MessageCircle,
-    label: defaultMessages.home.features.gpt,
-  },
-];
-
-const featureCards = [
-  {
-    icon: Bot,
-    title: defaultMessages.home.cards.aiPlan.title,
-    description: defaultMessages.home.cards.aiPlan.description,
-    href: "/chat",
-    linkLabel: defaultMessages.home.cards.aiPlan.linkLabel,
-  },
-  {
-    icon: Map,
-    title: defaultMessages.home.cards.map.title,
-    description: defaultMessages.home.cards.map.description,
-    href: "/chat",
-    linkLabel: defaultMessages.home.cards.map.linkLabel,
-  },
-  {
-    icon: FolderOpen,
-    title: defaultMessages.home.cards.save.title,
-    description: defaultMessages.home.cards.save.description,
-    href: "/dashboard",
-    linkLabel: defaultMessages.home.cards.save.linkLabel,
-  },
-];
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function HomePage() {
+  const { messages: defaultMessages } = useLocale();
+  const featureItems = [
+    {
+      icon: Bot,
+      label: defaultMessages.home.features.aiPowered,
+    },
+    {
+      icon: MapPin,
+      label: defaultMessages.home.features.kyotoSpots,
+    },
+    {
+      icon: Map,
+      label: defaultMessages.home.features.googleMaps,
+    },
+    {
+      icon: MessageCircle,
+      label: defaultMessages.home.features.gpt,
+    },
+  ];
+
+  const featureCards = [
+    {
+      icon: Bot,
+      title: defaultMessages.home.cards.aiPlan.title,
+      description: defaultMessages.home.cards.aiPlan.description,
+      href: "/chat",
+      linkLabel: defaultMessages.home.cards.aiPlan.linkLabel,
+    },
+    {
+      icon: Map,
+      title: defaultMessages.home.cards.map.title,
+      description: defaultMessages.home.cards.map.description,
+      href: "/chat",
+      linkLabel: defaultMessages.home.cards.map.linkLabel,
+    },
+    {
+      icon: FolderOpen,
+      title: defaultMessages.home.cards.save.title,
+      description: defaultMessages.home.cards.save.description,
+      href: "/dashboard",
+      linkLabel: defaultMessages.home.cards.save.linkLabel,
+    },
+  ];
+
   return (
     <>
       <Header />

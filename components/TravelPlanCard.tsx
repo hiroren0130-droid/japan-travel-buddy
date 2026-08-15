@@ -17,6 +17,7 @@ import {
 
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import { useLocale } from "@/components/LocaleProvider";
 
 import InteractiveTravelMap from "./InteractiveTravelMap";
 import SpotImage from "./SpotImage";
@@ -30,14 +31,10 @@ import {
 } from "@/lib/favorites";
 import { saveTravelPlan } from "@/lib/firestore";
 import { createGoogleMapsRoute } from "@/lib/googleMaps";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
 import { downloadTravelPlanPdf } from "@/lib/pdf";
 import { getSpotById } from "@/lib/spotService";
 
 import type { TravelPlan } from "@/types/travel";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Props = {
   plan: TravelPlan;
@@ -106,6 +103,7 @@ function isAbortError(error: unknown) {
 export default function TravelPlanCard({
   plan,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
   const [favorite, setFavorite] = useState(() =>
     isFavorite(plan.title)
   );

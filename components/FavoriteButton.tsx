@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { Heart, Check } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   text: string;
@@ -21,6 +18,7 @@ type Favorite = {
 export default function FavoriteButton({
   text,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
   const [saved, setSaved] = useState(false);
 
   const saveFavorite = () => {

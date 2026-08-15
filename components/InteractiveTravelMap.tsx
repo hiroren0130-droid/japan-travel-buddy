@@ -14,11 +14,7 @@ import {
   ExternalLink,
   MapPin,
 } from "lucide-react";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const messages = getMessages(DEFAULT_LOCALE);
-const interactiveTravelMapMessages = messages.interactiveTravelMap;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Spot = {
   name: string;
@@ -33,6 +29,9 @@ type Props = {
 export default function InteractiveTravelMap({
   spots,
 }: Props) {
+  const { messages } = useLocale();
+  const interactiveTravelMapMessages =
+    messages.interactiveTravelMap;
   const [selected, setSelected] =
     useState<Spot | null>(null);
 

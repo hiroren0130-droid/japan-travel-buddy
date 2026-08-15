@@ -1,11 +1,8 @@
 "use client";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
 import { TravelPlan } from "@/types/travel";
 import TravelPlanCard from "./TravelPlanCard";
-
-const messages = getMessages(DEFAULT_LOCALE).messageBubble;
 
 type Props = {
   role: "user" | "assistant";
@@ -18,6 +15,8 @@ export default function MessageBubble({
   content,
   plan,
 }: Props) {
+  const messages =
+    useLocale().messages.messageBubble;
   const isUser = role === "user";
 
   if (isUser) {

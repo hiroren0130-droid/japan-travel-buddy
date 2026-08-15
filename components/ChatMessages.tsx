@@ -1,11 +1,10 @@
+"use client";
+
 import type { TravelPlan } from "@/types/travel";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
 
 import MessageBubble from "./MessageBubble";
-
-const chatMessages = getMessages(DEFAULT_LOCALE).chatMessages;
 
 type Message = {
   role: "user" | "assistant";
@@ -20,6 +19,9 @@ type Props = {
 export default function ChatMessages({
   messages,
 }: Props) {
+  const chatMessages =
+    useLocale().messages.chatMessages;
+
   return (
     <div
       className="space-y-6 bg-gray-50 p-6"

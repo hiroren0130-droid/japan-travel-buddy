@@ -5,8 +5,7 @@ import Image from "next/image";
 import FavoriteButton from "./FavoriteButton";
 import CopyButton from "./CopyButton";
 import PdfButton from "./PdfButton";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
 
 import {
   CalendarDays,
@@ -14,8 +13,6 @@ import {
   Sparkles,
   Footprints,
 } from "lucide-react";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Props = {
   title: string;
@@ -26,6 +23,8 @@ export default function TravelPlanHeader({
   title,
   text,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
+
   return (
     <header className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
       {/* Hero */}

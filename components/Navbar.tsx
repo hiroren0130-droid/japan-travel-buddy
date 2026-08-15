@@ -3,21 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const messages = getMessages(DEFAULT_LOCALE).navbar;
-
-const menus = [
-  { href: "/", label: messages.home },
-  { href: "/chat", label: messages.aiTravel },
-  { href: "/history", label: messages.history },
-  { href: "/favorites", label: messages.favorites },
-  { href: "/dashboard", label: messages.myPage },
-];
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { messages } = useLocale();
+  const navbarMessages = messages.navbar;
+  const menus = [
+    { href: "/", label: navbarMessages.home },
+    { href: "/chat", label: navbarMessages.aiTravel },
+    { href: "/history", label: navbarMessages.history },
+    { href: "/favorites", label: navbarMessages.favorites },
+    { href: "/dashboard", label: navbarMessages.myPage },
+  ];
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-white shadow-sm">

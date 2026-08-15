@@ -1,32 +1,33 @@
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+"use client";
 
-const travelPlanSkeletonMessages = getMessages(DEFAULT_LOCALE).travelPlanSkeleton;
-
-const generationSteps = [
-  {
-    icon: "📍",
-    label: travelPlanSkeletonMessages.steps[0].label,
-    description: travelPlanSkeletonMessages.steps[0].description,
-  },
-  {
-    icon: "🏯",
-    label: travelPlanSkeletonMessages.steps[1].label,
-    description: travelPlanSkeletonMessages.steps[1].description,
-  },
-  {
-    icon: "🚃",
-    label: travelPlanSkeletonMessages.steps[2].label,
-    description: travelPlanSkeletonMessages.steps[2].description,
-  },
-  {
-    icon: "✨",
-    label: travelPlanSkeletonMessages.steps[3].label,
-    description: travelPlanSkeletonMessages.steps[3].description,
-  },
-];
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function TravelPlanSkeleton() {
+  const travelPlanSkeletonMessages =
+    useLocale().messages.travelPlanSkeleton;
+  const generationSteps = [
+    {
+      icon: "📍",
+      label: travelPlanSkeletonMessages.steps[0].label,
+      description: travelPlanSkeletonMessages.steps[0].description,
+    },
+    {
+      icon: "🏯",
+      label: travelPlanSkeletonMessages.steps[1].label,
+      description: travelPlanSkeletonMessages.steps[1].description,
+    },
+    {
+      icon: "🚃",
+      label: travelPlanSkeletonMessages.steps[2].label,
+      description: travelPlanSkeletonMessages.steps[2].description,
+    },
+    {
+      icon: "✨",
+      label: travelPlanSkeletonMessages.steps[3].label,
+      description: travelPlanSkeletonMessages.steps[3].description,
+    },
+  ];
+
   return (
     <div
       className="

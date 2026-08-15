@@ -1,11 +1,10 @@
+"use client";
+
 import type { FormEvent } from "react";
 
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   destination: string;
@@ -81,6 +80,8 @@ export default function TravelForm({
   onSubmit,
   loading,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
+
   const inputClass = [
     "w-full",
     "min-h-12",

@@ -1,11 +1,12 @@
+"use client";
+
 import Link from "next/link";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function Footer() {
+  const { messages } = useLocale();
+
   return (
     <footer className="mt-20 border-t bg-gray-50">
       <div className="mx-auto max-w-7xl px-6 py-10">
@@ -14,30 +15,30 @@ export default function Footer() {
 
           <div>
             <h2 className="text-lg font-semibold">
-              {defaultMessages.appName}
+              {messages.appName}
             </h2>
 
             <p className="mt-3 text-sm text-gray-600 leading-7">
-              {defaultMessages.footer.description}
+              {messages.footer.description}
             </p>
           </div>
 
           <div className="flex flex-col gap-3 text-sm">
 
             <Link href="/about" className="hover:underline">
-              {defaultMessages.footer.links.about}
+              {messages.footer.links.about}
             </Link>
 
             <Link href="/contact" className="hover:underline">
-              {defaultMessages.footer.links.contact}
+              {messages.footer.links.contact}
             </Link>
 
             <Link href="/privacy" className="hover:underline">
-              {defaultMessages.footer.links.privacyPolicy}
+              {messages.footer.links.privacyPolicy}
             </Link>
 
             <Link href="/terms" className="hover:underline">
-              {defaultMessages.footer.links.termsOfService}
+              {messages.footer.links.termsOfService}
             </Link>
 
           </div>
@@ -45,8 +46,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 border-t pt-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} {defaultMessages.appName}.{" "}
-          {defaultMessages.footer.rightsReserved}
+          © {new Date().getFullYear()} {messages.appName}.{" "}
+          {messages.footer.rightsReserved}
         </div>
 
       </div>

@@ -2,10 +2,7 @@
 
 import { ExternalLink, MapPinned } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   spot: string;
@@ -20,6 +17,8 @@ function getGoogleMapsUrl(query: string) {
 export default function TimelineMapButton({
   spot,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
+
   if (!spot.trim()) {
     return null;
   }

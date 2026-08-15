@@ -4,10 +4,7 @@ import { useState } from "react";
 import jsPDF from "jspdf";
 import { Check, FileDown, LoaderCircle } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   text: string;
@@ -16,6 +13,7 @@ type Props = {
 export default function PdfButton({
   text,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
   const [creating, setCreating] = useState(false);
   const [completed, setCompleted] = useState(false);
 

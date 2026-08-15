@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Footer from "@/components/Footer";
+import LocaleProvider from "@/components/LocaleProvider";
 import { DEFAULT_LOCALE } from "@/lib/locale";
 import { getMessages } from "@/lib/messages";
 
@@ -71,8 +72,10 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className="min-h-screen bg-gray-50 text-gray-900">
-        {children}
-        <Footer />
+        <LocaleProvider>
+          {children}
+          <Footer />
+        </LocaleProvider>
       </body>
     </html>
   );

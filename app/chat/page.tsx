@@ -10,14 +10,11 @@ import {
 
 import ChatMessages from "@/components/ChatMessages";
 import Header from "@/components/Header";
+import { useLocale } from "@/components/LocaleProvider";
 import TravelForm from "@/components/TravelForm";
 import TravelPlanSkeleton from "@/components/TravelPlanSkeleton";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
 
 import type { TravelPlan } from "@/types/travel";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Message = {
   role: "user" | "assistant";
@@ -31,6 +28,10 @@ type CurrentLocation = {
 };
 
 export default function ChatPage() {
+  const {
+    locale,
+    messages: defaultMessages,
+  } = useLocale();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const loadingSectionRef = useRef<HTMLElement | null>(null);
@@ -114,7 +115,7 @@ ${specialRequest || "なし"}
     body: JSON.stringify({
       message: prompt,
       days: selectedDays,
-      locale: DEFAULT_LOCALE,
+      locale,
       specialRequest,
       currentLocation:
         shouldUseCurrentLocation

@@ -1,13 +1,12 @@
+"use client";
+
 import { TravelPlan } from "@/types/travel";
 import TimelineItem from "./TimelineItem";
 
 import { CalendarDays, MapPin } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
 import { getSpotById } from "@/lib/spotService";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Props = {
   plan: TravelPlan;
@@ -16,6 +15,8 @@ type Props = {
 export default function TravelTimeline({
   plan,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
+
   return (
     <div className="space-y-12">
       {plan.days.map((day) => (

@@ -3,10 +3,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   text: string;
@@ -15,6 +12,7 @@ type Props = {
 export default function CopyButton({
   text,
 }: Props) {
+  const { messages: defaultMessages } = useLocale();
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {

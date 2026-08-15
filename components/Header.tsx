@@ -11,36 +11,43 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const defaultMessages = getMessages(DEFAULT_LOCALE);
-
-const menus = [
-  {
-    href: "/",
-    label: defaultMessages.header.menu.home,
-    icon: Home,
-  },
-  {
-    href: "/chat",
-    label: defaultMessages.header.menu.aiTrip,
-    icon: Plane,
-  },
-  {
-    href: "/favorites",
-    label: defaultMessages.header.menu.favorites,
-    icon: Heart,
-  },
-  {
-    href: "/dashboard",
-    label: defaultMessages.header.menu.myPage,
-    icon: UserRound,
-  },
-];
+import { useLocale } from "@/components/LocaleProvider";
+import {
+  getLocaleLabel,
+  SUPPORTED_LOCALES,
+  type Locale,
+} from "@/lib/locale";
 
 export default function Header() {
   const pathname = usePathname();
+  const {
+    locale,
+    messages,
+    setLocale,
+  } = useLocale();
+
+  const menus = [
+    {
+      href: "/",
+      label: messages.header.menu.home,
+      icon: Home,
+    },
+    {
+      href: "/chat",
+      label: messages.header.menu.aiTrip,
+      icon: Plane,
+    },
+    {
+      href: "/favorites",
+      label: messages.header.menu.favorites,
+      icon: Heart,
+    },
+    {
+      href: "/dashboard",
+      label: messages.header.menu.myPage,
+      icon: UserRound,
+    },
+  ];
 
   function isActive(href: string) {
     if (href === "/") {
@@ -56,7 +63,7 @@ export default function Header() {
         {/* Brand */}
         <Link
           href="/"
-          aria-label={defaultMessages.header.brandHomeLabel}
+          aria-label={messages.header.brandHomeLabel}
           className="
             group
             flex
@@ -80,18 +87,18 @@ export default function Header() {
 
           <div className="min-w-0">
             <p className="whitespace-nowrap text-xl font-black tracking-tight text-blue-600 transition-colors duration-300 group-hover:text-blue-700 sm:text-2xl lg:text-[28px]">
-              {defaultMessages.appName}
+              {messages.appName}
             </p>
 
             <p className="mt-0.5 hidden text-sm font-medium text-slate-500 sm:block">
-              {defaultMessages.header.tagline}
+              {messages.header.tagline}
             </p>
           </div>
         </Link>
 
         {/* Navigation */}
         <nav
-          aria-label={defaultMessages.header.navigationLabel}
+          aria-label={messages.header.navigationLabel}
           className="
             flex
             min-w-0
@@ -103,6 +110,34 @@ export default function Header() {
             sm:pb-0
           "
         >
+          <label className="shrink-0">
+            <span className="sr-only">
+              Language / 言語
+            </span>
+            <select
+              value={locale}
+              onChange={(event) =>
+                setLocale(
+                  event.target.value as Locale
+                )
+              }
+              className="min-h-11 rounded-full border border-slate-200 bg-white px-3 text-sm font-bold text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            >
+              {SUPPORTED_LOCALES.map(
+                (supportedLocale) => (
+                  <option
+                    key={supportedLocale}
+                    value={supportedLocale}
+                  >
+                    {getLocaleLabel(
+                      supportedLocale
+                    )}
+                  </option>
+                )
+              )}
+            </select>
+          </label>
+
           {menus.map((menu) => {
             const Icon = menu.icon;
             const active = isActive(menu.href);
