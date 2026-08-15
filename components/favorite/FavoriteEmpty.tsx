@@ -1,6 +1,10 @@
 "use client";
 
 import { Heart } from "lucide-react";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const favoriteEmptyMessages = getMessages(DEFAULT_LOCALE).favoriteEmpty;
 
 export default function FavoriteEmpty() {
   return (
@@ -8,12 +12,11 @@ export default function FavoriteEmpty() {
       <Heart className="mb-4 h-16 w-16 fill-gray-300 text-gray-300" />
 
       <h2 className="text-2xl font-semibold text-gray-700">
-        お気に入りはまだありません
+        {favoriteEmptyMessages.title}
       </h2>
 
       <p className="mt-3 max-w-md text-gray-500">
-        気に入った旅行プランを保存すると、
-        ここからいつでも見返すことができます。
+        {favoriteEmptyMessages.description}
       </p>
     </div>
   );

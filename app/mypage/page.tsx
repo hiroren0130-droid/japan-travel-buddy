@@ -13,8 +13,12 @@ import {
   getTravelPlans,
   deleteTravelPlan,
 } from "@/lib/firestore";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 
 import { SavedTravelPlan } from "@/types/travel";
+
+const myPageMessages = getMessages(DEFAULT_LOCALE).myPage;
 
 type SavedPlan = SavedTravelPlan & {
   createdAt?: Timestamp;
@@ -86,7 +90,7 @@ export default function MyPage() {
           console.error("Saved travel plan loading failed.");
         }
 
-        alert("保存済み旅行プランを読み込めませんでした。");
+        alert(myPageMessages.loadFailedAlert);
       } finally {
         if (
           active &&
@@ -109,7 +113,7 @@ export default function MyPage() {
         console.error("Authentication state check failed.");
       }
 
-      alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
+      alert(myPageMessages.authFailedAlert);
     });
 
     return () => {
@@ -122,12 +126,12 @@ export default function MyPage() {
   async function handleDelete(id: string) {
     if (deletingIdsRef.current.has(id)) return;
 
-    const ok = confirm("この旅行プランを削除しますか？");
+    const ok = confirm(myPageMessages.deleteConfirm);
 
     if (!ok) return;
 
     if (!isValidPlanId(id)) {
-      alert("旅行プランを削除できませんでした。");
+      alert(myPageMessages.deleteFailedAlert);
       return;
     }
 
@@ -153,7 +157,7 @@ export default function MyPage() {
 
       setPlans((prev) => prev.filter((plan) => plan.id !== id));
 
-      alert("削除しました。");
+      alert(myPageMessages.deleteSuccessAlert);
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error("旅行プラン削除エラー:", error);
@@ -161,7 +165,7 @@ export default function MyPage() {
         console.error("Travel plan deletion failed.");
       }
 
-      alert("旅行プランを削除できませんでした。");
+      alert(myPageMessages.deleteFailedAlert);
     } finally {
       deletingIdsRef.current.delete(id);
     }
@@ -170,7 +174,7 @@ export default function MyPage() {
   if (loading) {
     return (
       <main className="mx-auto max-w-5xl p-6">
-        <p>読み込み中...</p>
+        <p>{myPageMessages.loading}</p>
       </main>
     );
   }

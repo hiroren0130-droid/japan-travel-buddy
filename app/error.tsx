@@ -1,5 +1,10 @@
 "use client";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const messages = getMessages(DEFAULT_LOCALE).globalError;
+
 type Props = {
   error: Error & { digest?: string };
   reset: () => void;
@@ -20,19 +25,20 @@ export default function Error({
         </div>
         
         <h1 className="text-3xl font-extrabold text-slate-900">
-          Something went wrong
+          {messages.title}
         </h1>
 
         <p className="mt-4 leading-7 text-slate-600">
-          An unexpected error occurred.
-          Please try again.
+          {messages.description}
+          {" "}
+          {messages.retryMessage}
         </p>
 
         <button
           onClick={reset}
           className="mt-8 rounded-2xl bg-blue-600 px-6 py-3 font-semibold text-white transition hover:-translate-y-1 hover:bg-blue-700 hover:shadow-xl"
         >
-          Try Again
+          {messages.retryButton}
         </button>
       </div>
     </main>

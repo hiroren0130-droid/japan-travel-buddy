@@ -9,50 +9,51 @@ import {
 } from "lucide-react";
 
 import Header from "@/components/Header";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 const featureItems = [
   {
     icon: Bot,
-    label: "AI Powered",
+    label: defaultMessages.home.features.aiPowered,
   },
   {
     icon: MapPin,
-    label: "Kyoto Spots",
+    label: defaultMessages.home.features.kyotoSpots,
   },
   {
     icon: Map,
-    label: "Google Maps",
+    label: defaultMessages.home.features.googleMaps,
   },
   {
     icon: MessageCircle,
-    label: "GPT-5",
+    label: defaultMessages.home.features.gpt,
   },
 ];
 
 const featureCards = [
   {
     icon: Bot,
-    title: "AI旅行プラン作成",
-    description:
-      "あなたの希望に合わせたオリジナル旅行プランを、AIが数秒で作成します。",
+    title: defaultMessages.home.cards.aiPlan.title,
+    description: defaultMessages.home.cards.aiPlan.description,
     href: "/chat",
-    linkLabel: "プランを作成する",
+    linkLabel: defaultMessages.home.cards.aiPlan.linkLabel,
   },
   {
     icon: Map,
-    title: "地図でチェック",
-    description:
-      "観光スポットや移動ルートを地図上で確認し、効率的な旅を計画できます。",
+    title: defaultMessages.home.cards.map.title,
+    description: defaultMessages.home.cards.map.description,
     href: "/chat",
-    linkLabel: "地図を見る",
+    linkLabel: defaultMessages.home.cards.map.linkLabel,
   },
   {
     icon: FolderOpen,
-    title: "旅行プランを保存",
-    description:
-      "お気に入りの旅行プランを保存して、いつでもどこでも確認できます。",
+    title: defaultMessages.home.cards.save.title,
+    description: defaultMessages.home.cards.save.description,
     href: "/dashboard",
-    linkLabel: "マイプランを見る",
+    linkLabel: defaultMessages.home.cards.save.linkLabel,
   },
 ];
 
@@ -131,7 +132,7 @@ export default function HomePage() {
             >
               <Sparkles size={18} aria-hidden="true" />
 
-              <span>AI Travel Planner</span>
+              <span>{defaultMessages.home.badge}</span>
             </div>
 
             <p
@@ -145,16 +146,16 @@ export default function HomePage() {
     sm:text-base
   "
 >
-              Japan Travel Buddy
+              {defaultMessages.appName}
             </p>
 
             <h1 className="text-center font-black tracking-[-0.05em] text-slate-950">
   <span className="block text-[48px] leading-[0.92] sm:text-[64px] lg:text-[82px]">
-    Discover Japan
+    {defaultMessages.home.hero.title}
   </span>
 
   <span className="-mt-1 block bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-[42px] leading-[0.92] text-transparent sm:text-[56px] lg:text-[68px]">
-  with AI
+  {defaultMessages.home.hero.titleAccent}
 </span>
 </h1>
 
@@ -168,9 +169,9 @@ export default function HomePage() {
                 sm:text-2xl
               "
             >
-              もっとスマートに、もっと自由に、
+              {defaultMessages.home.hero.subtitleLead}
               <br className="sm:hidden" />
-              あなただけの理想の日本旅行を。
+              {defaultMessages.home.hero.subtitleRest}
             </p>
 
             <p
@@ -185,11 +186,9 @@ export default function HomePage() {
                 sm:leading-9
               "
             >
-              AIがあなたの希望に合わせて、
-              最適な旅行プランを自動で作成します。
+              {defaultMessages.home.hero.descriptionLead}
               <br className="hidden sm:block" />
-              まだ知らない日本の魅力を、
-              あなただけの旅で発見しましょう。
+              {defaultMessages.home.hero.descriptionRest}
             </p>
 
             <div className="mt-10 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row">
@@ -231,7 +230,7 @@ export default function HomePage() {
               >
                 <Sparkles size={20} aria-hidden="true" />
 
-                <span>AIで旅行プランを作成する</span>
+                <span>{defaultMessages.home.hero.primaryCta}</span>
 
                 <span
                   className="transition-transform duration-300 group-hover:translate-x-1"
@@ -284,7 +283,7 @@ export default function HomePage() {
                   aria-hidden="true"
                 />
 
-                <span>マイ旅行プラン</span>
+                <span>{defaultMessages.home.hero.secondaryCta}</span>
               </Link>
             </div>
 

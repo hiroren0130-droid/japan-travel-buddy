@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { getSpotByName } from "@/lib/spotService";
+
+const placeLinkMessages = getMessages(DEFAULT_LOCALE).placeLink;
 
 type Props = {
   name: string;
@@ -17,7 +21,7 @@ export default function PlaceLink({
   if (!trimmedName) {
     return (
       <span className="text-lg font-semibold text-slate-400">
-        不明なスポット
+        {placeLinkMessages.unknownSpot}
       </span>
     );
   }
@@ -35,7 +39,7 @@ export default function PlaceLink({
   return (
     <Link
       href={`/spots/${spot.id}`}
-      aria-label={`${trimmedName}の詳細ページを見る`}
+      aria-label={`${trimmedName}${placeLinkMessages.detailAriaLabelSuffix}`}
       className="
         group
         inline-flex

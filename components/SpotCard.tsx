@@ -11,7 +11,11 @@ import {
 
 import Card from "@/components/ui/Card";
 import SpotImage from "@/components/SpotImage";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import TravelMap from "./TravelMap";
+
+const spotCardMessages = getMessages(DEFAULT_LOCALE).spotCard;
 
 type Spot = {
   name: string;
@@ -359,14 +363,14 @@ export default function SpotCard({ spot }: Props) {
 
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-                  Travel Details
+                  {spotCardMessages.travelDetails}
                 </p>
 
                 <h4
                   id={`spot-details-${spot.name}`}
                   className="mt-0.5 text-lg font-extrabold text-slate-900"
                 >
-                  基本情報
+                  {spotCardMessages.basicInformation}
                 </h4>
               </div>
             </div>
@@ -375,7 +379,7 @@ export default function SpotCard({ spot }: Props) {
               {spot.address && (
                 <InformationItem
                   icon={MapPin}
-                  label="Address"
+                  label={spotCardMessages.addressLabel}
                   value={spot.address}
                 />
               )}
@@ -383,7 +387,7 @@ export default function SpotCard({ spot }: Props) {
               {spot.hours && (
                 <InformationItem
                   icon={Clock3}
-                  label="Hours"
+                  label={spotCardMessages.hoursLabel}
                   value={spot.hours}
                 />
               )}
@@ -391,7 +395,7 @@ export default function SpotCard({ spot }: Props) {
               {spot.price && (
                 <InformationItem
                   icon={Wallet}
-                  label="Price"
+                  label={spotCardMessages.priceLabel}
                   value={spot.price}
                 />
               )}
@@ -399,7 +403,7 @@ export default function SpotCard({ spot }: Props) {
               {spot.area && !spot.address && (
                 <InformationItem
                   icon={MapPin}
-                  label="Area"
+                  label={spotCardMessages.areaLabel}
                   value={spot.area}
                 />
               )}
@@ -453,14 +457,14 @@ export default function SpotCard({ spot }: Props) {
 
               <div className="min-w-0">
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-                  Spot Information
+                  {spotCardMessages.spotInformation}
                 </p>
 
                 <h4
                   id={`spot-information-${spot.name}`}
                   className="mt-1 text-lg font-extrabold text-slate-900"
                 >
-                  このスポットについて
+                  {spotCardMessages.aboutSpot}
                 </h4>
 
                 <p className="mt-3 break-words text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
@@ -475,7 +479,7 @@ export default function SpotCard({ spot }: Props) {
         {spot.website && (
           <a
             href={spot.website}
-            aria-label={`${spot.name}の公式サイトを新しいタブで開く`}
+            aria-label={`${spot.name}${spotCardMessages.officialWebsiteAriaLabelSuffix}`}
             target="_blank"
             rel="noopener noreferrer"
             className="
@@ -515,7 +519,7 @@ export default function SpotCard({ spot }: Props) {
               aria-hidden="true"
             />
 
-            <span>公式サイトを見る</span>
+            <span>{spotCardMessages.officialWebsiteLabel}</span>
 
             <ExternalLink
               size={17}
@@ -549,14 +553,14 @@ export default function SpotCard({ spot }: Props) {
 
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-emerald-600">
-                  Map Preview
+                  {spotCardMessages.mapPreview}
                 </p>
 
                 <h4
                   id={`map-preview-${spot.name}`}
                   className="mt-0.5 text-lg font-extrabold text-slate-900"
                 >
-                  所在地
+                  {spotCardMessages.location}
                 </h4>
               </div>
             </div>

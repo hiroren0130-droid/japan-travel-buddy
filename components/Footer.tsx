@@ -1,5 +1,10 @@
 import Link from "next/link";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
+
 export default function Footer() {
   return (
     <footer className="mt-20 border-t bg-gray-50">
@@ -9,31 +14,30 @@ export default function Footer() {
 
           <div>
             <h2 className="text-lg font-semibold">
-              Japan Travel Buddy
+              {defaultMessages.appName}
             </h2>
 
             <p className="mt-3 text-sm text-gray-600 leading-7">
-              AI-powered travel planner for exploring Japan.
-              Plan smarter, travel easier.
+              {defaultMessages.footer.description}
             </p>
           </div>
 
           <div className="flex flex-col gap-3 text-sm">
 
             <Link href="/about" className="hover:underline">
-              About
+              {defaultMessages.footer.links.about}
             </Link>
 
             <Link href="/contact" className="hover:underline">
-              Contact
+              {defaultMessages.footer.links.contact}
             </Link>
 
             <Link href="/privacy" className="hover:underline">
-              Privacy Policy
+              {defaultMessages.footer.links.privacyPolicy}
             </Link>
 
             <Link href="/terms" className="hover:underline">
-              Terms of Service
+              {defaultMessages.footer.links.termsOfService}
             </Link>
 
           </div>
@@ -41,7 +45,8 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 border-t pt-6 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Japan Travel Buddy. All rights reserved.
+          © {new Date().getFullYear()} {defaultMessages.appName}.{" "}
+          {defaultMessages.footer.rightsReserved}
         </div>
 
       </div>

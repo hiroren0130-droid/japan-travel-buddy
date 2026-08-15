@@ -4,6 +4,8 @@ import Link from "next/link";
 
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 
 import type { SavedTravelPlan } from "@/types/travel";
 
@@ -16,6 +18,8 @@ export default function HistoryCard({
   plan,
   onDelete,
 }: Props) {
+  const historyCardMessages = getMessages(DEFAULT_LOCALE).historyCard;
+
   return (
     <Card>
       <h2 className="text-xl font-bold">
@@ -23,13 +27,13 @@ export default function HistoryCard({
       </h2>
 
       <p className="mt-3 text-gray-600">
-  {plan.summary || "旅行プランの概要はありません。"}
+  {plan.summary || historyCardMessages.summaryFallback}
 </p>
 
       <div className="mt-6 flex gap-3">
         <Link href={`/history/${plan.id}`}>
           <Button type="button">
-  開く
+  {historyCardMessages.openLabel}
 </Button>
         </Link>
 
@@ -38,7 +42,7 @@ export default function HistoryCard({
   variant="danger"
   onClick={onDelete}
 >
-          削除
+          {historyCardMessages.deleteLabel}
         </Button>
       </div>
     </Card>

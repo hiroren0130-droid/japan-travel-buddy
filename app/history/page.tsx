@@ -16,7 +16,11 @@ import {
   deleteTravelPlan,
   getTravelPlans,
 } from "@/lib/firestore";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { SavedTravelPlan } from "@/types/travel";
+
+const historyPageMessages = getMessages(DEFAULT_LOCALE).historyPage;
 
 export default function HistoryPage() {
   const router = useRouter();
@@ -72,7 +76,7 @@ export default function HistoryPage() {
           console.error("Travel history loading failed.");
         }
 
-        alert("旅行履歴を読み込めませんでした。");
+        alert(historyPageMessages.loadFailedAlert);
       } finally {
         if (
           active &&
@@ -95,7 +99,7 @@ export default function HistoryPage() {
         console.error("Authentication state check failed.");
       }
 
-      alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
+      alert(historyPageMessages.authFailedAlert);
     });
 
     return () => {
@@ -106,7 +110,7 @@ export default function HistoryPage() {
   }, [router]);
 
   async function handleDelete(id: string) {
-    if (!confirm("この旅行プランを削除しますか？")) {
+    if (!confirm(historyPageMessages.deleteConfirm)) {
       return;
     }
 
@@ -121,7 +125,7 @@ export default function HistoryPage() {
         console.error("Travel plan deletion failed.");
       }
 
-      alert("旅行プランを削除できませんでした。");
+      alert(historyPageMessages.deleteFailedAlert);
     }
   }
 
@@ -146,7 +150,7 @@ export default function HistoryPage() {
   if (loading) {
     return (
       <main className="mx-auto max-w-5xl p-8">
-        <p>読み込み中...</p>
+        <p>{historyPageMessages.loading}</p>
       </main>
     );
   }

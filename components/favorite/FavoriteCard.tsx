@@ -6,6 +6,10 @@ import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 
 import type { TravelPlan } from "@/types/travel";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const favoriteCardMessages = getMessages(DEFAULT_LOCALE).favoriteCard;
 
 type Props = {
   plan: TravelPlan;
@@ -44,18 +48,18 @@ const spotCount =
           </h2>
 
           <p className="mt-2 line-clamp-2 text-gray-600">
-  {plan.summary || "旅行プランの概要はありません。"}
+  {plan.summary || favoriteCardMessages.summaryFallback}
 </p>
 
           <div className="mt-4 flex items-center gap-6 text-sm text-gray-500">
             <div className="flex items-center gap-1">
               <CalendarDays size={16} />
-              <span>{dayCount}日間</span>
+              <span>{dayCount}{favoriteCardMessages.daySuffix}</span>
             </div>
 
             <div className="flex items-center gap-1">
               <MapPinned size={16} />
-              <span>{spotCount}スポット</span>
+              <span>{spotCount}{favoriteCardMessages.spotSuffix}</span>
             </div>
           </div>
         </div>
@@ -63,7 +67,7 @@ const spotCount =
         <Button
           size="icon"
           variant="secondary"
-          title="お気に入り解除"
+          title={favoriteCardMessages.removeFavoriteTitle}
           onClick={(e) => {
             e.stopPropagation();
             onRemove?.();

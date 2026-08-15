@@ -1,5 +1,10 @@
 "use client";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const favoriteSortMessages = getMessages(DEFAULT_LOCALE).favoriteSort;
+
 export type FavoriteSortType =
   | "newest"
   | "oldest"
@@ -23,9 +28,9 @@ export default function FavoriteSort({
         }
         className="rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
       >
-        <option value="newest">新しい順</option>
-        <option value="oldest">古い順</option>
-        <option value="title">タイトル順</option>
+        <option value="newest">{favoriteSortMessages.newest}</option>
+        <option value="oldest">{favoriteSortMessages.oldest}</option>
+        <option value="title">{favoriteSortMessages.title}</option>
       </select>
     </div>
   );

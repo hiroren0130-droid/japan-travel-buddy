@@ -7,6 +7,10 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const signupMessages = getMessages(DEFAULT_LOCALE).signup;
 
 export default function SignupPage() {
   const router = useRouter();
@@ -28,7 +32,7 @@ export default function SignupPage() {
   const trimmedEmail = email.trim();
 
   if (!trimmedName || !trimmedEmail || !password) {
-    setError("表示名、メールアドレス、パスワードを入力してください。");
+    setError(signupMessages.requiredError);
     return;
   }
 
@@ -48,10 +52,10 @@ export default function SignupPage() {
             displayName: trimmedName,
           });
         } catch {
-          alert("アカウントは作成されましたが、表示名を設定できませんでした。そのままサービスを利用できます。");
+          alert(signupMessages.profileUpdateWarning);
         }
       } catch {
-        setError("アカウントを作成できませんでした。入力内容を確認して、もう一度お試しください。");
+        setError(signupMessages.creationFailedError);
         return;
       }
 
@@ -65,18 +69,18 @@ export default function SignupPage() {
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-6">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="mb-6 text-center text-3xl font-bold">
-          Create Account
+          {signupMessages.title}
         </h1>
 
         <form onSubmit={handleSignup} className="space-y-5">
           <div>
             <label className="mb-2 block text-sm font-medium">
-              Name
+              {signupMessages.nameLabel}
             </label>
 
             <input
               type="text"
-              placeholder="Your name"
+              placeholder={signupMessages.namePlaceholder}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -86,12 +90,12 @@ export default function SignupPage() {
 
           <div>
             <label className="mb-2 block text-sm font-medium">
-              Email
+              {signupMessages.emailLabel}
             </label>
 
             <input
               type="email"
-              placeholder="Your email"
+              placeholder={signupMessages.emailPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -101,12 +105,12 @@ export default function SignupPage() {
 
           <div>
             <label className="mb-2 block text-sm font-medium">
-              Password
+              {signupMessages.passwordLabel}
             </label>
 
             <input
               type="password"
-              placeholder="Password"
+              placeholder={signupMessages.passwordPlaceholder}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -125,7 +129,7 @@ export default function SignupPage() {
             disabled={loading}
             className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Create Account"}
+            {loading ? signupMessages.loadingLabel : signupMessages.submitLabel}
           </button>
         </form>
       </div>

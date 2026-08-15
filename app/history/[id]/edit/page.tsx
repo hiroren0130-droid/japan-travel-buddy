@@ -5,6 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getTravelPlan, updateTravelPlan } from "@/lib/firestore";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const historyEditMessages = getMessages(DEFAULT_LOCALE).historyEdit;
 
 const CONTROL_CHARACTER_PATTERN =
   /[\u0000-\u001f\u007f-\u009f]/;
@@ -67,7 +71,7 @@ useEffect(() => {
   let requestGeneration = 0;
 
   if (!validatedId) {
-    alert("旅行プランのIDが不正です。");
+    alert(historyEditMessages.invalidIdAlert);
     router.replace("/history");
 
     return () => {
@@ -108,7 +112,7 @@ useEffect(() => {
       }
 
       if (!isOwnedEditablePlan(plan, uid)) {
-        alert("旅行プランを読み込めませんでした。");
+        alert(historyEditMessages.loadFailedAlert);
         router.replace("/history");
         return;
       }
@@ -133,7 +137,7 @@ useEffect(() => {
         console.error("Travel plan loading failed.");
       }
 
-      alert("旅行プランを読み込めませんでした。");
+      alert(historyEditMessages.loadFailedAlert);
       router.replace("/history");
     } finally {
       if (
@@ -161,7 +165,7 @@ useEffect(() => {
       console.error("Authentication state check failed.");
     }
 
-    alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
+    alert(historyEditMessages.authFailedAlert);
   });
 
   return () => {
@@ -182,7 +186,7 @@ async function handleSave() {
     !validatedId ||
     validatedId !== loadedId
   ) {
-    alert("認証状態が変更されました。もう一度ログインしてください。");
+    alert(historyEditMessages.authChangedAlert);
     router.replace("/login");
     return;
   }
@@ -191,17 +195,17 @@ async function handleSave() {
   const trimmedSummary = summary.trim();
 
   if (!trimmedTitle || !trimmedSummary) {
-    alert("タイトルと概要を入力してください。");
+    alert(historyEditMessages.requiredAlert);
     return;
   }
 
   if (Array.from(trimmedTitle).length > 120) {
-    alert("タイトルは120文字以内で入力してください。");
+    alert(historyEditMessages.titleTooLongAlert);
     return;
   }
 
   if (Array.from(trimmedSummary).length > 2000) {
-    alert("概要は2000文字以内で入力してください。");
+    alert(historyEditMessages.summaryTooLongAlert);
     return;
   }
 
@@ -213,7 +217,7 @@ async function handleSave() {
       summary: trimmedSummary,
     });
 
-    alert("保存しました");
+    alert(historyEditMessages.saveSuccessAlert);
     router.push(`/history/${encodeURIComponent(validatedId)}`);
   } catch (error) {
     if (process.env.NODE_ENV === "development") {
@@ -222,7 +226,7 @@ async function handleSave() {
       console.error("Travel plan saving failed.");
     }
 
-    alert("旅行プランを保存できませんでした。");
+    alert(historyEditMessages.saveFailedAlert);
   } finally {
     setSaving(false);
   }
@@ -231,17 +235,17 @@ async function handleSave() {
   return (
   <main className="mx-auto max-w-3xl p-8">
     <h1 className="mb-6 text-3xl font-bold">
-      ✏️ 旅行プラン編集
+      {historyEditMessages.title}
     </h1>
 
     {loading ? (
-      <p>読み込み中...</p>
+      <p>{historyEditMessages.loading}</p>
     ) : (
       <div className="space-y-6">
 
         <div>
           <label className="mb-2 block font-semibold">
-            タイトル
+            {historyEditMessages.titleLabel}
           </label>
 
           <input
@@ -254,7 +258,7 @@ async function handleSave() {
 
         <div>
           <label className="mb-2 block font-semibold">
-            概要
+            {historyEditMessages.summaryLabel}
           </label>
 
           <textarea
@@ -268,7 +272,7 @@ async function handleSave() {
   disabled={saving}
   className="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 >
-  {saving ? "保存中..." : "💾 保存"}
+  {saving ? historyEditMessages.savingLabel : historyEditMessages.saveLabel}
 </button>
       </div>
     )}

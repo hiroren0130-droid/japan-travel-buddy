@@ -2,6 +2,11 @@
 
 import { ExternalLink, MapPinned } from "lucide-react";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
+
 type Props = {
   spot: string;
 };
@@ -24,7 +29,7 @@ export default function TimelineMapButton({
       href={getGoogleMapsUrl(spot)}
       target="_blank"
       rel="noopener noreferrer"
-      aria-label={`${spot}をGoogle Mapsで開く`}
+      aria-label={`${defaultMessages.timelineMapButton.ariaLabelPrefix}${spot}${defaultMessages.timelineMapButton.ariaLabelSuffix}`}
       className="
         group
         inline-flex
@@ -58,7 +63,7 @@ export default function TimelineMapButton({
         aria-hidden="true"
       />
 
-      <span>Google Maps</span>
+      <span>{defaultMessages.timelineMapButton.label}</span>
 
       <ExternalLink
         size={14}

@@ -1,63 +1,62 @@
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const messages = getMessages(DEFAULT_LOCALE).aboutPage;
+
 export const metadata = {
-  title: "About | Japan Travel Buddy",
-  description: "Learn more about Japan Travel Buddy",
+  title: messages.metadata.title,
+  description: messages.metadata.description,
 };
 
 export default function AboutPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-16">
       <h1 className="mb-8 text-4xl font-bold">
-        About Japan Travel Buddy
+        {messages.title}
       </h1>
 
       <div className="space-y-10">
 
         <section>
           <h2 className="mb-3 text-2xl font-semibold">
-            Our Mission
+            {messages.mission.title}
           </h2>
 
           <p className="leading-8 text-gray-700">
-            Japan Travel Buddy was created to make traveling in Japan easier,
-            more enjoyable, and more personal through the power of AI.
+            {messages.mission.description}
           </p>
 
           <p className="mt-4 leading-8 text-gray-700">
-            Instead of spending hours researching destinations, transportation,
-            and itineraries, travelers can receive personalized travel plans in
-            seconds.
+            {messages.mission.benefit}
           </p>
         </section>
 
         <section>
           <h2 className="mb-3 text-2xl font-semibold">
-            What We Offer
+            {messages.offer.title}
           </h2>
 
           <ul className="list-disc pl-6 space-y-2 leading-8 text-gray-700">
-            <li>AI-powered travel itinerary generation</li>
-            <li>Curated sightseeing spot database</li>
-            <li>Interactive maps</li>
-            <li>Favorite travel plans</li>
-            <li>PDF export</li>
-            <li>Responsive experience across devices</li>
+            <li>{messages.offer.features[0]}</li>
+            <li>{messages.offer.features[1]}</li>
+            <li>{messages.offer.features[2]}</li>
+            <li>{messages.offer.features[3]}</li>
+            <li>{messages.offer.features[4]}</li>
+            <li>{messages.offer.features[5]}</li>
           </ul>
         </section>
 
         <section>
           <h2 className="mb-3 text-2xl font-semibold">
-            Our Vision
+            {messages.vision.title}
           </h2>
 
           <p className="leading-8 text-gray-700">
-            We aim to become the most trusted AI travel companion for visitors
-            exploring Japan.
+            {messages.vision.description}
           </p>
 
           <p className="mt-4 leading-8 text-gray-700">
-            Our goal is to continuously improve the service by expanding
-            destination coverage, enhancing AI recommendations, and delivering
-            a better travel experience for every user.
+            {messages.vision.goal}
           </p>
         </section>
 

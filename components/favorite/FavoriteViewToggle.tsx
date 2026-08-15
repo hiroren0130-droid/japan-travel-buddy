@@ -1,6 +1,11 @@
 "use client";
 
 import { LayoutGrid, List } from "lucide-react";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const favoriteViewToggleMessages =
+  getMessages(DEFAULT_LOCALE).favoriteViewToggle;
 
 export type FavoriteViewType = "grid" | "list";
 
@@ -17,7 +22,7 @@ export default function FavoriteViewToggle({
     <div className="mb-6 flex justify-end gap-2">
       <button
         type="button"
-        aria-label="グリッド表示"
+        aria-label={favoriteViewToggleMessages.gridAriaLabel}
         aria-pressed={value === "grid"}
         onClick={() => onChange("grid")}
         className={`rounded-lg p-2 transition ${
@@ -31,7 +36,7 @@ export default function FavoriteViewToggle({
 
       <button
         type="button"
-        aria-label="リスト表示"
+        aria-label={favoriteViewToggleMessages.listAriaLabel}
         aria-pressed={value === "list"}
         onClick={() => onChange("list")}
         className={`rounded-lg p-2 transition ${

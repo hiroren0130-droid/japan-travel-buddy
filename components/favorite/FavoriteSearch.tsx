@@ -1,6 +1,10 @@
 "use client";
 
 import { Search } from "lucide-react";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const favoriteSearchMessages = getMessages(DEFAULT_LOCALE).favoriteSearch;
 
 export interface FavoriteSearchProps {
   value: string;
@@ -20,7 +24,7 @@ export default function FavoriteSearch({
   type="text"
   value={value}
   onChange={(e) => onChange(e.target.value)}
-  placeholder="旅行プランを検索..."
+  placeholder={favoriteSearchMessages.placeholder}
   autoComplete="off"
   className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-12 pr-4 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
 />

@@ -1,6 +1,10 @@
 import SpotImage from "@/components/SpotImage";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { getSpotByName } from "@/lib/spotService";
+
+const placeImageMessages = getMessages(DEFAULT_LOCALE).placeImage;
 
 type Props = {
   name: string;
@@ -35,7 +39,7 @@ export default function PlaceImage({
       <div className="relative h-40 w-full">
         <SpotImage
           src={imageSrc}
-          alt={`${name}の写真`}
+          alt={`${name}${placeImageMessages.photoAltSuffix}`}
           className="
             transition-transform
             duration-300

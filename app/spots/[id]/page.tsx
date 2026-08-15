@@ -2,7 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import SpotImage from "@/components/SpotImage";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { getSpotById } from "@/lib/spotService";
+
+const spotDetailMessages = getMessages(DEFAULT_LOCALE).spotDetail;
 
 type Props = {
   params: Promise<{
@@ -27,7 +31,7 @@ export default async function SpotDetailPage({
         href="/spots"
         className="mb-6 inline-block text-sm font-semibold text-blue-600 hover:text-blue-700"
       >
-        ← スポット一覧へ戻る
+        {spotDetailMessages.backToSpots}
       </Link>
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-lg">
@@ -40,16 +44,16 @@ export default async function SpotDetailPage({
 
         <div className="p-8">
           <h1 className="text-4xl font-bold">
-            📍 {spot.name}
+            {spotDetailMessages.namePrefix}{spot.name}
           </h1>
 
           <p className="mt-2 text-gray-500">
-            {spot.area} ・ {spot.category}
+            {spot.area}{spotDetailMessages.metadataSeparator}{spot.category}
           </p>
 
           {spot.rating != null && (
             <p className="mt-4 text-lg">
-              ⭐ {spot.rating} / 5
+              {spotDetailMessages.ratingPrefix}{spot.rating}{spotDetailMessages.ratingSuffix}
             </p>
           )}
 
@@ -60,21 +64,21 @@ export default async function SpotDetailPage({
           <div className="mt-8 grid gap-3 rounded-xl bg-gray-50 p-6">
             {spot.address && (
               <div>
-                📍 <strong>住所：</strong>
+                {spotDetailMessages.addressPrefix}<strong>{spotDetailMessages.addressLabel}</strong>
                 {spot.address}
               </div>
             )}
 
             {spot.hours && (
               <div>
-                🕒 <strong>営業時間：</strong>
+                {spotDetailMessages.hoursPrefix}<strong>{spotDetailMessages.hoursLabel}</strong>
                 {spot.hours}
               </div>
             )}
 
             {spot.price && (
               <div>
-                💴 <strong>入場料：</strong>
+                {spotDetailMessages.pricePrefix}<strong>{spotDetailMessages.priceLabel}</strong>
                 {spot.price}
               </div>
             )}
@@ -89,7 +93,7 @@ export default async function SpotDetailPage({
               rel="noreferrer"
               className="rounded-lg bg-blue-600 px-5 py-3 text-white"
             >
-              🗺 Google Maps
+              {spotDetailMessages.googleMapsLabel}
             </a>
 
             {spot.website && (
@@ -99,7 +103,7 @@ export default async function SpotDetailPage({
                 rel="noreferrer"
                 className="rounded-lg border px-5 py-3"
               >
-                🌐 公式サイト
+                {spotDetailMessages.officialWebsiteLabel}
               </a>
             )}
           </div>

@@ -1,3 +1,8 @@
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const messages = getMessages(DEFAULT_LOCALE).travelRouteMap;
+
 type Props = {
   spots: {
     name: string;
@@ -20,7 +25,7 @@ export default function TravelRouteMap({
   return (
     <div className="mt-8 overflow-hidden rounded-3xl border bg-white shadow-md">
       <div className="border-b bg-blue-600 px-6 py-4 text-lg font-bold text-white">
-        🗺️ Travel Route Map
+        {messages.title}
       </div>
 
       <iframe

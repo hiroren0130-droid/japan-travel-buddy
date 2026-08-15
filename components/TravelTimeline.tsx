@@ -3,7 +3,11 @@ import TimelineItem from "./TimelineItem";
 
 import { CalendarDays, MapPin } from "lucide-react";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { getSpotById } from "@/lib/spotService";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Props = {
   plan: TravelPlan;
@@ -46,7 +50,7 @@ export default function TravelTimeline({
               {/* Day情報 */}
               <div className="min-w-0">
                 <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-blue-100 sm:text-xs">
-                  JAPAN TRAVEL BUDDY
+                  {defaultMessages.travelTimeline.brandLabel}
                 </p>
 
                 <div className="mt-1 flex flex-wrap items-center gap-3">
@@ -54,7 +58,9 @@ export default function TravelTimeline({
                     id={`day-${day.day}`}
                     className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
                   >
-                    Day {day.day}
+                    {defaultMessages.travelTimeline.dayPrefix}
+                    {day.day}
+                    {defaultMessages.travelTimeline.daySuffix}
                   </h2>
 
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 shadow-sm sm:text-sm">
@@ -64,7 +70,8 @@ export default function TravelTimeline({
                       aria-hidden="true"
                     />
 
-                    {day.items.length}スポット
+                    {day.items.length}
+                    {defaultMessages.travelTimeline.spotCountSuffix}
                   </span>
                 </div>
               </div>
@@ -79,7 +86,7 @@ export default function TravelTimeline({
             {day.items.length === 0 ? (
               <div className="rounded-2xl bg-slate-50 px-5 py-10 text-center">
                 <p className="text-sm font-medium text-slate-500">
-                  この日の旅行プランはありません。
+                  {defaultMessages.travelTimeline.emptyMessage}
                 </p>
               </div>
             ) : (
@@ -90,7 +97,7 @@ export default function TravelTimeline({
                   <TimelineItem
                     key={`${day.day}-${item.time}-${item.spotId}`}
                     time={item.time}
-                    spot={spot?.name ?? "不明なスポット"}
+                    spot={spot?.name ?? defaultMessages.travelTimeline.unknownSpot}
                     description={item.description}
                     transport={item.transport}
                     duration={item.duration}

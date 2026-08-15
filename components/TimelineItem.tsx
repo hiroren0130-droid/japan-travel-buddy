@@ -3,6 +3,8 @@ import PlaceLink from "./PlaceLink";
 import SpotImage from "./SpotImage";
 import TimelineMapButton from "./TimelineMapButton";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { getSpotByName } from "@/lib/spotService";
 
 import {
@@ -13,6 +15,8 @@ import {
   MapPin,
   Train,
 } from "lucide-react";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Props = {
   time: string;
@@ -177,7 +181,7 @@ export default function TimelineItem({
               {/* 説明 */}
               <p className="mt-3 text-sm leading-6 text-slate-700 sm:text-base sm:leading-7">
                 {description ||
-                  "説明はありません。"}
+                  defaultMessages.timelineItem.descriptionFallback}
               </p>
 
               {/* 移動情報 */}

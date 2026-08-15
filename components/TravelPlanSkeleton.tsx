@@ -1,23 +1,28 @@
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const travelPlanSkeletonMessages = getMessages(DEFAULT_LOCALE).travelPlanSkeleton;
+
 const generationSteps = [
   {
     icon: "📍",
-    label: "旅行条件を確認",
-    description: "行き先やご希望を整理しています",
+    label: travelPlanSkeletonMessages.steps[0].label,
+    description: travelPlanSkeletonMessages.steps[0].description,
   },
   {
     icon: "🏯",
-    label: "観光スポットを選定",
-    description: "条件に合う場所を探しています",
+    label: travelPlanSkeletonMessages.steps[1].label,
+    description: travelPlanSkeletonMessages.steps[1].description,
   },
   {
     icon: "🚃",
-    label: "移動ルートを調整",
-    description: "無理のない順番を組み立てています",
+    label: travelPlanSkeletonMessages.steps[2].label,
+    description: travelPlanSkeletonMessages.steps[2].description,
   },
   {
     icon: "✨",
-    label: "旅行プランを仕上げ",
-    description: "読みやすい日程にまとめています",
+    label: travelPlanSkeletonMessages.steps[3].label,
+    description: travelPlanSkeletonMessages.steps[3].description,
   },
 ];
 
@@ -34,7 +39,7 @@ export default function TravelPlanSkeleton() {
       "
       role="status"
       aria-live="polite"
-      aria-label="AIが旅行プランを作成しています"
+      aria-label={travelPlanSkeletonMessages.ariaLabel}
     >
       {/* Loading status */}
       <div
@@ -154,7 +159,7 @@ export default function TravelPlanSkeleton() {
                     text-blue-600
                   "
                 >
-                  AI Travel Planner
+                  {travelPlanSkeletonMessages.badge}
                 </p>
 
                 <h2
@@ -167,7 +172,7 @@ export default function TravelPlanSkeleton() {
                     sm:text-2xl
                   "
                 >
-                  AIが旅行プランを作成しています
+                  {travelPlanSkeletonMessages.title}
                 </h2>
 
                 <p
@@ -179,8 +184,7 @@ export default function TravelPlanSkeleton() {
                     text-gray-600
                   "
                 >
-                  ご希望に合うスポットや移動順を確認しながら、
-                  あなただけの旅行プランを組み立てています。
+                  {travelPlanSkeletonMessages.description}
                 </p>
               </div>
             </div>
@@ -215,7 +219,7 @@ export default function TravelPlanSkeleton() {
                 aria-hidden="true"
               />
 
-              プランを準備中
+              {travelPlanSkeletonMessages.preparingLabel}
             </div>
           </div>
 
@@ -252,8 +256,7 @@ export default function TravelPlanSkeleton() {
                 text-gray-500
               "
             >
-              内容によっては少し時間がかかる場合があります。
-              このままお待ちください。
+              {travelPlanSkeletonMessages.waitMessage}
             </p>
           </div>
 

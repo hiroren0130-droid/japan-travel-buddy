@@ -1,6 +1,11 @@
 import type { TravelPlan } from "@/types/travel";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
 import MessageBubble from "./MessageBubble";
+
+const chatMessages = getMessages(DEFAULT_LOCALE).chatMessages;
 
 type Message = {
   role: "user" | "assistant";
@@ -20,7 +25,7 @@ export default function ChatMessages({
       className="space-y-6 bg-gray-50 p-6"
       role="log"
       aria-live="polite"
-      aria-label="チャットメッセージ"
+      aria-label={chatMessages.ariaLabel}
     >
       {messages.map((msg, index) => (
         <MessageBubble

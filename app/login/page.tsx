@@ -4,6 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const loginMessages = getMessages(DEFAULT_LOCALE).login;
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,7 +24,7 @@ export default function LoginPage() {
     const trimmedEmail = email.trim();
 
     if (!trimmedEmail || !password) {
-      alert("メールアドレスとパスワードを入力してください。");
+      alert(loginMessages.requiredAlert);
       return;
     }
 
@@ -30,7 +34,7 @@ export default function LoginPage() {
   await signInWithEmailAndPassword(auth, trimmedEmail, password);
   router.push("/dashboard");
 } catch {
-  alert("メールアドレスまたはパスワードが正しくありません。");
+  alert(loginMessages.invalidCredentialsAlert);
 } finally {
   setLoading(false);
 }
@@ -40,18 +44,18 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-gray-100 px-6">
       <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="mb-6 text-center text-3xl font-bold">
-          ログイン
+          {loginMessages.title}
         </h1>
 
         <form onSubmit={handleLogin} className="space-y-5">
           <div>
             <label className="mb-2 block text-sm font-medium">
-              メールアドレス
+              {loginMessages.emailLabel}
             </label>
 
             <input
               type="email"
-              placeholder="メールアドレスを入力"
+              placeholder={loginMessages.emailPlaceholder}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -61,12 +65,12 @@ export default function LoginPage() {
 
           <div>
             <label className="mb-2 block text-sm font-medium">
-              パスワード
+              {loginMessages.passwordLabel}
             </label>
 
             <input
               type="password"
-              placeholder="パスワードを入力"
+              placeholder={loginMessages.passwordPlaceholder}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -79,7 +83,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700"
           >
-            {loading ? "ログイン中..." : "ログイン"}
+            {loading ? loginMessages.loadingLabel : loginMessages.submitLabel}
           </button>
         </form>
       </div>

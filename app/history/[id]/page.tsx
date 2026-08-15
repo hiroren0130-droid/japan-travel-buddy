@@ -8,7 +8,11 @@ import { onAuthStateChanged } from "firebase/auth";
 import TravelPlanCard from "@/components/TravelPlanCard";
 import { auth } from "@/lib/firebase";
 import { getTravelPlan } from "@/lib/firestore";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { TravelPlan } from "@/types/travel";
+
+const historyDetailMessages = getMessages(DEFAULT_LOCALE).historyDetail;
 
 const CONTROL_CHARACTER_PATTERN =
   /[\u0000-\u001f\u007f-\u009f]/;
@@ -62,7 +66,7 @@ export default function HistoryDetailPage() {
     let requestGeneration = 0;
 
     if (!validatedId) {
-      alert("旅行プランのIDが不正です。");
+      alert(historyDetailMessages.invalidIdAlert);
       router.replace("/history");
 
       return () => {
@@ -100,7 +104,7 @@ export default function HistoryDetailPage() {
         }
 
         if (!isOwnedTravelPlan(result, uid)) {
-          alert("旅行プランを読み込めませんでした。");
+          alert(historyDetailMessages.loadFailedAlert);
           router.replace("/history");
           return;
         }
@@ -122,7 +126,7 @@ export default function HistoryDetailPage() {
           console.error("Travel plan loading failed.");
         }
 
-        alert("旅行プランを読み込めませんでした。");
+        alert(historyDetailMessages.loadFailedAlert);
         router.replace("/history");
       } finally {
         if (
@@ -147,7 +151,7 @@ export default function HistoryDetailPage() {
         console.error("Authentication state check failed.");
       }
 
-      alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
+      alert(historyDetailMessages.authFailedAlert);
     });
 
     return () => {
@@ -160,7 +164,7 @@ export default function HistoryDetailPage() {
   if (loading) {
     return (
       <main className="mx-auto max-w-6xl p-8">
-        <p>読み込み中...</p>
+        <p>{historyDetailMessages.loading}</p>
       </main>
     );
   }
@@ -168,7 +172,7 @@ export default function HistoryDetailPage() {
   if (!plan) {
     return (
       <main className="mx-auto max-w-6xl p-8">
-        <h1 className="text-2xl font-bold">旅行プランが見つかりません</h1>
+        <h1 className="text-2xl font-bold">{historyDetailMessages.notFoundTitle}</h1>
       </main>
     );
   }
@@ -180,7 +184,7 @@ export default function HistoryDetailPage() {
     href="/dashboard"
     className="mb-4 inline-block rounded-lg bg-gray-200 px-4 py-2 hover:bg-gray-300"
   >
-    ← Dashboardへ戻る
+    {historyDetailMessages.backToDashboard}
   </Link>
 
   <TravelPlanCard plan={plan} />

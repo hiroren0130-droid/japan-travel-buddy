@@ -1,39 +1,32 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Footer from "@/components/Footer";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const messages = getMessages(DEFAULT_LOCALE).siteMetadata;
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://japantravelbuddy.com"),
 
   title: {
-    default: "Japan Travel Buddy",
-    template: "%s | Japan Travel Buddy",
+    default: messages.defaultTitle,
+    template: messages.titleTemplate,
   },
 
-  description:
-  "Plan your perfect trip to Japan with AI. Discover destinations, build personalized itineraries, explore interactive maps, and save your travel plans with Japan Travel Buddy.",
+  description: messages.description,
 
-  keywords: [
-    "Japan",
-    "Travel",
-    "Kyoto",
-    "AI",
-    "Travel Planner",
-    "Japan Trip",
-    "Itinerary",
-    "Tourism",
-    "OpenAI",
-  ],
+  keywords: messages.keywords,
 
   authors: [
     {
-      name: "Japan Travel Buddy",
+      name: messages.authorName,
     },
   ],
 
-  creator: "Japan Travel Buddy",
+  creator: messages.creator,
 
-  applicationName: "Japan Travel Buddy",
+  applicationName: messages.applicationName,
 
   robots: {
     index: true,
@@ -44,25 +37,23 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ja_JP",
     url: "https://japantravelbuddy.com",
-    siteName: "Japan Travel Buddy",
-    title: "Japan Travel Buddy",
-    description:
-      "Create personalized Japan travel plans with AI.",
+    siteName: messages.openGraphSiteName,
+    title: messages.openGraphTitle,
+    description: messages.openGraphDescription,
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Japan Travel Buddy",
+        alt: messages.openGraphImageAlt,
       },
     ],
   },
 
   twitter: {
     card: "summary_large_image",
-    title: "Japan Travel Buddy",
-    description:
-      "Create personalized Japan travel plans with AI.",
+    title: messages.twitterTitle,
+    description: messages.twitterDescription,
     images: ["/og-image.jpg"],
   },
 

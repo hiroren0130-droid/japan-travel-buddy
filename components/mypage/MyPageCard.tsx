@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { Timestamp } from "firebase/firestore";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { SavedTravelPlan } from "@/types/travel";
+
+const myPageCardMessages = getMessages(DEFAULT_LOCALE).myPageCard;
 
 type SavedPlan = SavedTravelPlan & {
   createdAt?: Timestamp;
@@ -25,12 +29,12 @@ export default function MyPageCard({
       </h2>
 
       <p className="mt-2 text-gray-600">
-  {plan.summary || "旅行プランの概要はありません。"}
+  {plan.summary || myPageCardMessages.summaryFallback}
 </p>
 
       {plan.createdAt && (
         <p className="mt-3 text-sm text-gray-500">
-          作成日：
+          {myPageCardMessages.createdAtLabel}
           {plan.createdAt
             .toDate()
             .toLocaleDateString("ja-JP")}
@@ -42,7 +46,7 @@ export default function MyPageCard({
   href={`/mypage/${plan.id}`}
   className="rounded-lg bg-blue-600 px-4 py-2 text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
 >
-  詳細を見る
+  {myPageCardMessages.detailLabel}
 </Link>
 
         <button
@@ -50,14 +54,14 @@ export default function MyPageCard({
   onClick={onDelete}
           className="rounded-lg bg-red-600 px-4 py-2 text-white transition hover:bg-red-700"
         >
-          削除
+          {myPageCardMessages.deleteLabel}
         </button>
 
         <Link
   href="/"
   className="rounded-lg border px-4 py-2 transition hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
 >
-  ホームへ戻る
+  {myPageCardMessages.backHomeLabel}
 </Link>
       </div>
     </div>

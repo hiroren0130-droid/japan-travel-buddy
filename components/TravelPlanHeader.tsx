@@ -5,6 +5,8 @@ import Image from "next/image";
 import FavoriteButton from "./FavoriteButton";
 import CopyButton from "./CopyButton";
 import PdfButton from "./PdfButton";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 
 import {
   CalendarDays,
@@ -12,6 +14,8 @@ import {
   Sparkles,
   Footprints,
 } from "lucide-react";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Props = {
   title: string;
@@ -28,7 +32,7 @@ export default function TravelPlanHeader({
       <div className="relative min-h-[420px] w-full overflow-hidden sm:min-h-[460px] lg:min-h-[500px]">
         <Image
           src="/images/kyoto-header.jpg"
-          alt="京都の旅行風景"
+          alt={defaultMessages.travelPlanHeader.imageAlt}
           fill
           priority
           sizes="100vw"
@@ -55,7 +59,7 @@ export default function TravelPlanHeader({
               </div>
 
               <p className="text-xs font-bold uppercase tracking-[0.24em] text-blue-100 sm:text-sm">
-                Japan Travel Buddy
+                {defaultMessages.appName}
               </p>
             </div>
 
@@ -66,8 +70,7 @@ export default function TravelPlanHeader({
 
             {/* 説明 */}
             <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-200 sm:text-base sm:leading-8">
-              京都の人気スポットを効率よく巡る、AIが作成した旅行プランです。
-              観光、移動、滞在時間をまとめて確認できます。
+              {defaultMessages.travelPlanHeader.description}
             </p>
 
             {/* Travel Info */}
@@ -77,12 +80,12 @@ export default function TravelPlanHeader({
                   <CalendarDays size={16} aria-hidden="true" />
 
                   <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
-                    Duration
+                    {defaultMessages.travelPlanHeader.info.durationLabel}
                   </span>
                 </div>
 
                 <p className="mt-1 text-sm font-bold text-white sm:text-base">
-                  3 Days
+                  {defaultMessages.travelPlanHeader.info.durationValue}
                 </p>
               </div>
 
@@ -91,12 +94,12 @@ export default function TravelPlanHeader({
                   <MapPin size={16} aria-hidden="true" />
 
                   <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
-                    Spots
+                    {defaultMessages.travelPlanHeader.info.spotsLabel}
                   </span>
                 </div>
 
                 <p className="mt-1 text-sm font-bold text-white sm:text-base">
-                  12 Spots
+                  {defaultMessages.travelPlanHeader.info.spotsValue}
                 </p>
               </div>
 
@@ -105,12 +108,12 @@ export default function TravelPlanHeader({
                   <Footprints size={16} aria-hidden="true" />
 
                   <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
-                    Area
+                    {defaultMessages.travelPlanHeader.info.areaLabel}
                   </span>
                 </div>
 
                 <p className="mt-1 text-sm font-bold text-white sm:text-base">
-                  Kyoto
+                  {defaultMessages.travelPlanHeader.info.areaValue}
                 </p>
               </div>
 
@@ -119,12 +122,12 @@ export default function TravelPlanHeader({
                   <Sparkles size={16} aria-hidden="true" />
 
                   <span className="text-[10px] font-bold uppercase tracking-[0.16em]">
-                    Plan
+                    {defaultMessages.travelPlanHeader.info.planLabel}
                   </span>
                 </div>
 
                 <p className="mt-1 text-sm font-bold text-white sm:text-base">
-                  AI Generated
+                  {defaultMessages.travelPlanHeader.info.planValue}
                 </p>
               </div>
             </div>

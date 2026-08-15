@@ -10,7 +10,12 @@ import {
   deleteTravelPlan,
   updateTravelPlan,
 } from "@/lib/firestore";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import Link from "next/link";
+
+const messages = getMessages(DEFAULT_LOCALE);
+const dashboardMessages = messages.dashboard;
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -63,7 +68,7 @@ export default function DashboardPage() {
         console.error("Travel plan loading failed.");
       }
 
-      alert("旅行プランを読み込めませんでした。");
+      alert(dashboardMessages.alerts.loadFailed);
     }
   }, (error) => {
     if (!active) return;
@@ -77,7 +82,7 @@ export default function DashboardPage() {
       console.error("Authentication state check failed.");
     }
 
-    alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
+    alert(dashboardMessages.alerts.authFailed);
   });
 
   return () => {
@@ -102,14 +107,14 @@ export default function DashboardPage() {
         console.error("Logout failed.");
       }
 
-      alert("ログアウトできませんでした。もう一度お試しください。");
+      alert(dashboardMessages.alerts.logoutFailed);
     } finally {
       setLoggingOut(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-  if (!confirm("この旅行プランを削除しますか？")) {
+  if (!confirm(dashboardMessages.deleteConfirm)) {
     return;
   }
 
@@ -126,7 +131,7 @@ export default function DashboardPage() {
       console.error("Travel plan deletion failed.");
     }
 
-    alert("旅行プランを削除できませんでした。");
+    alert(dashboardMessages.alerts.deleteFailed);
   }
 };
 
@@ -156,7 +161,7 @@ const handleFavorite = async (
       console.error("Favorite update failed.");
     }
 
-    alert("お気に入りを更新できませんでした。");
+    alert(dashboardMessages.alerts.favoriteFailed);
   }
 };
 
@@ -175,7 +180,7 @@ Japan Travel Buddyで作成した旅行プラン`;
       });
     } else {
       await navigator.clipboard.writeText(shareText);
-      alert("旅行プランをコピーしました。");
+      alert(dashboardMessages.alerts.copySuccess);
     }
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
@@ -188,7 +193,7 @@ Japan Travel Buddyで作成した旅行プラン`;
       console.error("Sharing failed.");
     }
 
-    alert("共有できませんでした。");
+    alert(dashboardMessages.alerts.shareFailed);
   }
 }
 
@@ -197,7 +202,7 @@ Japan Travel Buddyで作成した旅行プラン`;
     <div className="mx-auto max-w-6xl p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold sm:text-4xl">
-          マイページ
+          {dashboardMessages.title}
         </h1>
 
         <button
@@ -205,17 +210,17 @@ Japan Travel Buddyで作成した旅行プラン`;
           disabled={loggingOut}
           className="rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
         >
-          {loggingOut ? "ログアウト中..." : "ログアウト"}
+          {loggingOut ? dashboardMessages.loggingOut : dashboardMessages.logout}
         </button>
       </div>
 
       <p className="mt-4 text-gray-600">
-        Japan Travel Buddy へようこそ！
+        {messages.appName}{dashboardMessages.welcomeSuffix}
       </p>
 
       <div className="mt-8 rounded-xl bg-white p-6 shadow">
         <h2 className="mb-4 text-2xl font-semibold">
-          📚 保存済み旅行プラン
+          {dashboardMessages.savedPlansTitle}
         </h2>
 
         <button
@@ -223,13 +228,13 @@ Japan Travel Buddyで作成した旅行プラン`;
   className="mb-4 rounded-lg bg-gray-700 px-4 py-2 text-white hover:bg-gray-800"
 >
   {showFavoritesOnly
-    ? "📚 すべて表示"
-    : "⭐ お気に入りのみ"}
+    ? dashboardMessages.showAll
+    : dashboardMessages.favoritesOnly}
 </button>
 
 <input
   type="text"
-  placeholder="旅行プランを検索..."
+  placeholder={dashboardMessages.searchPlaceholder}
   value={searchText}
   onChange={(e) => setSearchText(e.target.value)}
   className="mb-4 w-full rounded-lg border p-3"
@@ -237,7 +242,7 @@ Japan Travel Buddyで作成した旅行プラン`;
 
         {plans.length === 0 ? (
           <p className="text-gray-500">
-            保存された旅行プランはありません。
+            {dashboardMessages.emptyMessage}
           </p>
         ) : (
           <div className="space-y-4">
@@ -270,7 +275,7 @@ Japan Travel Buddyで作成した旅行プラン`;
 
     {plan.createdAt && (
   <p className="mt-3 text-sm text-gray-400">
-    作成日：
+    {dashboardMessages.createdAtLabel}
     {plan.createdAt.toDate().toLocaleDateString("ja-JP")}
   </p>
 )}
@@ -285,8 +290,8 @@ Japan Travel Buddyで作成した旅行プラン`;
   }
   aria-label={
     plan.favorite
-      ? "お気に入りから削除"
-      : "お気に入りに追加"
+      ? dashboardMessages.removeFavoriteAriaLabel
+      : dashboardMessages.addFavoriteAriaLabel
   }
   aria-pressed={plan.favorite ?? false}
   className={`w-full rounded-lg border px-4 py-2 font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 sm:w-auto sm:min-w-[130px] ${
@@ -302,21 +307,21 @@ Japan Travel Buddyで作成した旅行プラン`;
     onClick={() => handleDelete(plan.id)}
     className="w-full sm:min-w-[130px] sm:w-auto rounded-lg bg-red-500 px-4 py-2 text-white transition hover:bg-red-600"
   >
-    🗑 削除
+    {dashboardMessages.deleteLabel}
   </button>
 
   <button
   onClick={() => router.push(`/history/${plan.id}/edit`)}
   className="w-full sm:min-w-[130px] sm:w-auto rounded-lg bg-blue-500 px-4 py-2 text-white transition hover:bg-blue-600"
 >
-  ✏️ 編集
+  {dashboardMessages.editLabel}
 </button>
 
 <button
   onClick={() => handleShare(plan)}
   className="w-full sm:min-w-[130px] sm:w-auto rounded-lg bg-green-600 px-4 py-2 text-white transition hover:bg-green-700"
 >
-  📤 共有
+  {dashboardMessages.shareLabel}
 </button>
 
 </div>

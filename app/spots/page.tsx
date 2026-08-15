@@ -2,25 +2,29 @@ import Link from "next/link";
 
 import SpotImage from "@/components/SpotImage";
 import { allSpots } from "@/data";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const spotsPageMessages = getMessages(DEFAULT_LOCALE).spotsPage;
 
 export default function SpotsPage() {
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-10">
         <p className="text-sm font-bold tracking-widest text-blue-600">
-          KYOTO SPOT DATABASE
+          {spotsPageMessages.eyebrow}
         </p>
 
         <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-          京都スポット一覧
+          {spotsPageMessages.title}
         </h1>
 
         <p className="mt-3 text-slate-600">
-          京都の観光スポットを一覧から探せます。
+          {spotsPageMessages.description}
         </p>
 
         <p className="mt-2 text-sm font-semibold text-slate-500">
-          全 {allSpots.length} スポット
+          {spotsPageMessages.countPrefix}{allSpots.length}{spotsPageMessages.countSuffix}
         </p>
       </div>
 
@@ -67,15 +71,15 @@ export default function SpotsPage() {
               </div>
 
               <p className="mt-2 text-sm font-semibold text-slate-500">
-                📍 {spot.area}
+                {spotsPageMessages.areaPrefix}{spot.area}
               </p>
 
-              <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
+              <p className="mt-4 line-clamp-1 text-sm leading-6 text-slate-600">
                 {spot.description}
               </p>
 
               <div className="mt-5 text-sm font-bold text-blue-600">
-                詳細を見る →
+                {spotsPageMessages.detailLink}
               </div>
             </div>
           </Link>

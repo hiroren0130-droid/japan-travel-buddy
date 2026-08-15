@@ -1,3 +1,8 @@
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const globalLoadingMessages = getMessages(DEFAULT_LOCALE).globalLoading;
+
 export default function Loading() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-50 via-white to-blue-100 px-6">
@@ -6,7 +11,7 @@ export default function Loading() {
         <div className="flex items-center gap-3">
           <span className="text-5xl">🇯🇵</span>
           <h1 className="text-3xl font-extrabold text-slate-900">
-            Japan Travel Buddy
+            {globalLoadingMessages.brandName}
           </h1>
         </div>
 
@@ -16,17 +21,17 @@ export default function Loading() {
         {/* Message */}
 <div className="text-center">
   <p className="text-lg font-medium text-gray-800">
-    Creating your perfect Japan journey...
+    {globalLoadingMessages.primaryMessage}
   </p>
 
   <p className="mt-2 text-sm text-gray-500">
-    Our AI is planning the best route for you.
+    {globalLoadingMessages.secondaryMessage}
   </p>
 
   <div className="mt-4 space-y-2 text-sm text-slate-500">
-  <p>🤖 おすすめスポットを検索中...</p>
-  <p>🗺️ 最適なルートを作成中...</p>
-  <p>✨ 旅行プランを仕上げています...</p>
+  <p>{globalLoadingMessages.searchingSpots}</p>
+  <p>{globalLoadingMessages.creatingRoute}</p>
+  <p>{globalLoadingMessages.finalizingPlan}</p>
 </div>
 </div>
       </div>

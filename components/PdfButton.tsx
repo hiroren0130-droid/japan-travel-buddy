@@ -4,6 +4,11 @@ import { useState } from "react";
 import jsPDF from "jspdf";
 import { Check, FileDown, LoaderCircle } from "lucide-react";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
+
 type Props = {
   text: string;
 };
@@ -60,17 +65,17 @@ export default function PdfButton({
       disabled={creating}
       aria-label={
         creating
-          ? "旅行プランのPDFを作成中"
+          ? defaultMessages.pdfButton.creatingAriaLabel
           : completed
-            ? "旅行プランをPDFで保存しました"
-            : "旅行プランをPDFで保存"
+            ? defaultMessages.pdfButton.completedAriaLabel
+            : defaultMessages.pdfButton.saveAriaLabel
       }
       title={
         creating
-          ? "PDF作成中"
+          ? defaultMessages.pdfButton.creatingLabel
           : completed
-            ? "保存しました"
-            : "PDF保存"
+            ? defaultMessages.pdfButton.savedLabel
+            : defaultMessages.pdfButton.saveLabel
       }
       className="
         group
@@ -127,10 +132,10 @@ export default function PdfButton({
 
       <span className="sr-only">
         {creating
-          ? "PDF作成中"
+          ? defaultMessages.pdfButton.creatingLabel
           : completed
-            ? "PDF保存完了"
-            : "旅行プランをPDFで保存"}
+            ? defaultMessages.pdfButton.completedStatus
+            : defaultMessages.pdfButton.saveAriaLabel}
       </span>
     </button>
   );

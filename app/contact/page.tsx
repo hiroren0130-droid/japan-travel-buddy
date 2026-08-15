@@ -1,45 +1,49 @@
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const messages = getMessages(DEFAULT_LOCALE).contactPage;
+
 export const metadata = {
-  title: "Contact | Japan Travel Buddy",
-  description: "Contact Japan Travel Buddy",
+  title: messages.metadata.title,
+  description: messages.metadata.description,
 };
 
 export default function ContactPage() {
   return (
     <main className="mx-auto max-w-4xl px-6 py-16">
       <h1 className="mb-8 text-4xl font-bold">
-        Contact
+        {messages.title}
       </h1>
 
       <div className="space-y-10">
 
         <section>
           <p className="leading-8 text-gray-700">
-            Thank you for using Japan Travel Buddy.
+            {messages.introduction}
           </p>
 
           <p className="leading-8 text-gray-700">
-            If you have any questions, feedback, or suggestions,
-            please feel free to contact us.
-          </p>
-        </section>
-
-        <section>
-          <h2 className="mb-3 text-2xl font-semibold">
-            Support
-          </h2>
-
-          <p className="leading-8 text-gray-700">
-            We welcome bug reports, feature requests, and general inquiries.
+            {messages.invitation}
           </p>
         </section>
 
         <section>
           <h2 className="mb-3 text-2xl font-semibold">
-            Contact Method
+            {messages.supportTitle}
           </h2>
 
           <p className="leading-8 text-gray-700">
-            Contact information will be available here before the official release.
+            {messages.supportDescription}
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-2xl font-semibold">
+            {messages.contactMethodTitle}
+          </h2>
+
+          <p className="leading-8 text-gray-700">
+            {messages.contactMethodDescription}
           </p>
 
           {/*
@@ -55,12 +59,11 @@ export default function ContactPage() {
 
         <section>
           <h2 className="mb-3 text-2xl font-semibold">
-            Response Time
+            {messages.responseTimeTitle}
           </h2>
 
           <p className="leading-8 text-gray-700">
-            We aim to respond to inquiries as quickly as possible.
-            Response times may vary depending on the volume of requests.
+            {messages.responseTimeDescription}
           </p>
         </section>
 

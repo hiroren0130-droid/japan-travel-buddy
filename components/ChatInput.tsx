@@ -1,3 +1,8 @@
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const messages = getMessages(DEFAULT_LOCALE).chatInput;
+
 type Props = {
   message: string;
   setMessage: (value: string) => void;
@@ -16,7 +21,7 @@ export default function ChatInput({
   return (
     <div className="sticky bottom-0 flex gap-3 border-t bg-white p-4">
       <label htmlFor="chat-message" className="sr-only">
-        メッセージ入力
+        {messages.inputLabel}
       </label>
 
       <input
@@ -25,7 +30,7 @@ export default function ChatInput({
         className="flex-1 rounded-lg border p-3 transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="京都を3日旅行したい"
+        placeholder={messages.placeholder}
         autoComplete="off"
         disabled={loading}
         onKeyDown={(e) => {
@@ -43,7 +48,7 @@ export default function ChatInput({
         aria-busy={loading}
         className="rounded-lg bg-blue-600 px-6 text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:cursor-not-allowed disabled:bg-gray-400"
       >
-        {loading ? "送信中..." : "送信"}
+        {loading ? messages.sendingLabel : messages.sendLabel}
       </button>
     </div>
   );

@@ -12,8 +12,12 @@ import ChatMessages from "@/components/ChatMessages";
 import Header from "@/components/Header";
 import TravelForm from "@/components/TravelForm";
 import TravelPlanSkeleton from "@/components/TravelPlanSkeleton";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 
 import type { TravelPlan } from "@/types/travel";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Message = {
   role: "user" | "assistant";
@@ -150,8 +154,7 @@ ${specialRequest || "なし"}
   setMessages([
     {
       role: "assistant",
-      content:
-        "旅行プランの作成中にエラーが発生しました。時間を置いて、もう一度お試しください。",
+      content: defaultMessages.chatPage.errorMessage,
     },
   ]);
 } finally {
@@ -185,15 +188,15 @@ return (
                     aria-hidden="true"
                   />
 
-                  <span>AI Travel Planner</span>
+                  <span>{defaultMessages.chatPage.badge}</span>
                 </div>
 
                 <h1 className="mt-3 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
-                  AI旅行プランナー
+                  {defaultMessages.chatPage.title}
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-                  行き先や日数、興味を入力すると、AIがあなた専用の旅行プランを作成します。
+                  {defaultMessages.chatPage.description}
                 </p>
               </div>
 
@@ -208,11 +211,11 @@ return (
 
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Planner
+                      {defaultMessages.chatPage.plannerLabel}
                     </p>
 
                     <p className="text-sm font-bold text-slate-800">
-                      AIが自動作成
+                      {defaultMessages.chatPage.plannerStatus}
                     </p>
                   </div>
                 </div>
@@ -248,13 +251,13 @@ return (
 
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                      Location
+                      {defaultMessages.chatPage.locationLabel}
                     </p>
 
                     <p className="text-sm font-bold text-slate-800">
                       {currentLocation
-                        ? "現在地を取得済み"
-                        : "現在地を確認中"}
+                        ? defaultMessages.chatPage.locationReady
+                        : defaultMessages.chatPage.locationLoading}
                     </p>
                   </div>
                 </div>
@@ -273,11 +276,11 @@ return (
 
               <div>
                 <h2 className="text-xl font-black tracking-tight text-slate-950 sm:text-2xl">
-                  旅行条件を入力
+                  {defaultMessages.chatPage.formTitle}
                 </h2>
 
                 <p className="mt-1 text-sm leading-6 text-slate-500">
-                  分かる範囲だけ入力すれば、残りはAIが提案します。
+                  {defaultMessages.chatPage.formDescription}
                 </p>
               </div>
             </div>

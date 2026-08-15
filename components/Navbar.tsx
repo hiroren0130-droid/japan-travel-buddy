@@ -3,12 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const messages = getMessages(DEFAULT_LOCALE).navbar;
+
 const menus = [
-  { href: "/", label: "🏠 ホーム" },
-  { href: "/chat", label: "🤖 AI旅行" },
-  { href: "/history", label: "📚 履歴" },
-  { href: "/favorites", label: "⭐ お気に入り" },
-  { href: "/dashboard", label: "👤 マイページ" },
+  { href: "/", label: messages.home },
+  { href: "/chat", label: messages.aiTravel },
+  { href: "/history", label: messages.history },
+  { href: "/favorites", label: messages.favorites },
+  { href: "/dashboard", label: messages.myPage },
 ];
 
 export default function Navbar() {

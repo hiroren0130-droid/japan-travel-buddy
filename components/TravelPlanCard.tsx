@@ -30,10 +30,14 @@ import {
 } from "@/lib/favorites";
 import { saveTravelPlan } from "@/lib/firestore";
 import { createGoogleMapsRoute } from "@/lib/googleMaps";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
 import { downloadTravelPlanPdf } from "@/lib/pdf";
 import { getSpotById } from "@/lib/spotService";
 
 import type { TravelPlan } from "@/types/travel";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Props = {
   plan: TravelPlan;
@@ -129,14 +133,14 @@ export default function TravelPlanCard({
         )
       );
 
-      alert("旅行プランをコピーしました。");
+      alert(defaultMessages.travelPlanCard.alerts.copySuccess);
     } catch (error) {
       logClientError(
         "旅行プランのコピーに失敗しました。",
         error
       );
 
-      alert("コピーに失敗しました。");
+      alert(defaultMessages.travelPlanCard.alerts.copyFailed);
     }
   }
 
@@ -149,7 +153,7 @@ export default function TravelPlanCard({
         error
       );
 
-      alert("PDFを作成できませんでした。");
+      alert(defaultMessages.travelPlanCard.alerts.pdfFailed);
     }
   }
 
@@ -159,12 +163,12 @@ export default function TravelPlanCard({
     const user = auth.currentUser;
 
     if (!user) {
-      alert("ログインしてください。");
+      alert(defaultMessages.travelPlanCard.alerts.loginRequired);
       return;
     }
 
     if (!isValidTravelPlan(plan)) {
-      alert("旅行プランの内容が不正なため保存できませんでした。");
+      alert(defaultMessages.travelPlanCard.alerts.invalidPlan);
       return;
     }
 
@@ -183,18 +187,18 @@ export default function TravelPlanCard({
       await saveTravelPlan(uid, normalizedPlan);
 
       if (auth.currentUser?.uid !== uid) {
-        alert("認証状態が変更されました。もう一度ログインしてください。");
+        alert(defaultMessages.travelPlanCard.alerts.authChanged);
         return;
       }
 
-      alert("旅行プランを保存しました。");
+      alert(defaultMessages.travelPlanCard.alerts.saveSuccess);
     } catch (error) {
       logClientError(
         "旅行プランの保存に失敗しました。",
         error
       );
 
-      alert("旅行プランを保存できませんでした。");
+      alert(defaultMessages.travelPlanCard.alerts.saveFailed);
     } finally {
       savingRef.current = false;
       setSaving(false);
@@ -224,7 +228,7 @@ Japan Travel Buddyで作成した旅行プラン`;
           error
         );
 
-        alert("共有できませんでした。");
+        alert(defaultMessages.travelPlanCard.alerts.shareUnavailable);
       }
 
       return;
@@ -238,14 +242,14 @@ Japan Travel Buddyで作成した旅行プラン`;
           2
         )
       );
-      alert("共有用の旅行プランをコピーしました。");
+      alert(defaultMessages.travelPlanCard.alerts.shareCopySuccess);
     } catch (error) {
       logClientError(
         "共有用テキストのコピーに失敗しました。",
         error
       );
 
-      alert("共有に失敗しました。");
+      alert(defaultMessages.travelPlanCard.alerts.shareFailed);
     }
   }
 
@@ -264,7 +268,7 @@ Japan Travel Buddyで作成した旅行プラン`;
 
       if (spotNames.length === 0) {
         alert(
-          "ルートを作成できるスポットがありません。"
+          defaultMessages.travelPlanCard.alerts.noRouteSpots
         );
         return;
       }
@@ -286,7 +290,7 @@ Japan Travel Buddyで作成した旅行プラン`;
         error
       );
 
-      alert("Googleマップを開けませんでした。");
+      alert(defaultMessages.travelPlanCard.alerts.mapsFailed);
     }
   }
 
@@ -384,7 +388,7 @@ Japan Travel Buddyで作成した旅行プラン`;
               {/* Title area */}
               <div className="min-w-0">
                 <p className="text-xs font-bold uppercase tracking-[0.28em] text-cyan-200 sm:text-sm">
-                  Japan Travel Buddy
+                  {defaultMessages.appName}
                 </p>
 
                 <h1 className="mt-2 text-3xl font-black leading-[1.16] tracking-tight sm:text-4xl lg:text-[40px]">
@@ -406,13 +410,13 @@ Japan Travel Buddyで作成した旅行プラン`;
                   variant="secondary"
                   aria-label={
                     favorite
-                      ? "お気に入りから削除"
-                      : "お気に入りに追加"
+                      ? defaultMessages.travelPlanCard.actions.removeFavorite
+                      : defaultMessages.travelPlanCard.actions.addFavorite
                   }
                   title={
                     favorite
-                      ? "お気に入りから削除"
-                      : "お気に入り"
+                      ? defaultMessages.travelPlanCard.actions.removeFavorite
+                      : defaultMessages.travelPlanCard.actions.favoriteTitle
                   }
                   className={actionButtonClass}
                 >
@@ -431,8 +435,8 @@ Japan Travel Buddyで作成した旅行プラン`;
                   size="icon"
                   onClick={handleCopy}
                   variant="secondary"
-                  aria-label="旅行プランをコピー"
-                  title="コピー"
+                  aria-label={defaultMessages.travelPlanCard.actions.copy}
+                  title={defaultMessages.travelPlanCard.actions.copyTitle}
                   className={actionButtonClass}
                 >
                   <Copy
@@ -445,8 +449,8 @@ Japan Travel Buddyで作成した旅行プラン`;
                   size="icon"
                   onClick={handlePdf}
                   variant="secondary"
-                  aria-label="旅行プランをPDFで保存"
-                  title="PDF保存"
+                  aria-label={defaultMessages.travelPlanCard.actions.savePdf}
+                  title={defaultMessages.travelPlanCard.actions.savePdfTitle}
                   className={actionButtonClass}
                 >
                   <FileText
@@ -460,8 +464,16 @@ Japan Travel Buddyで作成した旅行プラン`;
                   onClick={handleSave}
                   disabled={saving}
                   variant="secondary"
-                  aria-label={saving ? "保存中..." : "旅行プランを保存"}
-                  title={saving ? "保存中..." : "保存"}
+                  aria-label={
+                    saving
+                      ? defaultMessages.travelPlanCard.actions.saving
+                      : defaultMessages.travelPlanCard.actions.save
+                  }
+                  title={
+                    saving
+                      ? defaultMessages.travelPlanCard.actions.saving
+                      : defaultMessages.travelPlanCard.actions.saveTitle
+                  }
                   className={actionButtonClass}
                 >
                   <Save
@@ -474,8 +486,8 @@ Japan Travel Buddyで作成した旅行プラン`;
                   size="icon"
                   onClick={handleRoute}
                   variant="secondary"
-                  aria-label="Google Mapsでルートを開く"
-                  title="Google Maps"
+                  aria-label={defaultMessages.travelPlanCard.actions.openRoute}
+                  title={defaultMessages.travelPlanCard.actions.mapsTitle}
                   className="h-11 w-11 rounded-xl border border-white/80 bg-white text-slate-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-50 hover:text-blue-700 lg:col-start-3"
                 >
                   <Map
@@ -488,8 +500,8 @@ Japan Travel Buddyで作成した旅行プラン`;
                   size="icon"
                   onClick={handleShare}
                   variant="secondary"
-                  aria-label="旅行プランを共有"
-                  title="共有"
+                  aria-label={defaultMessages.travelPlanCard.actions.share}
+                  title={defaultMessages.travelPlanCard.actions.shareTitle}
                   className={actionButtonClass}
                 >
                   <Share2
@@ -504,7 +516,7 @@ Japan Travel Buddyで作成した旅行プラン`;
             <div className="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
               <div className="rounded-2xl border border-white/15 bg-white/15 px-4 py-3 backdrop-blur-md">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-100">
-                  Duration
+                  {defaultMessages.travelPlanCard.info.durationLabel}
                 </p>
 
                 <div className="mt-1.5 flex items-center gap-2">
@@ -515,14 +527,15 @@ Japan Travel Buddyで作成した旅行プラン`;
                   />
 
                   <p className="text-base font-bold text-white">
-                    {totalDays}日間
+                    {totalDays}
+                    {defaultMessages.travelPlanCard.info.daySuffix}
                   </p>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-white/15 bg-white/15 px-4 py-3 backdrop-blur-md">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-100">
-                  Spots
+                  {defaultMessages.travelPlanCard.info.spotsLabel}
                 </p>
 
                 <div className="mt-1.5 flex items-center gap-2">
@@ -533,14 +546,15 @@ Japan Travel Buddyで作成した旅行プラン`;
                   />
 
                   <p className="whitespace-nowrap text-base font-bold text-white">
-                    {totalSpots}スポット
+                    {totalSpots}
+                    {defaultMessages.travelPlanCard.info.spotSuffix}
                   </p>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-white/15 bg-white/15 px-4 py-3 backdrop-blur-md">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-100">
-                  Area
+                  {defaultMessages.travelPlanCard.info.areaLabel}
                 </p>
 
                 <div className="mt-1.5 flex min-w-0 items-center gap-2">
@@ -551,14 +565,14 @@ Japan Travel Buddyで作成した旅行プラン`;
                   />
 
                   <p className="truncate text-base font-bold text-white">
-                    {firstSpot?.area ?? "日本"}
+                    {firstSpot?.area ?? defaultMessages.travelPlanCard.info.defaultArea}
                   </p>
                 </div>
               </div>
 
               <div className="rounded-2xl border border-white/15 bg-white/15 px-4 py-3 backdrop-blur-md">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-100">
-                  AI
+                  {defaultMessages.travelPlanCard.info.aiLabel}
                 </p>
 
                 <div className="mt-1.5 flex min-w-0 items-center gap-2">
@@ -569,7 +583,7 @@ Japan Travel Buddyで作成した旅行プラン`;
                   />
 
                   <p className="truncate text-base font-bold text-white">
-                    Concierge
+                    {defaultMessages.travelPlanCard.info.aiValue}
                   </p>
                 </div>
               </div>
@@ -593,11 +607,11 @@ Japan Travel Buddyで作成した旅行プラン`;
 
               <div className="min-w-0">
                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">
-                  Travel Summary
+                  {defaultMessages.travelPlanCard.summaryEyebrow}
                 </p>
 
                 <h2 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
-                  プラン概要
+                  {defaultMessages.travelPlanCard.summaryTitle}
                 </h2>
 
                 <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
@@ -624,11 +638,11 @@ Japan Travel Buddyで作成した旅行プラン`;
 
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.18em] text-blue-600">
-                  Travel Map
+                  {defaultMessages.travelPlanCard.mapEyebrow}
                 </p>
 
                 <h2 className="text-lg font-bold text-slate-900">
-                  旅行ルート
+                  {defaultMessages.travelPlanCard.mapTitle}
                 </h2>
               </div>
             </div>

@@ -1,5 +1,10 @@
 "use client";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const travelMapMessages = getMessages(DEFAULT_LOCALE).travelMap;
+
 type Props = {
   latitude: number;
   longitude: number;
@@ -17,7 +22,7 @@ export default function TravelMap({
         className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-8 text-center text-gray-500 shadow-sm"
         role="status"
       >
-        地図を表示できません。
+        {travelMapMessages.unavailableMessage}
       </div>
     );
   }
@@ -27,7 +32,7 @@ export default function TravelMap({
   return (
     <div className="mt-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-lg">
       <iframe
-        title={`${name}の地図`}
+        title={`${travelMapMessages.titlePrefix}${name}${travelMapMessages.titleSuffix}`}
         src={src}
         width="100%"
         height="360"

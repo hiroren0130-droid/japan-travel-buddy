@@ -14,6 +14,11 @@ import {
   ExternalLink,
   MapPin,
 } from "lucide-react";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const messages = getMessages(DEFAULT_LOCALE);
+const interactiveTravelMapMessages = messages.interactiveTravelMap;
 
 type Spot = {
   name: string;
@@ -77,11 +82,11 @@ export default function InteractiveTravelMap({
           </div>
 
           <p className="mt-4 text-sm font-bold text-slate-700">
-            地図を表示できません
+            {interactiveTravelMapMessages.unavailableTitle}
           </p>
 
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Google Maps API Keyが設定されていません。
+            {interactiveTravelMapMessages.missingApiKeyMessage}
           </p>
         </div>
       </div>
@@ -103,7 +108,7 @@ export default function InteractiveTravelMap({
   return (
     <APIProvider apiKey={apiKey}>
       <div
-        aria-label="旅行スポットのルートマップ"
+        aria-label={interactiveTravelMapMessages.mapAriaLabel}
         className="relative h-[360px] w-full overflow-hidden bg-slate-100 sm:h-[440px] lg:h-[520px]"
       >
         <Map
@@ -167,7 +172,7 @@ export default function InteractiveTravelMap({
                     </h3>
 
                     <p className="mt-1 text-xs text-slate-500">
-                      Japan Travel Buddy
+                      {messages.appName}
                     </p>
                   </div>
                 </div>
@@ -179,7 +184,7 @@ export default function InteractiveTravelMap({
                   }
                   className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                 >
-                  Google Mapsで開く
+                  {interactiveTravelMapMessages.openGoogleMaps}
 
                   <ExternalLink
                     size={14}
@@ -200,7 +205,7 @@ export default function InteractiveTravelMap({
               aria-hidden="true"
             />
 
-            {spots.length}スポット
+            {spots.length}{interactiveTravelMapMessages.spotCountSuffix}
           </span>
         </div>
       </div>

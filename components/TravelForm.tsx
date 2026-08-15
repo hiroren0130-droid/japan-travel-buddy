@@ -2,6 +2,10 @@ import type { FormEvent } from "react";
 
 import Button from "@/components/ui/Button";
 import Card from "@/components/ui/Card";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
 
 type Props = {
   destination: string;
@@ -182,11 +186,11 @@ export default function TravelForm({
 
             <div>
               <h2 className="text-2xl font-bold tracking-tight text-gray-900">
-                AI旅行プラン作成
+                {defaultMessages.travelForm.title}
               </h2>
 
               <p className="mt-1.5 text-sm leading-6 text-gray-500">
-                行き先や旅行条件を入力すると、AIが希望に合わせたプランを作成します。
+                {defaultMessages.travelForm.description}
               </p>
             </div>
           </div>
@@ -206,9 +210,9 @@ export default function TravelForm({
             "
           >
             <span className="font-semibold">
-              必須項目：
+              {defaultMessages.travelForm.requiredLabel}
             </span>
-            行き先・日数・人数
+            {defaultMessages.travelForm.requiredItems}
           </div>
         </div>
 
@@ -220,7 +224,7 @@ export default function TravelForm({
               className={labelClass}
             >
               <span aria-hidden="true">📍</span>{" "}
-              行き先
+              {defaultMessages.travelForm.destination.label}
               <span className="ml-1 text-red-500">
                 *
               </span>
@@ -234,7 +238,7 @@ export default function TravelForm({
               onChange={(event) =>
                 setDestination(event.target.value)
               }
-              placeholder="例：京都、東京、大阪"
+              placeholder={defaultMessages.travelForm.destination.placeholder}
               className={inputClass}
               disabled={loading}
               required
@@ -247,7 +251,7 @@ export default function TravelForm({
               id="destination-help"
               className="mt-2 text-xs leading-5 text-gray-500"
             >
-              都道府県、市区町村、観光エリアなどを入力してください。
+              {defaultMessages.travelForm.destination.help}
             </p>
           </div>
 
@@ -258,7 +262,7 @@ export default function TravelForm({
               className={labelClass}
             >
               <span aria-hidden="true">📅</span>{" "}
-              日数
+              {defaultMessages.travelForm.days.label}
               <span className="ml-1 text-red-500">
                 *
               </span>
@@ -276,7 +280,7 @@ export default function TravelForm({
               required
             >
               <option value="">
-                選択してください
+                {defaultMessages.travelForm.selectPlaceholder}
               </option>
 
               {DAY_OPTIONS.map((day) => (
@@ -284,7 +288,7 @@ export default function TravelForm({
                   key={day}
                   value={day}
                 >
-                  {day}日
+                  {day}{defaultMessages.travelForm.days.unit}
                 </option>
               ))}
             </select>
@@ -297,7 +301,7 @@ export default function TravelForm({
               className={labelClass}
             >
               <span aria-hidden="true">👥</span>{" "}
-              人数
+              {defaultMessages.travelForm.travelers.label}
               <span className="ml-1 text-red-500">
                 *
               </span>
@@ -315,7 +319,7 @@ export default function TravelForm({
               required
             >
               <option value="">
-                選択してください
+                {defaultMessages.travelForm.selectPlaceholder}
               </option>
 
               {TRAVELER_OPTIONS.map((person) => (
@@ -323,7 +327,7 @@ export default function TravelForm({
                   key={person}
                   value={person}
                 >
-                  {person}人
+                  {person}{defaultMessages.travelForm.travelers.unit}
                 </option>
               ))}
             </select>
@@ -336,7 +340,7 @@ export default function TravelForm({
               className={labelClass}
             >
               <span aria-hidden="true">💴</span>{" "}
-              旅行全体の予算
+              {defaultMessages.travelForm.budget.label}
             </label>
 
             <select
@@ -349,12 +353,12 @@ export default function TravelForm({
               className={inputClass}
               disabled={loading}
             >
-              {BUDGET_OPTIONS.map((option) => (
+              {BUDGET_OPTIONS.map((option, index) => (
                 <option
                   key={option}
                   value={option}
                 >
-                  {option}
+                  {defaultMessages.travelForm.budget.optionLabels[index]}
                 </option>
               ))}
             </select>
@@ -374,9 +378,9 @@ export default function TravelForm({
             >
               <legend className="text-sm font-semibold text-gray-800">
                 <span aria-hidden="true">🎯</span>{" "}
-                興味・旅行テーマ
+                {defaultMessages.travelForm.interests.label}
                 <span className="ml-2 font-normal text-gray-500">
-                  複数選択可
+                  {defaultMessages.travelForm.interests.multipleSelection}
                 </span>
               </legend>
 
@@ -393,7 +397,8 @@ export default function TravelForm({
                   "
                   aria-live="polite"
                 >
-                  {selectedInterests.length}件選択
+                  {selectedInterests.length}
+                  {defaultMessages.travelForm.interests.selectedSuffix}
                 </span>
 
                 {selectedInterests.length > 0 && (
@@ -411,14 +416,14 @@ export default function TravelForm({
                       disabled:text-gray-400
                     "
                   >
-                    すべて解除
+                    {defaultMessages.travelForm.interests.clearAll}
                   </button>
                 )}
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-              {INTEREST_OPTIONS.map((interest) => {
+              {INTEREST_OPTIONS.map((interest, index) => {
                 const checked =
                   selectedInterests.includes(interest);
 
@@ -472,7 +477,7 @@ export default function TravelForm({
                     />
 
                     <span className="leading-5">
-                      {interest}
+                      {defaultMessages.travelForm.interests.optionLabels[index]}
                     </span>
                   </label>
                 );
@@ -496,9 +501,9 @@ export default function TravelForm({
                 className="block text-sm font-semibold text-gray-800"
               >
                 <span aria-hidden="true">✍️</span>{" "}
-                その他のご希望
+                {defaultMessages.travelForm.specialRequest.label}
                 <span className="ml-2 font-normal text-gray-500">
-                  任意
+                  {defaultMessages.travelForm.specialRequest.optional}
                 </span>
               </label>
 
@@ -518,11 +523,7 @@ export default function TravelForm({
               onChange={(event) =>
                 setSpecialRequest(event.target.value)
               }
-              placeholder={`例：
-・抹茶スイーツを食べたい
-・人混みを避けたい
-・雨でも楽しめる場所がいい
-・歩く距離を少なくしたい`}
+              placeholder={defaultMessages.travelForm.specialRequest.placeholder}
               rows={5}
               maxLength={SPECIAL_REQUEST_MAX_LENGTH}
               className={`${inputClass} resize-y leading-6`}
@@ -534,7 +535,7 @@ export default function TravelForm({
               id="special-request-help"
               className="mt-2 text-xs leading-5 text-gray-500"
             >
-              食べたいもの、避けたい場所、移動方法、体力面の希望などを自由に入力できます。
+              {defaultMessages.travelForm.specialRequest.help}
             </p>
           </div>
         </div>
@@ -547,8 +548,8 @@ export default function TravelForm({
             className="w-full"
           >
             {loading
-              ? "AIが旅行プランを作成中..."
-              : "✨ AIで旅行プランを作成"}
+              ? defaultMessages.travelForm.submit.loading
+              : defaultMessages.travelForm.submit.idle}
           </Button>
 
           {!loading && !isFormReady && (
@@ -562,7 +563,7 @@ export default function TravelForm({
               "
               role="status"
             >
-              行き先・日数・人数を入力すると作成できます。
+              {defaultMessages.travelForm.submit.incomplete}
             </p>
           )}
 
@@ -578,7 +579,7 @@ export default function TravelForm({
               role="status"
               aria-live="polite"
             >
-              条件を確認し、旅行ルートを組み立てています。
+              {defaultMessages.travelForm.submit.loadingStatus}
             </p>
           )}
         </div>

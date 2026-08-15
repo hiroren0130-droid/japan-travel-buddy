@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Heart, Check } from "lucide-react";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
+
 type Props = {
   text: string;
 };
@@ -63,13 +68,13 @@ export default function FavoriteButton({
       onClick={saveFavorite}
       aria-label={
         saved
-          ? "お気に入りに保存しました"
-          : "お気に入りに保存"
+          ? defaultMessages.favoriteButton.savedAriaLabel
+          : defaultMessages.favoriteButton.saveAriaLabel
       }
       title={
         saved
-          ? "保存しました"
-          : "お気に入り"
+          ? defaultMessages.favoriteButton.savedLabel
+          : defaultMessages.favoriteButton.favoriteLabel
       }
       className="
         group
@@ -116,8 +121,8 @@ export default function FavoriteButton({
 
       <span className="sr-only">
         {saved
-          ? "保存しました"
-          : "お気に入り"}
+          ? defaultMessages.favoriteButton.savedLabel
+          : defaultMessages.favoriteButton.favoriteLabel}
       </span>
     </button>
   );

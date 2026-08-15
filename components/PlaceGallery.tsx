@@ -1,4 +1,8 @@
 import PlaceImage from "./PlaceImage";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const placeGalleryMessages = getMessages(DEFAULT_LOCALE).placeGallery;
 
 type Props = {
   content: string;
@@ -29,7 +33,7 @@ export default function PlaceGallery({ content }: Props) {
   return (
     <div className="mt-6">
       <h3 className="mb-4 text-lg font-bold">
-        📸 観光スポット
+        {placeGalleryMessages.title}
       </h3>
 
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3">

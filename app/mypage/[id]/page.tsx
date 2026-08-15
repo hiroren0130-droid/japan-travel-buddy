@@ -9,6 +9,10 @@ import TravelPlanCard from "@/components/TravelPlanCard";
 import type { TravelPlan } from "@/types/travel";
 import { auth } from "@/lib/firebase";
 import { getTravelPlan } from "@/lib/firestore";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const myPageDetailMessages = getMessages(DEFAULT_LOCALE).myPageDetail;
 
 const CONTROL_CHARACTER_PATTERN =
   /[\u0000-\u001f\u007f-\u009f]/;
@@ -62,7 +66,7 @@ export default function TravelPlanDetailPage() {
     let requestGeneration = 0;
 
     if (!validatedId) {
-      alert("旅行プランのIDが不正です。");
+      alert(myPageDetailMessages.invalidIdAlert);
       router.replace("/mypage");
 
       return () => {
@@ -100,7 +104,7 @@ export default function TravelPlanDetailPage() {
         }
 
         if (!isOwnedTravelPlan(data, uid)) {
-          alert("旅行プランを読み込めませんでした。");
+          alert(myPageDetailMessages.loadFailedAlert);
           router.replace("/mypage");
           return;
         }
@@ -122,7 +126,7 @@ export default function TravelPlanDetailPage() {
           console.error("Travel plan loading failed.");
         }
 
-        alert("旅行プランを読み込めませんでした。");
+        alert(myPageDetailMessages.loadFailedAlert);
         router.replace("/mypage");
       } finally {
         if (
@@ -147,7 +151,7 @@ export default function TravelPlanDetailPage() {
         console.error("Authentication state check failed.");
       }
 
-      alert("認証状態を確認できませんでした。ページを再読み込みしてください。");
+      alert(myPageDetailMessages.authFailedAlert);
     });
 
     return () => {
@@ -161,7 +165,7 @@ export default function TravelPlanDetailPage() {
     return (
       <main className="mx-auto max-w-5xl p-6">
         <p className="text-center text-gray-500">
-          読み込み中...
+          {myPageDetailMessages.loading}
         </p>
       </main>
     );
@@ -171,19 +175,18 @@ export default function TravelPlanDetailPage() {
     return (
       <main className="mx-auto max-w-3xl p-6 text-center">
         <h1 className="mb-4 text-3xl font-bold">
-          プランが見つかりません
+          {myPageDetailMessages.notFoundTitle}
         </h1>
 
         <p className="mb-8 text-gray-600">
-          この旅行プランは削除されたか、
-          存在しない可能性があります。
+          {myPageDetailMessages.notFoundDescription}
         </p>
 
         <Link
           href="/mypage"
           className="rounded-lg bg-blue-600 px-5 py-3 text-white hover:bg-blue-700"
         >
-          マイページへ戻る
+          {myPageDetailMessages.backToMyPage}
         </Link>
       </main>
     );
@@ -196,7 +199,7 @@ export default function TravelPlanDetailPage() {
           href="/mypage"
           className="text-blue-600 hover:underline"
         >
-          ← マイページへ戻る
+          {myPageDetailMessages.backToMyPageWithArrow}
         </Link>
       </div>
 

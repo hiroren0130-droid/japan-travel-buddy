@@ -11,25 +11,30 @@ import {
   UserRound,
 } from "lucide-react";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
+
 const menus = [
   {
     href: "/",
-    label: "ホーム",
+    label: defaultMessages.header.menu.home,
     icon: Home,
   },
   {
     href: "/chat",
-    label: "AI旅行",
+    label: defaultMessages.header.menu.aiTrip,
     icon: Plane,
   },
   {
     href: "/favorites",
-    label: "お気に入り",
+    label: defaultMessages.header.menu.favorites,
     icon: Heart,
   },
   {
     href: "/dashboard",
-    label: "マイページ",
+    label: defaultMessages.header.menu.myPage,
     icon: UserRound,
   },
 ];
@@ -51,7 +56,7 @@ export default function Header() {
         {/* Brand */}
         <Link
           href="/"
-          aria-label="Japan Travel Buddy ホーム"
+          aria-label={defaultMessages.header.brandHomeLabel}
           className="
             group
             flex
@@ -75,18 +80,18 @@ export default function Header() {
 
           <div className="min-w-0">
             <p className="whitespace-nowrap text-xl font-black tracking-tight text-blue-600 transition-colors duration-300 group-hover:text-blue-700 sm:text-2xl lg:text-[28px]">
-              Japan Travel Buddy
+              {defaultMessages.appName}
             </p>
 
             <p className="mt-0.5 hidden text-sm font-medium text-slate-500 sm:block">
-              AIで日本を旅しよう
+              {defaultMessages.header.tagline}
             </p>
           </div>
         </Link>
 
         {/* Navigation */}
         <nav
-          aria-label="メインナビゲーション"
+          aria-label={defaultMessages.header.navigationLabel}
           className="
             flex
             min-w-0

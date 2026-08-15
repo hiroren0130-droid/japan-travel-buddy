@@ -3,6 +3,11 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getMessages } from "@/lib/messages";
+
+const defaultMessages = getMessages(DEFAULT_LOCALE);
+
 type Props = {
   text: string;
 };
@@ -36,13 +41,13 @@ export default function CopyButton({
       onClick={copy}
       aria-label={
         copied
-          ? "旅行プランをコピーしました"
-          : "旅行プランをコピー"
+          ? defaultMessages.copyButton.copiedAriaLabel
+          : defaultMessages.copyButton.copyAriaLabel
       }
       title={
         copied
-          ? "コピーしました"
-          : "コピー"
+          ? defaultMessages.copyButton.copiedLabel
+          : defaultMessages.copyButton.copyLabel
       }
       className="
         group
@@ -89,8 +94,8 @@ export default function CopyButton({
 
       <span className="sr-only">
         {copied
-          ? "コピーしました"
-          : "旅行プランをコピー"}
+          ? defaultMessages.copyButton.copiedLabel
+          : defaultMessages.copyButton.copyAriaLabel}
       </span>
     </button>
   );
