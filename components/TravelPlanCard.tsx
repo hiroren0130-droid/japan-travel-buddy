@@ -31,6 +31,10 @@ import {
 } from "@/lib/favorites";
 import { saveTravelPlan } from "@/lib/firestore";
 import { createGoogleMapsRoute } from "@/lib/googleMaps";
+import {
+  getLocalizedSpotArea,
+  getLocalizedSpotName,
+} from "@/lib/localizedSpot";
 import { downloadTravelPlanPdf } from "@/lib/pdf";
 import { getSpotById } from "@/lib/spotService";
 
@@ -103,7 +107,7 @@ function isAbortError(error: unknown) {
 export default function TravelPlanCard({
   plan,
 }: Props) {
-  const { messages: defaultMessages } = useLocale();
+  const { locale, messages: defaultMessages } = useLocale();
   const [favorite, setFavorite] = useState(() =>
     isFavorite(plan.title)
   );
@@ -315,6 +319,12 @@ Japan Travel Buddyで作成した旅行プラン`;
     }));
 
   const firstSpot = allSpots[0];
+  const firstSpotName = firstSpot
+    ? getLocalizedSpotName(firstSpot, locale)
+    : undefined;
+  const firstSpotArea = firstSpot
+    ? getLocalizedSpotArea(firstSpot, locale)
+    : undefined;
 
   const totalDays = plan.days.length;
 
@@ -353,7 +363,8 @@ Japan Travel Buddyで作成した旅行プラン`;
             {firstSpot ? (
   <SpotImage
   src={firstSpot.image}
-  alt={firstSpot.name}
+  alt={firstSpotName ?? firstSpot.name}
+  spotName={firstSpot.name}
   spotId={firstSpot.id}
   latitude={firstSpot.latitude}
   longitude={firstSpot.longitude}
@@ -368,11 +379,11 @@ Japan Travel Buddyで作成した旅行プラン`;
               <div className="absolute bottom-3 left-3 right-3">
                 <div className="rounded-xl border border-white/30 bg-slate-950/40 px-3 py-2 text-white backdrop-blur-md">
                   <p className="truncate text-sm font-bold">
-                    {firstSpot.name}
+                    {firstSpotName}
                   </p>
 
                   <p className="mt-0.5 truncate text-xs text-white/75">
-                    {firstSpot.area}
+                    {firstSpotArea}
                   </p>
                 </div>
               </div>
@@ -563,7 +574,7 @@ Japan Travel Buddyで作成した旅行プラン`;
                   />
 
                   <p className="truncate text-base font-bold text-white">
-                    {firstSpot?.area ?? defaultMessages.travelPlanCard.info.defaultArea}
+                    {firstSpotArea ?? defaultMessages.travelPlanCard.info.defaultArea}
                   </p>
                 </div>
               </div>

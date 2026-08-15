@@ -1,8 +1,8 @@
-import PlaceImage from "./PlaceImage";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+"use client";
 
-const placeGalleryMessages = getMessages(DEFAULT_LOCALE).placeGallery;
+import { useLocale } from "@/components/LocaleProvider";
+
+import PlaceImage from "./PlaceImage";
 
 type Props = {
   content: string;
@@ -22,6 +22,9 @@ const places = [
 ];
 
 export default function PlaceGallery({ content }: Props) {
+  const { messages } = useLocale();
+  const placeGalleryMessages = messages.placeGallery;
+
   if (!content) return null;
   
   const detectedPlaces = places.filter((place) =>

@@ -7,6 +7,10 @@ import SpotImage from "./SpotImage";
 import TimelineMapButton from "./TimelineMapButton";
 
 import { getSpotByName } from "@/lib/spotService";
+import {
+  getLocalizedSpotArea,
+  getLocalizedSpotName,
+} from "@/lib/localizedSpot";
 
 import {
   Bus,
@@ -82,7 +86,10 @@ export default function TimelineItem({
   transport,
   duration,
 }: Props) {
-  const { messages: defaultMessages } = useLocale();
+  const {
+    locale,
+    messages: defaultMessages,
+  } = useLocale();
   const transportLabels: Record<string, string> = {
     徒歩: defaultMessages.timelineItem.transport.walking,
     JR: defaultMessages.timelineItem.transport.jr,
@@ -92,6 +99,9 @@ export default function TimelineItem({
     タクシー: defaultMessages.timelineItem.transport.taxi,
   };
   const spotData = getSpotByName(spot);
+  const localizedSpotName = spotData
+    ? getLocalizedSpotName(spotData, locale)
+    : spot;
 
   return (
     <div
@@ -155,7 +165,8 @@ export default function TimelineItem({
             >
               <SpotImage
                 src={spotData.image}
-                alt={spotData.name}
+                alt={localizedSpotName}
+                spotName={spotData.name}
                 spotId={spotData.id}
                 latitude={spotData.latitude}
                 longitude={spotData.longitude}
@@ -181,7 +192,12 @@ export default function TimelineItem({
                       aria-hidden="true"
                     />
 
-                    <span>{spotData.area}</span>
+                    <span>
+                      {getLocalizedSpotArea(
+                        spotData,
+                        locale
+                      )}
+                    </span>
                   </div>
                 )}
               </div>

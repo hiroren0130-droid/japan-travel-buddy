@@ -1,9 +1,6 @@
 "use client";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const travelMapMessages = getMessages(DEFAULT_LOCALE).travelMap;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   latitude: number;
@@ -16,6 +13,9 @@ export default function TravelMap({
   longitude,
   name,
 }: Props) {
+  const { messages } = useLocale();
+  const travelMapMessages = messages.travelMap;
+
   if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
     return (
       <div

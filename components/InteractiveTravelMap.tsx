@@ -15,6 +15,8 @@ import {
   MapPin,
 } from "lucide-react";
 import { useLocale } from "@/components/LocaleProvider";
+import { getLocalizedSpotName } from "@/lib/localizedSpot";
+import { getSpotByName } from "@/lib/spotService";
 
 type Spot = {
   name: string;
@@ -29,7 +31,7 @@ type Props = {
 export default function InteractiveTravelMap({
   spots,
 }: Props) {
-  const { messages } = useLocale();
+  const { locale, messages } = useLocale();
   const interactiveTravelMapMessages =
     messages.interactiveTravelMap;
   const [selected, setSelected] =
@@ -104,6 +106,14 @@ export default function InteractiveTravelMap({
     );
   }
 
+  function getDisplayName(spot: Spot): string {
+    const spotData = getSpotByName(spot.name);
+
+    return spotData
+      ? getLocalizedSpotName(spotData, locale)
+      : spot.name;
+  }
+
   return (
     <APIProvider apiKey={apiKey}>
       <div
@@ -130,7 +140,7 @@ export default function InteractiveTravelMap({
       lat: spot.latitude,
       lng: spot.longitude,
     }}
-              title={`${index + 1}. ${spot.name}`}
+              title={`${index + 1}. ${getDisplayName(spot)}`}
               onClick={() =>
                 setSelected(spot)
               }
@@ -167,7 +177,7 @@ export default function InteractiveTravelMap({
 
                   <div className="min-w-0">
                     <h3 className="break-words text-sm font-bold leading-5 text-slate-900">
-                      {selected.name}
+                      {getDisplayName(selected)}
                     </h3>
 
                     <p className="mt-1 text-xs text-slate-500">

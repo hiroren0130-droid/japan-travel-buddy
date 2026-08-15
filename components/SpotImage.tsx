@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 type Props = {
   src: string;
   alt: string;
+  spotName?: string;
   spotId?: string;
   latitude?: number;
   longitude?: number;
@@ -60,6 +61,7 @@ function createPlacesPhotoUrl(
 export default function SpotImage({
   src,
   alt,
+  spotName,
   spotId,
   latitude,
   longitude,
@@ -77,12 +79,12 @@ export default function SpotImage({
   const placesPhotoUrl = useMemo(
     () =>
       createPlacesPhotoUrl(
-        alt,
+        spotName ?? alt,
         spotId,
         latitude,
         longitude
       ),
-    [alt, latitude, longitude, spotId]
+    [alt, latitude, longitude, spotId, spotName]
   );
 
   const [failedPlacesUrl, setFailedPlacesUrl] =

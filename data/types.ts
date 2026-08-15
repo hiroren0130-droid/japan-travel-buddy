@@ -8,6 +8,17 @@ export type TransportType =
   | "JR"
   | "タクシー";
 
+export type SpotTranslation = {
+  name?: string;
+  description?: string;
+  area?: string;
+  category?: string;
+  address?: string;
+};
+
+export type SpotTranslations =
+  Partial<Record<"en", SpotTranslation>>;
+
 export type Spot = {
   id: string;
   name: string;

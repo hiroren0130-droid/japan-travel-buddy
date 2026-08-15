@@ -1,10 +1,10 @@
+"use client";
+
 import SpotImage from "@/components/SpotImage";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
+import { getLocalizedSpotName } from "@/lib/localizedSpot";
 import { getSpotByName } from "@/lib/spotService";
-
-const placeImageMessages = getMessages(DEFAULT_LOCALE).placeImage;
 
 type Props = {
   name: string;
@@ -16,8 +16,13 @@ const FALLBACK_IMAGE =
 export default function PlaceImage({
   name,
 }: Props) {
+  const { locale, messages } = useLocale();
+  const placeImageMessages = messages.placeImage;
   const spot =
     getSpotByName(name);
+  const localizedName = spot
+    ? getLocalizedSpotName(spot, locale)
+    : name;
 
   const imageSrc =
     spot?.image?.trim() ||
@@ -39,7 +44,11 @@ export default function PlaceImage({
       <div className="relative h-40 w-full">
         <SpotImage
           src={imageSrc}
-          alt={`${name}${placeImageMessages.photoAltSuffix}`}
+          alt={`${localizedName}${placeImageMessages.photoAltSuffix}`}
+          spotName={spot?.name ?? name}
+          spotId={spot?.id}
+          latitude={spot?.latitude}
+          longitude={spot?.longitude}
           className="
             transition-transform
             duration-300
@@ -56,7 +65,7 @@ export default function PlaceImage({
             text-gray-900
           "
         >
-          {name}
+          {localizedName}
         </p>
       </div>
     </div>

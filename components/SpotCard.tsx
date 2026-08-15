@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Clock3,
   ExternalLink,
@@ -10,27 +12,17 @@ import {
 } from "lucide-react";
 
 import Card from "@/components/ui/Card";
+import { useLocale } from "@/components/LocaleProvider";
 import SpotImage from "@/components/SpotImage";
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import type { Spot } from "@/data/types";
+import {
+  getLocalizedSpotAddress,
+  getLocalizedSpotArea,
+  getLocalizedSpotCategory,
+  getLocalizedSpotDescription,
+  getLocalizedSpotName,
+} from "@/lib/localizedSpot";
 import TravelMap from "./TravelMap";
-
-const spotCardMessages = getMessages(DEFAULT_LOCALE).spotCard;
-
-type Spot = {
-  name: string;
-  category?: string;
-  area?: string;
-  description?: string;
-  image?: string;
-  address?: string;
-  hours?: string;
-  price?: string;
-  rating?: number;
-  website?: string;
-  latitude: number;
-  longitude: number;
-};
 
 type Props = {
   spot: Spot;
@@ -108,6 +100,18 @@ function InformationItem({
 }
 
 export default function SpotCard({ spot }: Props) {
+  const { locale, messages } = useLocale();
+  const spotCardMessages = messages.spotCard;
+  const localizedName =
+    getLocalizedSpotName(spot, locale);
+  const localizedArea =
+    getLocalizedSpotArea(spot, locale);
+  const localizedCategory =
+    getLocalizedSpotCategory(spot, locale);
+  const localizedAddress =
+    getLocalizedSpotAddress(spot, locale);
+  const localizedDescription =
+    getLocalizedSpotDescription(spot, locale);
   const hasInformation =
     Boolean(spot.area) ||
     Boolean(spot.address) ||
@@ -141,7 +145,11 @@ export default function SpotCard({ spot }: Props) {
         <div className="relative h-72 w-full overflow-hidden sm:h-80 lg:h-[380px]">
           <SpotImage
             src={spot.image}
-            alt={spot.name}
+            alt={localizedName}
+            spotName={spot.name}
+            spotId={spot.id}
+            latitude={spot.latitude}
+            longitude={spot.longitude}
             className="
               transition-transform
               duration-700
@@ -202,7 +210,7 @@ export default function SpotCard({ spot }: Props) {
                       aria-hidden="true"
                     />
 
-                    <span>{spot.category}</span>
+                    <span>{localizedCategory}</span>
                   </div>
                 )}
 
@@ -218,7 +226,7 @@ export default function SpotCard({ spot }: Props) {
                     sm:text-4xl
                   "
                 >
-                  {spot.name}
+                  {localizedName}
                 </h3>
 
                 {spot.area && (
@@ -228,7 +236,7 @@ export default function SpotCard({ spot }: Props) {
                       aria-hidden="true"
                     />
 
-                    <span>{spot.area}</span>
+                    <span>{localizedArea}</span>
                   </div>
                 )}
               </div>
@@ -304,12 +312,12 @@ export default function SpotCard({ spot }: Props) {
                       aria-hidden="true"
                     />
 
-                    <span>{spot.category}</span>
+                    <span>{localizedCategory}</span>
                   </div>
                 )}
 
                 <h3 className="break-words text-3xl font-black tracking-tight text-slate-950">
-                  {spot.name}
+                  {localizedName}
                 </h3>
 
                 {spot.area && (
@@ -319,7 +327,7 @@ export default function SpotCard({ spot }: Props) {
                       aria-hidden="true"
                     />
 
-                    <span>{spot.area}</span>
+                    <span>{localizedArea}</span>
                   </p>
                 )}
               </div>
@@ -357,7 +365,7 @@ export default function SpotCard({ spot }: Props) {
 
         {/* Information */}
         {hasInformation && (
-          <section aria-labelledby={`spot-details-${spot.name}`}>
+          <section aria-labelledby={`spot-details-${spot.id}`}>
             <div className="mb-4 flex items-center gap-3">
               <div className="h-6 w-1 rounded-full bg-gradient-to-b from-blue-600 to-cyan-400" />
 
@@ -367,7 +375,7 @@ export default function SpotCard({ spot }: Props) {
                 </p>
 
                 <h4
-                  id={`spot-details-${spot.name}`}
+                  id={`spot-details-${spot.id}`}
                   className="mt-0.5 text-lg font-extrabold text-slate-900"
                 >
                   {spotCardMessages.basicInformation}
@@ -380,7 +388,7 @@ export default function SpotCard({ spot }: Props) {
                 <InformationItem
                   icon={MapPin}
                   label={spotCardMessages.addressLabel}
-                  value={spot.address}
+                  value={localizedAddress ?? spot.address}
                 />
               )}
 
@@ -404,7 +412,7 @@ export default function SpotCard({ spot }: Props) {
                 <InformationItem
                   icon={MapPin}
                   label={spotCardMessages.areaLabel}
-                  value={spot.area}
+                  value={localizedArea}
                 />
               )}
             </div>
@@ -414,7 +422,7 @@ export default function SpotCard({ spot }: Props) {
         {/* Description */}
         {spot.description && (
           <section
-            aria-labelledby={`spot-information-${spot.name}`}
+            aria-labelledby={`spot-information-${spot.id}`}
             className="
               relative
               overflow-hidden
@@ -461,14 +469,14 @@ export default function SpotCard({ spot }: Props) {
                 </p>
 
                 <h4
-                  id={`spot-information-${spot.name}`}
+                  id={`spot-information-${spot.id}`}
                   className="mt-1 text-lg font-extrabold text-slate-900"
                 >
                   {spotCardMessages.aboutSpot}
                 </h4>
 
                 <p className="mt-3 break-words text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
-                  {spot.description}
+                  {localizedDescription}
                 </p>
               </div>
             </div>
@@ -479,7 +487,7 @@ export default function SpotCard({ spot }: Props) {
         {spot.website && (
           <a
             href={spot.website}
-            aria-label={`${spot.name}${spotCardMessages.officialWebsiteAriaLabelSuffix}`}
+            aria-label={`${localizedName}${spotCardMessages.officialWebsiteAriaLabelSuffix}`}
             target="_blank"
             rel="noopener noreferrer"
             className="
@@ -530,7 +538,7 @@ export default function SpotCard({ spot }: Props) {
         )}
 
         {/* Map */}
-        <section aria-labelledby={`map-preview-${spot.name}`}>
+        <section aria-labelledby={`map-preview-${spot.id}`}>
           <div className="mb-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div
@@ -557,7 +565,7 @@ export default function SpotCard({ spot }: Props) {
                 </p>
 
                 <h4
-                  id={`map-preview-${spot.name}`}
+                  id={`map-preview-${spot.id}`}
                   className="mt-0.5 text-lg font-extrabold text-slate-900"
                 >
                   {spotCardMessages.location}

@@ -3,11 +3,9 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+import { useLocale } from "@/components/LocaleProvider";
+import { getLocalizedSpotName } from "@/lib/localizedSpot";
 import { getSpotByName } from "@/lib/spotService";
-
-const placeLinkMessages = getMessages(DEFAULT_LOCALE).placeLink;
 
 type Props = {
   name: string;
@@ -16,6 +14,8 @@ type Props = {
 export default function PlaceLink({
   name,
 }: Props) {
+  const { locale, messages } = useLocale();
+  const placeLinkMessages = messages.placeLink;
   const trimmedName = name.trim();
 
   if (!trimmedName) {
@@ -36,10 +36,13 @@ export default function PlaceLink({
     );
   }
 
+  const localizedName =
+    getLocalizedSpotName(spot, locale);
+
   return (
     <Link
       href={`/spots/${spot.id}`}
-      aria-label={`${trimmedName}${placeLinkMessages.detailAriaLabelSuffix}`}
+      aria-label={`${localizedName}${placeLinkMessages.detailAriaLabelSuffix}`}
       className="
         group
         inline-flex
@@ -63,7 +66,7 @@ export default function PlaceLink({
       "
     >
       <span className="break-words">
-        {trimmedName}
+        {localizedName}
       </span>
 
       <ArrowUpRight
