@@ -79,3 +79,43 @@ export function getLocalizedSpotAddress(
     spot.address
   );
 }
+
+export function getLocalizedSpotHours(
+  spot: Spot,
+  locale: Locale
+): string | undefined {
+  if (!spot.hours) {
+    return undefined;
+  }
+
+  if (locale !== "en") {
+    return spot.hours;
+  }
+
+  const translatedHours =
+    getSpotTranslation(spot, locale)?.hours?.trim();
+
+  if (translatedHours) {
+    return translatedHours;
+  }
+
+  if (spot.hours.trim() === "24時間") {
+    return "Open 24 hours";
+  }
+
+  return spot.hours.replaceAll("〜", "–");
+}
+
+export function getLocalizedSpotPrice(
+  spot: Spot,
+  locale: Locale
+): string | undefined {
+  if (!spot.price) {
+    return undefined;
+  }
+
+  return localizedValue(
+    getSpotTranslation(spot, locale)?.price,
+    spot.price
+  );
+}

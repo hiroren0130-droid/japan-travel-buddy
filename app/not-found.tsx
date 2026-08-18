@@ -1,11 +1,12 @@
+"use client";
+
 import Link from "next/link";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const messages = getMessages(DEFAULT_LOCALE).notFound;
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function NotFound() {
+  const messages = useLocale().messages.notFound;
+
   return (
     <main className="flex min-h-screen items-center justify-center px-6">
       <div className="max-w-md text-center">

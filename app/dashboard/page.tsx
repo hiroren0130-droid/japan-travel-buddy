@@ -12,6 +12,7 @@ import {
 } from "@/lib/firestore";
 import { useLocale } from "@/components/LocaleProvider";
 import { getIntlLocale } from "@/lib/locale";
+import { createTravelPlanShareText } from "@/lib/travelPlanExport";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -170,11 +171,7 @@ const handleFavorite = async (
 };
 
 async function handleShare(plan: SavedTravelPlan) {
-  const shareText = `${plan.title}
-
-${plan.summary}
-
-Japan Travel Buddyで作成した旅行プラン`;
+  const shareText = createTravelPlanShareText(plan, locale);
 
   try {
     if (navigator.share) {

@@ -10,7 +10,9 @@ import {
   getLocalizedSpotArea,
   getLocalizedSpotCategory,
   getLocalizedSpotDescription,
+  getLocalizedSpotHours,
   getLocalizedSpotName,
+  getLocalizedSpotPrice,
 } from "@/lib/localizedSpot";
 
 export default function SpotDetail({
@@ -24,6 +26,10 @@ export default function SpotDetail({
     getLocalizedSpotName(spot, locale);
   const localizedAddress =
     getLocalizedSpotAddress(spot, locale);
+  const localizedHours =
+    getLocalizedSpotHours(spot, locale);
+  const localizedPrice =
+    getLocalizedSpotPrice(spot, locale);
 
   return (
     <main className="mx-auto max-w-5xl p-6 sm:p-8">
@@ -79,19 +85,19 @@ export default function SpotDetail({
               </div>
             )}
 
-            {spot.hours && (
+            {localizedHours && (
               <div>
                 {spotDetailMessages.hoursPrefix}
                 <strong>{spotDetailMessages.hoursLabel}</strong>
-                {spot.hours}
+                {localizedHours}
               </div>
             )}
 
-            {spot.price && (
+            {localizedPrice && (
               <div>
                 {spotDetailMessages.pricePrefix}
                 <strong>{spotDetailMessages.priceLabel}</strong>
-                {spot.price}
+                {localizedPrice}
               </div>
             )}
           </div>

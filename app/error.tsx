@@ -1,9 +1,6 @@
 "use client";
 
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
-
-const messages = getMessages(DEFAULT_LOCALE).globalError;
+import { useLocale } from "@/components/LocaleProvider";
 
 type Props = {
   error: Error & { digest?: string };
@@ -14,6 +11,8 @@ export default function Error({
   error,
   reset,
 }: Props) {
+  const messages = useLocale().messages.globalError;
+
   console.error(error);
 
   return (

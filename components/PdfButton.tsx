@@ -5,6 +5,7 @@ import jsPDF from "jspdf";
 import { Check, FileDown, LoaderCircle } from "lucide-react";
 
 import { useLocale } from "@/components/LocaleProvider";
+import { createTravelPlanPdfFilename } from "@/lib/travelPlanExport";
 
 type Props = {
   text: string;
@@ -13,7 +14,7 @@ type Props = {
 export default function PdfButton({
   text,
 }: Props) {
-  const { messages: defaultMessages } = useLocale();
+  const { locale, messages: defaultMessages } = useLocale();
   const [creating, setCreating] = useState(false);
   const [completed, setCompleted] = useState(false);
 
@@ -39,7 +40,7 @@ export default function PdfButton({
       );
 
       pdf.text(lines, 10, 30);
-      pdf.save("travel-plan.pdf");
+      pdf.save(createTravelPlanPdfFilename("", locale));
 
       setCompleted(true);
 

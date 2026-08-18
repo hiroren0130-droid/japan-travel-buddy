@@ -14,6 +14,8 @@ export type SpotTranslation = {
   area?: string;
   category?: string;
   address?: string;
+  hours?: string;
+  price?: string;
 };
 
 export type SpotTranslations =

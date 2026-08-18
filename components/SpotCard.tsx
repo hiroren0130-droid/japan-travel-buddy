@@ -20,7 +20,9 @@ import {
   getLocalizedSpotArea,
   getLocalizedSpotCategory,
   getLocalizedSpotDescription,
+  getLocalizedSpotHours,
   getLocalizedSpotName,
+  getLocalizedSpotPrice,
 } from "@/lib/localizedSpot";
 import TravelMap from "./TravelMap";
 
@@ -112,6 +114,10 @@ export default function SpotCard({ spot }: Props) {
     getLocalizedSpotAddress(spot, locale);
   const localizedDescription =
     getLocalizedSpotDescription(spot, locale);
+  const localizedHours =
+    getLocalizedSpotHours(spot, locale);
+  const localizedPrice =
+    getLocalizedSpotPrice(spot, locale);
   const hasInformation =
     Boolean(spot.area) ||
     Boolean(spot.address) ||
@@ -392,19 +398,19 @@ export default function SpotCard({ spot }: Props) {
                 />
               )}
 
-              {spot.hours && (
+              {localizedHours && (
                 <InformationItem
                   icon={Clock3}
                   label={spotCardMessages.hoursLabel}
-                  value={spot.hours}
+                  value={localizedHours}
                 />
               )}
 
-              {spot.price && (
+              {localizedPrice && (
                 <InformationItem
                   icon={Wallet}
                   label={spotCardMessages.priceLabel}
-                  value={spot.price}
+                  value={localizedPrice}
                 />
               )}
 

@@ -1,9 +1,10 @@
-import { DEFAULT_LOCALE } from "@/lib/locale";
-import { getMessages } from "@/lib/messages";
+"use client";
 
-const globalLoadingMessages = getMessages(DEFAULT_LOCALE).globalLoading;
+import { useLocale } from "@/components/LocaleProvider";
 
 export default function Loading() {
+  const globalLoadingMessages = useLocale().messages.globalLoading;
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-50 via-white to-blue-100 px-6">
       <div className="flex w-full max-w-md flex-col items-center gap-6 rounded-3xl border border-slate-200 bg-white p-10 shadow-xl">

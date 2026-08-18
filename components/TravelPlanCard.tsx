@@ -37,6 +37,7 @@ import {
 } from "@/lib/localizedSpot";
 import { downloadTravelPlanPdf } from "@/lib/pdf";
 import { getSpotById } from "@/lib/spotService";
+import { createTravelPlanShareText } from "@/lib/travelPlanExport";
 
 import type { TravelPlan } from "@/types/travel";
 
@@ -148,7 +149,7 @@ export default function TravelPlanCard({
 
   async function handlePdf() {
     try {
-      await downloadTravelPlanPdf(plan);
+      await downloadTravelPlanPdf(plan, locale);
     } catch (error) {
       logClientError(
         "旅行プランPDFの作成に失敗しました。",
@@ -208,11 +209,7 @@ export default function TravelPlanCard({
   }
 
   async function handleShare() {
-    const shareText = `${plan.title}
-
-${plan.summary}
-
-Japan Travel Buddyで作成した旅行プラン`;
+    const shareText = createTravelPlanShareText(plan, locale);
 
     if (navigator.share) {
       try {
@@ -237,13 +234,7 @@ Japan Travel Buddyで作成した旅行プラン`;
     }
 
     try {
-      await navigator.clipboard.writeText(
-        JSON.stringify(
-          createCopyablePlan(plan),
-          null,
-          2
-        )
-      );
+      await navigator.clipboard.writeText(shareText);
       alert(defaultMessages.travelPlanCard.alerts.shareCopySuccess);
     } catch (error) {
       logClientError(
