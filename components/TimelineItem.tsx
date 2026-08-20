@@ -29,6 +29,20 @@ type Props = {
   duration?: string;
 };
 
+function formatDuration(
+  duration: string,
+  locale: "ja" | "en"
+): string {
+  if (locale !== "en") {
+    return duration;
+  }
+
+  return duration.replace(
+    /^(\d+)\s*分$/,
+    "$1 min"
+  );
+}
+
 function TransportIcon({
   transport,
 }: {
@@ -234,7 +248,10 @@ export default function TimelineItem({
                       />
 
                       <span className="font-medium">
-                        {duration}
+                        {formatDuration(
+                          duration,
+                          locale
+                        )}
                       </span>
                     </div>
                   )}

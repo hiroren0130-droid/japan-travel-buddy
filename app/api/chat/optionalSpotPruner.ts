@@ -18,17 +18,22 @@ import {
   optimizeTravelPlanTimes,
 } from "./timeOptimizer";
 
+import { getSpotByName } from "@/lib/spotService";
+
 import type {
   AITravelPlan,
 } from "./travelValidator";
 
 const TARGET_ROUTE_SCORE = 90;
+const EARLY_END_MINUTES = 15 * 60;
+const DEFAULT_STAY_MINUTES = 60;
 
 type PlanQuality = {
   businessHoursViolationCount: number;
   scheduleConflictCount: number;
   lateEndCount: number;
   longDistanceMoveCount: number;
+  earlyEndCount: number;
   score: number;
 };
 
@@ -67,6 +72,79 @@ function containsRequiredSpotNames(
   );
 }
 
+function parseMinutes(
+  value: string | undefined
+): number {
+  const match = value?.match(/\d+/);
+
+  if (!match) {
+    return 0;
+  }
+
+  const minutes = Number(match[0]);
+
+  return Number.isFinite(minutes)
+    ? minutes
+    : 0;
+}
+
+function timeToMinutes(
+  value: string
+): number | null {
+  const match = value.match(
+    /^(\d{1,2}):(\d{2})$/
+  );
+
+  if (!match) {
+    return null;
+  }
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+
+  if (
+    hours < 0 ||
+    hours > 23 ||
+    minutes < 0 ||
+    minutes > 59
+  ) {
+    return null;
+  }
+
+  return hours * 60 + minutes;
+}
+
+function calculateEarlyEndCount(
+  plan: AITravelPlan
+): number {
+  return plan.days.filter((day) => {
+    const lastItem = day.items.at(-1);
+
+    if (!lastItem) {
+      return true;
+    }
+
+    const arrivalMinutes =
+      timeToMinutes(lastItem.time);
+
+    if (arrivalMinutes === null) {
+      return false;
+    }
+
+    const recommendedStayMinutes =
+      parseMinutes(
+        getSpotByName(lastItem.spot)
+          ?.recommendedStay
+      ) || DEFAULT_STAY_MINUTES;
+
+    return (
+      arrivalMinutes +
+        recommendedStayMinutes <
+      EARLY_END_MINUTES
+    );
+  }).length;
+}
+
 function evaluatePlan(
   plan: AITravelPlan
 ): PlanQuality {
@@ -90,6 +168,9 @@ function evaluatePlan(
       calculateLongDistanceMoveCount(
         plan
       ),
+
+    earlyEndCount:
+      calculateEarlyEndCount(plan),
 
     score:
       calculateRouteScore(
@@ -174,6 +255,20 @@ function isBetterQuality(
     return (
       candidate.longDistanceMoveCount <
       current.longDistanceMoveCount
+    );
+  }
+
+  /*
+   * 重大な旅程問題が同等なら、Route Score のためだけに
+   * 午後の観光を削って15時前に終わるプランへ悪化させません。
+   */
+  if (
+    candidate.earlyEndCount !==
+    current.earlyEndCount
+  ) {
+    return (
+      candidate.earlyEndCount <
+      current.earlyEndCount
     );
   }
 

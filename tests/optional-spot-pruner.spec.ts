@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 
 import { pruneOptionalSpots } from "@/app/api/chat/optionalSpotPruner";
+import { getSpotByName } from "@/lib/spotService";
 
 import type { AITravelPlan } from "@/app/api/chat/travelValidator";
 
@@ -37,6 +38,26 @@ function getSpotNames(
       day.items.map((item) => item.spot)
     )
   );
+}
+
+function getEstimatedEndMinutes(
+  plan: AITravelPlan
+): number {
+  const lastItem = plan.days[0]?.items.at(-1);
+
+  if (!lastItem) {
+    return 0;
+  }
+
+  const [hours, minutes] = lastItem.time
+    .split(":")
+    .map(Number);
+  const stayMinutes = Number(
+    getSpotByName(lastItem.spot)
+      ?.recommendedStay.match(/\d+/)?.[0] ?? 60
+  );
+
+  return hours * 60 + minutes + stayMinutes;
 }
 
 test("requiredの5スポットをpruneしない", () => {
@@ -91,4 +112,21 @@ test("optional候補があってもrequiredをpruneしない", () => {
 
   expect(removedSpotNames).not.toContain("清水寺");
   expect(removedSpotNames).not.toContain("八坂神社");
+});
+
+test("Route Score改善だけで1日プランを15時前終了にしない", () => {
+  const result = pruneOptionalSpots({
+    plan: createPlan([
+      "伏見稲荷大社",
+      "清水寺",
+      "八坂神社",
+      "平安神宮",
+      "南禅寺",
+    ]),
+    requiredSpotNames: [],
+  });
+
+  expect(
+    getEstimatedEndMinutes(result)
+  ).toBeGreaterThanOrEqual(15 * 60);
 });
