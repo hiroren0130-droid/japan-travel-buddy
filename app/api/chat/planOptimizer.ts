@@ -31,6 +31,25 @@ type OptimizeGeneratedPlanOptions = {
   normalizeDescriptions?: boolean;
 };
 
+function logSpotCount(
+  label: string,
+  plan: AITravelPlan
+): void {
+  if (
+    process.env.NODE_ENV !==
+    "development"
+  ) {
+    return;
+  }
+
+  console.log(
+    `===== Spot Count: ${label} =====`,
+    plan.days.map(
+      (day) => day.items.length
+    )
+  );
+}
+
 export function optimizeGeneratedPlan({
   plan,
   startSpotName,
@@ -38,6 +57,11 @@ export function optimizeGeneratedPlan({
   startTime = "09:00",
   normalizeDescriptions = true,
 }: OptimizeGeneratedPlanOptions): AITravelPlan {
+  logSpotCount(
+    "Before Optimizers",
+    plan
+  );
+
   let optimizedPlan =
     optimizeStartPoint({
       plan,
@@ -46,15 +70,30 @@ export function optimizeGeneratedPlan({
       locale,
     });
 
+  logSpotCount(
+    "After Start Point Optimizer",
+    optimizedPlan
+  );
+
   optimizedPlan =
     optimizeTravelPlanRoute(
       optimizedPlan
     );
 
+  logSpotCount(
+    "After Route Optimizer",
+    optimizedPlan
+  );
+
   optimizedPlan =
     optimizeTravelPlanTimes(
       optimizedPlan
     );
+
+  logSpotCount(
+    "After Time Optimizer",
+    optimizedPlan
+  );
 
   optimizedPlan =
   optimizeDayImbalance(
@@ -62,11 +101,21 @@ export function optimizeGeneratedPlan({
     startSpotName
   );
 
+  logSpotCount(
+    "After Day Imbalance Optimizer",
+    optimizedPlan
+  );
+
   if (normalizeDescriptions) {
     optimizedPlan =
       normalizeTravelPlanDescriptions(
         optimizedPlan
       );
+
+    logSpotCount(
+      "After Description Normalizer",
+      optimizedPlan
+    );
   }
 
   return optimizedPlan;

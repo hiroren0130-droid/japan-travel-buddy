@@ -167,8 +167,8 @@ if (
     }
 
     if (
-  !isValidAITravelPlan(
-    parsedResponse
+      !isValidAITravelPlan(
+        parsedResponse
   )
 ) {
       if (
@@ -192,8 +192,20 @@ if (
         );
       }
 
-  return null;
-}
+      return null;
+    }
+
+    if (
+      process.env.NODE_ENV ===
+      "development"
+    ) {
+      console.log(
+        "===== Spot Count: Raw AI Plan =====",
+        parsedResponse.days.map(
+          (day) => day.items.length
+        )
+      );
+    }
 
     return parsedResponse;
   } catch (error) {

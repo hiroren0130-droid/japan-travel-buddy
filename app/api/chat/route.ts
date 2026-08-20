@@ -54,6 +54,11 @@ import {
   normalizePlanSummary,
 } from "./planSummaryNormalizer";
 
+import {
+  getEstimatedDayEndMinutes,
+  hasLimitedScheduleRequest,
+} from "./planCompleteness";
+
 type RequestBody = {
   message: string;
   days: number;
@@ -540,6 +545,12 @@ ${message}
 ${specialRequest}
 `;
 
+    const enforceFullDayCoverage =
+      requestedDays === 1 &&
+      !hasLimitedScheduleRequest(
+        requestText
+      );
+
     const requestedStartSpotName =
       findRequestedStartSpotName({
         requestText,
@@ -763,7 +774,25 @@ ${specialRequest}
 
     protectedStartSpotName:
       requestedStartSpotName,
+    enforceFullDayCoverage,
       });
+
+    if (
+      process.env.NODE_ENV ===
+      "development"
+    ) {
+      console.log(
+        "===== Spot Count: First Pruner =====",
+        {
+          before: generatedPlan.days.map(
+            (day) => day.items.length
+          ),
+          after: locallyPrunedPlan.days.map(
+            (day) => day.items.length
+          ),
+        }
+      );
+    }
 
     generatedPlan =
       containsRequiredSpots(
@@ -849,7 +878,25 @@ ${specialRequest}
 
     protectedStartSpotName:
       requestedStartSpotName,
+    enforceFullDayCoverage,
       });
+
+    if (
+      process.env.NODE_ENV ===
+      "development"
+    ) {
+      console.log(
+        "===== Spot Count: Final Pruner =====",
+        {
+          before: generatedPlan.days.map(
+            (day) => day.items.length
+          ),
+          after: finalPrunedPlan.days.map(
+            (day) => day.items.length
+          ),
+        }
+      );
+    }
 
     generatedPlan =
       containsRequiredSpots(
@@ -913,6 +960,24 @@ const plan =
   buildPlanResponse(
     normalizedPlan
   );
+
+    if (
+      process.env.NODE_ENV ===
+      "development"
+    ) {
+      console.log(
+        "===== Final Response Audit =====",
+        {
+          spotCounts: plan.days.map(
+            (day) => day.items.length
+          ),
+          estimatedEndMinutes:
+            normalizedPlan.days.map(
+              getEstimatedDayEndMinutes
+            ),
+        }
+      );
+    }
 
     console.log(
       "===== Performance: total ====="

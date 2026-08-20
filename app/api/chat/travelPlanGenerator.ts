@@ -20,6 +20,11 @@ import {
   type AITravelPlan,
 } from "./travelValidator";
 
+import {
+  calculateEarlyEndCount,
+  hasLimitedScheduleRequest,
+} from "./planCompleteness";
+
 import type {
   Spot,
 } from "@/data/types";
@@ -128,10 +133,26 @@ export async function generateTravelPlan({
     generatedPlan.days.length !==
       requestedDays;
 
+  const hasLimitedSchedule =
+    hasLimitedScheduleRequest(
+      `${message}\n${specialRequest}`
+    );
+
+  const hasEarlyEnd =
+    requestedDays === 1 &&
+    !hasLimitedSchedule &&
+    isValidAITravelPlan(
+      generatedPlan
+    ) &&
+    calculateEarlyEndCount(
+      generatedPlan
+    ) > 0;
+
   const shouldRegenerate =
     hasValidationError ||
     hasDayCountMismatch ||
-    missingSpotNames.length > 0;
+    missingSpotNames.length > 0 ||
+    hasEarlyEnd;
 
   if (!shouldRegenerate) {
     return {
@@ -150,6 +171,7 @@ export async function generateTravelPlan({
         hasValidationError,
         hasDayCountMismatch,
         missingSpotNames,
+        hasEarlyEnd,
       }
     );
   }
@@ -187,6 +209,8 @@ ${requiredSpotText}
 ・同じ日の時刻を昇順にすること
 ・transportは許可された移動手段だけを使うこと
 ・同じ日の中で同じ駅を重複させないこと
+・通常の1日プランは、営業時間、移動時間、昼食、recommendedStayを守りながら、近隣候補を使って午後まで自然に観光が続く構成にすること
+・最終スポットの到着時刻とrecommendedStayを合わせても15:00より前に終わる日を作らないこと
 
 前回不足していたスポット:
 ${

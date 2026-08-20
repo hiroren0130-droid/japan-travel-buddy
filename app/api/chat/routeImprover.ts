@@ -33,6 +33,11 @@ import {
   type AITravelPlan,
 } from "./travelValidator";
 
+import {
+  calculateEarlyEndCount,
+  hasLimitedScheduleRequest,
+} from "./planCompleteness";
+
 type ImproveTravelPlanOptions = {
   plan: AITravelPlan;
   didRegenerate: boolean;
@@ -181,9 +186,19 @@ ${requiredSpotText}`,
       locale,
     });
 
+  const hasUnrequestedEarlyEnd =
+    requestedDays === 1 &&
+    !hasLimitedScheduleRequest(
+      `${message}\n${specialRequest}`
+    ) &&
+    calculateEarlyEndCount(
+      optimizedImprovedPlan
+    ) > 0;
+
   if (
     optimizedImprovedPlan.days.length !==
       requestedDays ||
+    hasUnrequestedEarlyEnd ||
     !containsRequiredSpots(
       optimizedImprovedPlan,
       requiredSpots

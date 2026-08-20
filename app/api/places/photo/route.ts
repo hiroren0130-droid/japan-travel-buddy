@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { getSpotById } from "@/lib/spotService";
+import { getLocalizedSpotName } from "@/lib/localizedSpot";
 
 const PLACES_TEXT_SEARCH_URL =
   "https://places.googleapis.com/v1/places:searchText";
@@ -35,7 +36,6 @@ const PHOTO_RESOURCE_NAME_PATTERN =
 const SPOT_ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 const EARTH_RADIUS_KM = 6371;
 const MAX_CANDIDATE_DISTANCE_KM = 5;
-const MAX_LOCATION_ONLY_DISTANCE_KM = 1.5;
 
 class GoogleApiTimeoutError extends Error {}
 
@@ -44,7 +44,7 @@ type PlaceCandidate = NonNullable<
 >[number];
 
 type SearchTarget = {
-  name: string;
+  names: string[];
   latitude: number | null;
   longitude: number | null;
 };
@@ -102,17 +102,28 @@ function getCandidateScore(
   const candidateName = normalizePlaceName(
     candidate.displayName?.text ?? ""
   );
-  const targetName = normalizePlaceName(target.name);
+  const targetNames = target.names
+    .map(normalizePlaceName)
+    .filter(Boolean);
 
-  if (!candidateName || !targetName) {
+  if (
+    !candidateName ||
+    targetNames.length === 0
+  ) {
     return null;
   }
 
   const exactNameMatch =
-    candidateName === targetName;
+    targetNames.some(
+      (targetName) =>
+        candidateName === targetName
+    );
   const partialNameMatch =
-    candidateName.includes(targetName) ||
-    targetName.includes(candidateName);
+    targetNames.some(
+      (targetName) =>
+        candidateName.includes(targetName) ||
+        targetName.includes(candidateName)
+    );
 
   const candidateLatitude =
     candidate.location?.latitude;
@@ -149,13 +160,7 @@ function getCandidateScore(
 
   if (
     !exactNameMatch &&
-    !partialNameMatch &&
-    !(
-      distanceKm !== null &&
-      distanceKm <=
-        MAX_LOCATION_ONLY_DISTANCE_KM &&
-      hasKyotoAddress
-    )
+    !partialNameMatch
   ) {
     return null;
   }
@@ -333,7 +338,15 @@ export async function GET(request: NextRequest) {
   }
 
   const target: SearchTarget = {
-    name: databaseSpot?.name ?? query.replace(/\s+京都$/, ""),
+    names: databaseSpot
+      ? [
+          databaseSpot.name,
+          getLocalizedSpotName(
+            databaseSpot,
+            "en"
+          ),
+        ]
+      : [query.replace(/\s+京都$/, "")],
     latitude:
       databaseSpot?.latitude ?? suppliedLatitude,
     longitude:

@@ -9,6 +9,7 @@ import TimelineMapButton from "./TimelineMapButton";
 import { getSpotByName } from "@/lib/spotService";
 import {
   getLocalizedSpotArea,
+  getLocalizedSpotDescription,
   getLocalizedSpotName,
 } from "@/lib/localizedSpot";
 
@@ -40,6 +41,14 @@ function formatDuration(
   return duration.replace(
     /^(\d+)\s*分$/,
     "$1 min"
+  );
+}
+
+function containsJapaneseText(
+  value: string
+): boolean {
+  return /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]/u.test(
+    value
   );
 }
 
@@ -116,6 +125,15 @@ export default function TimelineItem({
   const localizedSpotName = spotData
     ? getLocalizedSpotName(spotData, locale)
     : spot;
+  const displayedDescription =
+    locale === "en" &&
+    spotData &&
+    containsJapaneseText(description)
+      ? getLocalizedSpotDescription(
+          spotData,
+          locale
+        )
+      : description;
 
   return (
     <div
@@ -218,7 +236,7 @@ export default function TimelineItem({
 
               {/* 説明 */}
               <p className="mt-3 text-sm leading-6 text-slate-700 sm:text-base sm:leading-7">
-                {description ||
+                {displayedDescription ||
                   defaultMessages.timelineItem.descriptionFallback}
               </p>
 

@@ -1,6 +1,11 @@
 import { expect, test } from "@playwright/test";
 
 import { pruneOptionalSpots } from "@/app/api/chat/optionalSpotPruner";
+import {
+  calculateEarlyEndCount,
+  getEstimatedDayEndMinutes,
+  hasLimitedScheduleRequest,
+} from "@/app/api/chat/planCompleteness";
 import { getSpotByName } from "@/lib/spotService";
 
 import type { AITravelPlan } from "@/app/api/chat/travelValidator";
@@ -129,4 +134,66 @@ test("Route Score改善だけで1日プランを15時前終了にしない", () 
   expect(
     getEstimatedEndMinutes(result)
   ).toBeGreaterThanOrEqual(15 * 60);
+});
+
+test("伏見稲荷から平安神宮までの13:18終了を未完了と判定する", () => {
+  const plan: AITravelPlan = {
+    title: "Kyoto shrines",
+    summary: "Kyoto shrines",
+    days: [
+      {
+        day: 1,
+        items: [
+          {
+            time: "09:00",
+            spot: "伏見稲荷大社",
+            description: "Visit Fushimi Inari Taisha.",
+            transport: "徒歩",
+            duration: "0分",
+          },
+          {
+            time: "11:01",
+            spot: "八坂神社",
+            description: "Visit Yasaka Shrine.",
+            transport: "バス",
+            duration: "31分",
+          },
+          {
+            time: "13:18",
+            spot: "平安神宮",
+            description: "Visit Heian Jingu Shrine.",
+            transport: "バス",
+            duration: "18分",
+          },
+        ],
+      },
+    ],
+  };
+
+  expect(
+    getEstimatedDayEndMinutes(
+      plan.days[0]
+    )
+  ).toBe(14 * 60 + 18);
+  expect(
+    calculateEarlyEndCount(plan)
+  ).toBe(1);
+});
+
+test("明示的な半日希望を通常1日の完成度判定から除外できる", () => {
+  expect(
+    hasLimitedScheduleRequest(
+      "I only need a half-day plan."
+    )
+  ).toBe(true);
+  expect(
+    hasLimitedScheduleRequest(
+      "午前のみ観光したい"
+    )
+  ).toBe(true);
+  expect(
+    hasLimitedScheduleRequest(
+      "京都を1日観光したい"
+    )
+  ).toBe(false);
 });
