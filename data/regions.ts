@@ -18,3 +18,35 @@ export type PrefectureId =
 
 export type CityId =
   (typeof CITY_IDS)[keyof typeof CITY_IDS];
+
+type PlacesCityContext = {
+  searchContext: string;
+  addressTerms: readonly string[];
+};
+
+const PLACES_CITY_CONTEXTS: Readonly<
+  Record<CityId, PlacesCityContext>
+> = {
+  [CITY_IDS.KYOTO_CITY]: {
+    searchContext: "Kyoto, Japan",
+    addressTerms: ["京都", "Kyoto"],
+  },
+};
+
+export function getPlacesSearchContext(
+  cityId: string
+): string | undefined {
+  return PLACES_CITY_CONTEXTS[
+    cityId as CityId
+  ]?.searchContext;
+}
+
+export function getPlacesAddressTerms(
+  cityId: string
+): readonly string[] {
+  return (
+    PLACES_CITY_CONTEXTS[
+      cityId as CityId
+    ]?.addressTerms ?? []
+  );
+}

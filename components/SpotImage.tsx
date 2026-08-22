@@ -32,7 +32,7 @@ function createPlacesPhotoUrl(
   latitude?: number,
   longitude?: number
 ): string {
-  const query = `${spotName.trim()} 京都`;
+  const query = spotName.trim();
   const searchParams = new URLSearchParams({
     query,
   });

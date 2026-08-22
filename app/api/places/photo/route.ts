@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  getPlacesAddressTerms,
+  getPlacesSearchContext,
+} from "@/data/regions";
 import { getSpotById } from "@/lib/spotService";
 import { getLocalizedSpotName } from "@/lib/localizedSpot";
 
@@ -45,6 +49,7 @@ type PlaceCandidate = NonNullable<
 
 type SearchTarget = {
   names: string[];
+  addressTerms: readonly string[];
   latitude: number | null;
   longitude: number | null;
 };
@@ -129,10 +134,15 @@ function getCandidateScore(
     candidate.location?.latitude;
   const candidateLongitude =
     candidate.location?.longitude;
-  const hasKyotoAddress =
-    candidate.formattedAddress?.includes(
-      "京都"
-    ) ?? false;
+  const formattedAddress =
+    candidate.formattedAddress ?? "";
+  const hasMatchingAddress =
+    target.addressTerms.some(
+      (addressTerm) =>
+        formattedAddress.includes(
+          addressTerm
+        )
+    );
   let distanceKm: number | null = null;
 
   if (
@@ -178,7 +188,7 @@ function getCandidateScore(
     );
   }
 
-  if (hasKyotoAddress) {
+  if (hasMatchingAddress) {
     score += 20;
   }
 
@@ -346,15 +356,35 @@ export async function GET(request: NextRequest) {
             "en"
           ),
         ]
-      : [query.replace(/\s+京都$/, "")],
+      : [query],
+    addressTerms: databaseSpot
+      ? getPlacesAddressTerms(
+          databaseSpot.cityId
+        )
+      : [],
     latitude:
       databaseSpot?.latitude ?? suppliedLatitude,
     longitude:
       databaseSpot?.longitude ?? suppliedLongitude,
   };
 
+  const placesContext = databaseSpot
+    ? getPlacesSearchContext(
+        databaseSpot.cityId
+      )
+    : undefined;
   const searchQuery = databaseSpot
-    ? `${databaseSpot.name} ${databaseSpot.address}`
+    ? [
+        databaseSpot.name,
+        databaseSpot.address,
+        placesContext,
+      ]
+        .filter(
+          (value): value is string =>
+            typeof value === "string" &&
+            value.trim().length > 0
+        )
+        .join(" ")
     : query;
 
   const apiKey = process.env.GOOGLE_PLACES_API_KEY;

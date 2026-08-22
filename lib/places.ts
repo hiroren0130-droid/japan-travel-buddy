@@ -1,3 +1,8 @@
+import {
+  getPlacesSearchContext,
+  type CityId,
+} from "@/data/regions";
+
 const PLACES_TEXT_SEARCH_URL =
   "https://places.googleapis.com/v1/places:searchText";
 
@@ -307,21 +312,29 @@ export async function searchPlace(
 
 export async function getPlaceDetailsForSpot(
   spotName: string,
-  area = "京都"
+  cityId: CityId | undefined
 ): Promise<PlaceDetails | null> {
+  const placesContext = cityId
+    ? getPlacesSearchContext(cityId)
+    : undefined;
+
+  if (!placesContext) {
+    return null;
+  }
+
   return searchPlace(
-    `${spotName} ${area}`
+    `${spotName} ${placesContext}`
   );
 }
 
 export async function getOpeningHoursForSpot(
   spotName: string,
-  area = "京都"
+  cityId: CityId | undefined
 ): Promise<PlaceOpeningHours | null> {
   const place =
     await getPlaceDetailsForSpot(
       spotName,
-      area
+      cityId
     );
 
   return place?.openingHours ?? null;
@@ -330,7 +343,7 @@ export async function getOpeningHoursForSpot(
 export async function getPlacesForSpots(
   spots: Array<{
     name: string;
-    area?: string;
+    cityId?: CityId;
   }>,
   limit = 10
 ): Promise<
@@ -345,7 +358,7 @@ export async function getPlacesForSpots(
         const place =
           await getPlaceDetailsForSpot(
             spot.name,
-            spot.area ?? "京都"
+            spot.cityId
           );
 
         return {
