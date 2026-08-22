@@ -1,4 +1,9 @@
 import { allSpots } from "../data";
+import {
+  CITY_IDS,
+  PREFECTURE_IDS,
+  REGION_IDS,
+} from "../data/regions";
 
 type ValidationIssue = {
   spot: string;
@@ -18,6 +23,21 @@ const VALID_HOURS_PATTERN =
 
 const VALID_STAY_PATTERN =
   /^(0|[1-9]\d{0,2})分$/;
+
+const VALID_REGION_IDS =
+  new Set<string>(
+    Object.values(REGION_IDS)
+  );
+
+const VALID_PREFECTURE_IDS =
+  new Set<string>(
+    Object.values(PREFECTURE_IDS)
+  );
+
+const VALID_CITY_IDS =
+  new Set<string>(
+    Object.values(CITY_IDS)
+  );
 
 const HOURS_OPTIONAL_SPOTS =
   new Set([
@@ -57,6 +77,9 @@ const WEBSITE_OPTIONAL_SPOTS =
 
 const REQUIRED_STRING_FIELDS = [
   "id",
+  "regionId",
+  "prefectureId",
+  "cityId",
   "name",
   "area",
   "category",
@@ -161,6 +184,49 @@ function checkRequiredFields(): void {
         spotName,
         "longitude",
         "経度が正しい数値ではありません。"
+      );
+    }
+  }
+}
+
+function checkRegionIds(): void {
+  for (const spot of allSpots) {
+    if (
+      hasText(spot.regionId) &&
+      !VALID_REGION_IDS.has(
+        spot.regionId
+      )
+    ) {
+      addError(
+        spot.name,
+        "regionId",
+        `SSOTに存在しないIDです：${spot.regionId}`
+      );
+    }
+
+    if (
+      hasText(spot.prefectureId) &&
+      !VALID_PREFECTURE_IDS.has(
+        spot.prefectureId
+      )
+    ) {
+      addError(
+        spot.name,
+        "prefectureId",
+        `SSOTに存在しないIDです：${spot.prefectureId}`
+      );
+    }
+
+    if (
+      hasText(spot.cityId) &&
+      !VALID_CITY_IDS.has(
+        spot.cityId
+      )
+    ) {
+      addError(
+        spot.name,
+        "cityId",
+        `SSOTに存在しないIDです：${spot.cityId}`
       );
     }
   }
@@ -613,6 +679,7 @@ function countWarningsByField(): void {
 
 function runValidation(): void {
   checkRequiredFields();
+  checkRegionIds();
   checkDuplicateIds();
   checkDuplicateNames();
   checkDuplicateCoordinates();

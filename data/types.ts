@@ -1,5 +1,11 @@
 // data/types.ts
 
+import type {
+  CityId,
+  PrefectureId,
+  RegionId,
+} from "./regions";
+
 export type TransportType =
   | "徒歩"
   | "バス"
@@ -23,6 +29,9 @@ export type SpotTranslations =
 
 export type Spot = {
   id: string;
+  regionId: RegionId;
+  prefectureId: PrefectureId;
+  cityId: CityId;
   name: string;
   area: string;
   category: string;

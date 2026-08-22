@@ -1,8 +1,17 @@
 ﻿import type { Spot } from "./types";
 
+import {
+  CITY_IDS,
+  PREFECTURE_IDS,
+  REGION_IDS,
+} from "./regions";
+
 export const spots: Spot[] = [
   {
     id: "kiyomizudera",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "清水寺",
     area: "東山",
     category: "寺院",
@@ -26,6 +35,9 @@ export const spots: Spot[] = [
   },
   {
     id: "fushimi-inari",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "伏見稲荷大社",
     area: "伏見",
     category: "神社",
@@ -48,6 +60,9 @@ export const spots: Spot[] = [
   },
   {
     id: "kinkakuji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "金閣寺",
     area: "衣笠・北野",
     category: "寺院",
@@ -70,6 +85,9 @@ export const spots: Spot[] = [
   },
   {
     id: "ginkakuji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "銀閣寺",
     area: "銀閣寺・岡崎",
     category: "寺院",
@@ -93,6 +111,9 @@ export const spots: Spot[] = [
   },
   {
     id: "arashiyama",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "嵐山",
     area: "嵯峨・嵐山",
     category: "景勝地",
@@ -114,6 +135,9 @@ export const spots: Spot[] = [
   },
   {
     id: "bamboo-grove",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "竹林の小径",
     area: "嵯峨・嵐山",
     category: "自然",
@@ -135,6 +159,9 @@ export const spots: Spot[] = [
   },
   {
     id: "togetsukyo",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "渡月橋",
     area: "嵯峨・嵐山",
     category: "橋",
@@ -156,6 +183,9 @@ export const spots: Spot[] = [
   },
   {
     id: "tenryuji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "天龍寺",
     area: "嵯峨・嵐山",
     category: "寺院",
@@ -178,6 +208,9 @@ export const spots: Spot[] = [
   },
   {
     id: "yasaka-shrine",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "八坂神社",
     area: "東山",
     category: "神社",
@@ -201,6 +234,9 @@ export const spots: Spot[] = [
   },
   {
   id: "gion",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "祇園",
   area: "東山",
   category: "街並み",
@@ -223,6 +259,9 @@ export const spots: Spot[] = [
 },
   {
     id: "nijo-castle",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "二条城",
     area: "市内中心部",
     category: "城",
@@ -245,6 +284,9 @@ export const spots: Spot[] = [
   },
   {
   id: "nishiki-market",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "錦市場",
   area: "市内中心部",
   category: "市場",
@@ -267,6 +309,9 @@ export const spots: Spot[] = [
 },
   {
     id: "heian-shrine",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "平安神宮",
     area: "銀閣寺・岡崎",
     category: "神社",
@@ -290,6 +335,9 @@ export const spots: Spot[] = [
   },
   {
     id: "nanzenji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "南禅寺",
     area: "銀閣寺・岡崎",
     category: "寺院",
@@ -313,6 +361,9 @@ export const spots: Spot[] = [
   },
   {
     id: "eikando",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "永観堂",
     area: "銀閣寺・岡崎",
     category: "寺院",
@@ -336,6 +387,9 @@ export const spots: Spot[] = [
   },
   {
     id: "kodaiji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "高台寺",
     area: "東山",
     category: "寺院",
@@ -359,6 +413,9 @@ export const spots: Spot[] = [
   },
   {
     id: "kenninji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "建仁寺",
     area: "東山",
     category: "寺院",
@@ -382,6 +439,9 @@ export const spots: Spot[] = [
   },
   {
     id: "sanjusangendo",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "三十三間堂",
     area: "京都駅周辺",
     category: "寺院",
@@ -405,6 +465,9 @@ export const spots: Spot[] = [
   },
   {
     id: "toji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "東寺",
     area: "京都駅周辺",
     category: "寺院",
@@ -427,6 +490,9 @@ export const spots: Spot[] = [
   },
   {
     id: "kyoto-station",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "京都駅",
     area: "京都駅周辺",
     category: "駅",
@@ -449,6 +515,9 @@ export const spots: Spot[] = [
   },
   {
     id: "tofukuji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "東福寺",
     area: "伏見",
     category: "寺院",
@@ -471,6 +540,9 @@ export const spots: Spot[] = [
   },
   {
     id: "shimogamo-shrine",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "下鴨神社",
     area: "洛北",
     category: "神社",
@@ -493,6 +565,9 @@ export const spots: Spot[] = [
   },
   {
     id: "kamigamo-shrine",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "上賀茂神社",
     area: "洛北",
     category: "神社",
@@ -515,6 +590,9 @@ export const spots: Spot[] = [
   },
   {
     id: "kyoto-gyoen",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "京都御苑",
     area: "市内中心部",
     category: "公園",
@@ -537,6 +615,9 @@ export const spots: Spot[] = [
   },
   {
     id: "kitano-tenmangu",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "北野天満宮",
     area: "衣笠・北野",
     category: "神社",
@@ -559,6 +640,9 @@ export const spots: Spot[] = [
   },
   {
     id: "ryoanji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "龍安寺",
     area: "衣笠・北野",
     category: "寺院",
@@ -581,6 +665,9 @@ export const spots: Spot[] = [
   },
   {
     id: "ninnaji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "仁和寺",
     area: "衣笠・北野",
     category: "寺院",
@@ -603,6 +690,9 @@ export const spots: Spot[] = [
   },
   {
     id: "chionin",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "知恩院",
     area: "東山",
     category: "寺院",
@@ -626,6 +716,9 @@ export const spots: Spot[] = [
   },
   {
     id: "shorenin",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "青蓮院",
     area: "東山",
     category: "寺院",
@@ -649,6 +742,9 @@ export const spots: Spot[] = [
   },
   {
     id: "philosophers-path",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "哲学の道",
     area: "銀閣寺・岡崎",
     category: "散策路",
@@ -671,6 +767,9 @@ export const spots: Spot[] = [
   },
   {
     id: "higashi-honganji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "東本願寺",
     area: "京都駅周辺",
     category: "寺院",
@@ -694,6 +793,9 @@ export const spots: Spot[] = [
   },
   {
     id: "nishi-hongwanji",
+    regionId: REGION_IDS.KANSAI,
+    prefectureId: PREFECTURE_IDS.KYOTO,
+    cityId: CITY_IDS.KYOTO_CITY,
     name: "西本願寺",
     area: "京都駅周辺",
     category: "寺院",
@@ -716,6 +818,9 @@ export const spots: Spot[] = [
   },
   {
 id: "kyoto-imperial-palace",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都御所",
 area: "市内中心部",
 category: "歴史施設",
@@ -739,6 +844,9 @@ nearby: [
 },
 {
 id: "seimei-shrine",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "晴明神社",
 area: "市内中心部",
 category: "神社",
@@ -762,6 +870,9 @@ nearby: [
 },
 {
 id: "daitokuji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "大徳寺",
 area: "上賀茂・北山・大徳寺",
 category: "寺院",
@@ -784,6 +895,9 @@ nearby: [
 },
 {
 id: "imamiya-shrine",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "今宮神社",
 area: "上賀茂・北山・大徳寺",
 category: "神社",
@@ -807,6 +921,9 @@ nearby: [
 },
 {
 id: "genkoan",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "源光庵",
 area: "上賀茂・北山・大徳寺",
 category: "寺院",
@@ -830,6 +947,9 @@ nearby: [
 },
 {
 id: "enkoji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "圓光寺",
 area: "一乗寺・修学院",
 category: "寺院",
@@ -853,6 +973,9 @@ nearby: [
 },
 {
 id: "shisendo",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "詩仙堂",
 area: "一乗寺・修学院",
 category: "寺院",
@@ -876,6 +999,9 @@ nearby: [
 },
 {
 id: "manshuin",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "曼殊院",
 area: "一乗寺・修学院",
 category: "寺院",
@@ -899,6 +1025,9 @@ nearby: [
 },
 {
 id: "shugakuin-imperial-villa",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "修学院離宮",
 area: "一乗寺・修学院",
 category: "歴史施設",
@@ -922,6 +1051,9 @@ nearby: [
 },
 {
 id: "rurikoin",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "瑠璃光院",
 area: "大原・八瀬・比叡山",
 category: "寺院",
@@ -945,6 +1077,9 @@ nearby: [
 },
 {
 id: "sanzenin",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "三千院",
 area: "大原・八瀬・比叡山",
 category: "寺院",
@@ -966,6 +1101,9 @@ nearby: [
 },
 {
 id: "hosenin",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "宝泉院",
 area: "大原・八瀬・比叡山",
 category: "寺院",
@@ -987,6 +1125,9 @@ nearby: [
 },
 {
 id: "jakkoin",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "寂光院",
 area: "大原・八瀬・比叡山",
 category: "寺院",
@@ -1008,6 +1149,9 @@ nearby: [
 },
 {
 id: "kifune-shrine",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "貴船神社",
 area: "鞍馬・貴船・花背",
 category: "神社",
@@ -1029,6 +1173,9 @@ nearby: [
 },
 {
 id: "kuramadera",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "鞍馬寺",
 area: "鞍馬・貴船・花背",
 category: "寺院",
@@ -1050,6 +1197,9 @@ nearby: [
 },
 {
 id: "kurama-mountain",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "鞍馬山",
 area: "鞍馬・貴船・花背",
 category: "自然",
@@ -1070,6 +1220,9 @@ nearby: [
 },
 {
 id: "jingoji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "神護寺",
 area: "高雄",
 category: "寺院",
@@ -1091,6 +1244,9 @@ nearby: [
 },
 {
 id: "kosanji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "高山寺",
 area: "高雄",
 category: "寺院",
@@ -1112,6 +1268,9 @@ nearby: [
 },
 {
 id: "saimyoji-takao",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "西明寺",
 area: "高雄",
 category: "寺院",
@@ -1133,6 +1292,9 @@ nearby: [
 },
 {
 id: "daigoji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "醍醐寺",
 area: "山科・醍醐",
 category: "寺院",
@@ -1154,6 +1316,9 @@ nearby: [
 },
 {
 id: "bishamondo",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "毘沙門堂",
 area: "山科・醍醐",
 category: "寺院",
@@ -1176,6 +1341,9 @@ nearby: [
 },
 {
 id: "kajuji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "勧修寺",
 area: "山科・醍醐",
 category: "寺院",
@@ -1198,6 +1366,9 @@ nearby: [
 },
 {
 id: "zuishinin",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "隨心院",
 area: "山科・醍醐",
 category: "寺院",
@@ -1220,6 +1391,9 @@ nearby: [
 },
 {
 id: "oishi-shrine",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "大石神社",
 area: "山科・醍醐",
 category: "神社",
@@ -1242,6 +1416,9 @@ nearby: [
 },
 {
 id: "matsunoo-taisha",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "松尾大社",
 area: "桂・大原野",
 category: "神社",
@@ -1264,6 +1441,9 @@ nearby: [
 },
 {
 id: "suzumushidera",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "鈴虫寺",
 area: "桂・大原野",
 category: "寺院",
@@ -1286,6 +1466,9 @@ nearby: [
 },
 {
 id: "saihoji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "西芳寺",
 area: "桂・大原野",
 category: "寺院",
@@ -1307,6 +1490,9 @@ nearby: [
 },
 {
 id: "oharano-shrine",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "大原野神社",
 area: "桂・大原野",
 category: "神社",
@@ -1327,6 +1513,9 @@ nearby: [
 },
 {
 id: "yoshiminedera",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "善峯寺",
 area: "桂・大原野",
 category: "寺院",
@@ -1348,6 +1537,9 @@ nearby: [
 },
 {
 id: "horinji-arashiyama",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "法輪寺",
 area: "嵯峨・嵐山",
 category: "寺院",
@@ -1370,6 +1562,9 @@ nearby: [
 },
 {
 id: "jojakkoji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "常寂光寺",
 area: "嵯峨・嵐山",
 category: "寺院",
@@ -1393,6 +1588,9 @@ nearby: [
 },
 {
 id: "nisonin",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "二尊院",
 area: "嵯峨・嵐山",
 category: "寺院",
@@ -1416,6 +1614,9 @@ nearby: [
 },
 {
 id: "giouji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "祇王寺",
 area: "嵯峨・嵐山",
 category: "寺院",
@@ -1439,6 +1640,9 @@ nearby: [
 },
 {
 id: "daikakuji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "大覚寺",
 area: "嵯峨・嵐山",
 category: "寺院",
@@ -1462,6 +1666,9 @@ nearby: [
 },
 {
 id: "adashino-nenbutsuji",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "化野念仏寺",
 area: "嵯峨・嵐山",
 category: "寺院",
@@ -1485,6 +1692,9 @@ nearby: [
 },
 {
 id: "saga-toriimoto",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "嵯峨鳥居本",
 area: "嵯峨・嵐山",
 category: "街並み",
@@ -1507,6 +1717,9 @@ nearby: [
 },
 {
 id: "arashiyama-monkey-park",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "嵐山モンキーパークいわたやま",
 area: "嵯峨・嵐山",
 category: "自然・動物",
@@ -1530,6 +1743,9 @@ nearby: [
 },
 {
 id: "hozugawa-river-boat",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "保津川下り",
 area: "嵯峨・嵐山",
 category: "体験",
@@ -1552,6 +1768,9 @@ nearby: [
 },
 {
 id: "sagano-scenic-railway",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "嵯峨野トロッコ列車",
 area: "嵯峨・嵐山",
 category: "観光交通",
@@ -1574,6 +1793,9 @@ nearby: [
 },
 {
 id: "kyoto-city-kyocera-museum",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都市京セラ美術館",
 area: "銀閣寺・岡崎",
 category: "美術館",
@@ -1597,6 +1819,9 @@ nearby: [
 },
 {
 id: "national-museum-modern-art-kyoto",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都国立近代美術館",
 area: "銀閣寺・岡崎",
 category: "美術館",
@@ -1620,6 +1845,9 @@ nearby: [
 },
 {
 id: "kyoto-museum-crafts-design",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都伝統産業ミュージアム",
 area: "銀閣寺・岡崎",
 category: "博物館",
@@ -1643,6 +1871,9 @@ nearby: [
 },
 {
 id: "kyoto-city-zoo",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都市動物園",
 area: "銀閣寺・岡崎",
 category: "動物園",
@@ -1666,6 +1897,9 @@ nearby: [
 },
 {
 id: "rohm-theatre-kyoto",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "ロームシアター京都",
 area: "銀閣寺・岡崎",
 category: "文化施設",
@@ -1689,6 +1923,9 @@ nearby: [
 },
 {
 id: "okazaki-park",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "岡崎公園",
 area: "銀閣寺・岡崎",
 category: "公園",
@@ -1711,6 +1948,9 @@ nearby: [
 },
 {
 id: "murin-an",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "無鄰菴",
 area: "銀閣寺・岡崎",
 category: "庭園",
@@ -1734,6 +1974,9 @@ nearby: [
 },
 {
 id: "kyoto-national-museum",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都国立博物館",
 area: "京都駅周辺",
 category: "博物館",
@@ -1757,6 +2000,9 @@ nearby: [
 },
 {
 id: "kyoto-railway-museum",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都鉄道博物館",
 area: "京都駅周辺",
 category: "博物館",
@@ -1779,6 +2025,9 @@ nearby: [
 },
 {
 id: "kyoto-aquarium",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都水族館",
 area: "京都駅周辺",
 category: "水族館",
@@ -1802,6 +2051,9 @@ nearby: [
 },
 {
 id: "umekoji-park",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "梅小路公園",
 area: "京都駅周辺",
 category: "公園",
@@ -1824,6 +2076,9 @@ nearby: [
 },
 {
 id: "ryukoku-museum",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "龍谷ミュージアム",
 area: "京都駅周辺",
 category: "博物館",
@@ -1847,6 +2102,9 @@ nearby: [
 },
 {
 id: "kyoto-tower",
+regionId: REGION_IDS.KANSAI,
+prefectureId: PREFECTURE_IDS.KYOTO,
+cityId: CITY_IDS.KYOTO_CITY,
 name: "京都タワー",
 area: "京都駅周辺",
 category: "展望施設",
@@ -1870,6 +2128,9 @@ nearby: [
 },
   {
   id: "museum-of-kyoto",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "京都文化博物館",
   area: "市内中心部",
   category: "博物館",
@@ -1893,6 +2154,9 @@ nearby: [
 },
 {
   id: "kyoto-international-manga-museum",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "京都国際マンガミュージアム",
   area: "市内中心部",
   category: "博物館",
@@ -1916,6 +2180,9 @@ nearby: [
 },
 {
   id: "pontocho",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "先斗町",
   area: "市内中心部",
   category: "街歩き",
@@ -1938,6 +2205,9 @@ nearby: [
 },
 {
   id: "kiyamachi",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "木屋町",
   area: "市内中心部",
   category: "街歩き",
@@ -1960,6 +2230,9 @@ nearby: [
 },
 {
   id: "shinkyogoku-shopping-street",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "新京極商店街",
   area: "市内中心部",
   category: "商店街",
@@ -1982,6 +2255,9 @@ nearby: [
 },
 {
   id: "teramachi-kyogoku-shopping-street",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "寺町京極商店街",
   area: "市内中心部",
   category: "商店街",
@@ -2004,6 +2280,9 @@ nearby: [
 },
 {
   id: "hanamikoji",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "花見小路",
   area: "東山",
   category: "街並み",
@@ -2026,6 +2305,9 @@ nearby: [
 },
 {
   id: "hokanji-yasaka-pagoda",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "法観寺（八坂の塔）",
   area: "東山",
   category: "寺院",
@@ -2049,6 +2331,9 @@ nearby: [
 },
 {
   id: "gekkeikan-okura-sake-museum",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "月桂冠大倉記念館",
   area: "伏見",
   category: "博物館",
@@ -2071,6 +2356,9 @@ nearby: [
 },
 {
   id: "teradaya",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "寺田屋",
   area: "伏見",
   category: "歴史施設",
@@ -2094,6 +2382,9 @@ nearby: [
 },
 {
   id: "fushimi-jikkokubune",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "伏見十石舟",
   area: "伏見",
   category: "体験",
@@ -2116,6 +2407,9 @@ nearby: [
 },
 {
   id: "fushimi-sake-district",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "伏見酒蔵エリア",
   area: "伏見",
   category: "街歩き・グルメ",
@@ -2137,6 +2431,9 @@ nearby: [
 },
 {
   id: "ishibe-koji",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "石塀小路",
   area: "東山",
   category: "街並み",
@@ -2159,6 +2456,9 @@ nearby: [
 },
 {
   id: "maruyama-park",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "円山公園",
   area: "東山",
   category: "公園",
@@ -2181,6 +2481,9 @@ nearby: [
 },
 {
   id: "jonangu",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "城南宮",
   area: "伏見",
   category: "神社",
@@ -2203,6 +2506,9 @@ nearby: [
 },
 {
   id: "fujinomori-shrine",
+  regionId: REGION_IDS.KANSAI,
+  prefectureId: PREFECTURE_IDS.KYOTO,
+  cityId: CITY_IDS.KYOTO_CITY,
   name: "藤森神社",
   area: "伏見",
   category: "神社",
