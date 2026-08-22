@@ -14,6 +14,8 @@ import { useLocale } from "@/components/LocaleProvider";
 import TravelForm from "@/components/TravelForm";
 import TravelPlanSkeleton from "@/components/TravelPlanSkeleton";
 import { allSpots } from "@/data";
+import { getPrefectureDisplayName } from "@/data/regions";
+import { getSpotById } from "@/lib/spotService";
 
 import type { TravelPlan } from "@/types/travel";
 
@@ -112,13 +114,36 @@ export default function ChatPage() {
 try {
   const selectedDays = Number(days || "2");
 
+  const selectedPrefectureNames = [
+    ...new Set(
+      selectedSpotIds.flatMap((spotId) => {
+        const spot = getSpotById(spotId);
+
+        return spot
+          ? [
+              getPrefectureDisplayName(
+                spot.prefectureId,
+                locale
+              ),
+            ]
+          : [];
+      })
+    ),
+  ];
+  const resolvedDestination =
+    destination.trim() ||
+    selectedPrefectureNames.join(
+      locale === "en" ? " / " : "・"
+    ) ||
+    (locale === "en" ? "Not specified" : "指定なし");
+
   const shouldUseCurrentLocation =
     /現在地|今いる場所|ここから/.test(
       specialRequest
     );
 
   const prompt = `
-行き先: ${destination || "京都"}
+行き先: ${resolvedDestination}
 日数: ${selectedDays}日
 人数: ${travelers || "2"}人
 予算: ${budget || "指定なし"}

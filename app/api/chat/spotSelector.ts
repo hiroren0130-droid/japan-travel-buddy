@@ -1,4 +1,5 @@
 import type { Spot } from "@/data/types";
+import { getPrefectureDisplayName } from "@/data/regions";
 
 import { calculateDistance } from "@/lib/distance";
 import {
@@ -103,6 +104,17 @@ function getSpotSearchScore(
   const normalizedCategory =
     normalizeText(spot.category);
 
+  const normalizedPrefectureNames = [
+    getPrefectureDisplayName(
+      spot.prefectureId,
+      "ja"
+    ),
+    getPrefectureDisplayName(
+      spot.prefectureId,
+      "en"
+    ),
+  ].map(normalizeText);
+
   let score = 0;
 
   if (
@@ -130,6 +142,18 @@ function getSpotSearchScore(
     )
   ) {
     score += 20;
+  }
+
+  if (
+    normalizedPrefectureNames.some(
+      (prefectureName) =>
+        prefectureName &&
+        normalizedRequestText.includes(
+          prefectureName
+        )
+    )
+  ) {
+    score += 60;
   }
 
   return score;

@@ -34,7 +34,7 @@ export default function SpotDetail({
   return (
     <main className="mx-auto max-w-5xl p-6 sm:p-8">
       <Link
-        href="/spots"
+        href={`/discover/${spot.prefectureId}`}
         className="mb-6 inline-block text-sm font-semibold text-blue-600 hover:text-blue-700"
       >
         {spotDetailMessages.backToSpots}

@@ -440,6 +440,9 @@ function checkHours(): void {
   for (const spot of allSpots) {
     if (!spot.hours) {
       if (
+        hasText(
+          spot.openingHours
+        ) ||
         HOURS_OPTIONAL_SPOTS.has(
           spot.name
         )

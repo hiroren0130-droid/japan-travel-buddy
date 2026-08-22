@@ -4,10 +4,12 @@ export const REGION_IDS = {
 
 export const PREFECTURE_IDS = {
   KYOTO: "kyoto",
+  OSAKA: "osaka",
 } as const;
 
 export const CITY_IDS = {
   KYOTO_CITY: "kyoto-city",
+  OSAKA_CITY: "osaka-city",
 } as const;
 
 export type RegionId =
@@ -23,6 +25,10 @@ const PREFECTURE_DISPLAY_NAMES = {
   [PREFECTURE_IDS.KYOTO]: {
     ja: "京都",
     en: "Kyoto",
+  },
+  [PREFECTURE_IDS.OSAKA]: {
+    ja: "大阪",
+    en: "Osaka",
   },
 } as const;
 
@@ -60,6 +66,10 @@ const PLACES_CITY_CONTEXTS: Readonly<
   [CITY_IDS.KYOTO_CITY]: {
     searchContext: "Kyoto, Japan",
     addressTerms: ["京都", "Kyoto"],
+  },
+  [CITY_IDS.OSAKA_CITY]: {
+    searchContext: "Osaka, Japan",
+    addressTerms: ["大阪", "Osaka"],
   },
 };
 
