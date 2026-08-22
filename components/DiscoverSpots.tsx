@@ -131,6 +131,14 @@ export default function DiscoverSpots({
       );
     });
 
+    try {
+      window.localStorage.removeItem(
+        SPOT_SELECTION_STORAGE_KEY
+      );
+    } catch {
+      // Navigation can continue when storage is unavailable.
+    }
+
     router.push(
       `/chat?${searchParams.toString()}`
     );
