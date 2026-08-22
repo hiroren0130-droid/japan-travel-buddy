@@ -13,6 +13,7 @@ import Header from "@/components/Header";
 import { useLocale } from "@/components/LocaleProvider";
 import TravelForm from "@/components/TravelForm";
 import TravelPlanSkeleton from "@/components/TravelPlanSkeleton";
+import { allSpots } from "@/data";
 
 import type { TravelPlan } from "@/types/travel";
 
@@ -26,6 +27,10 @@ type CurrentLocation = {
   latitude: number;
   longitude: number;
 };
+
+const availableSpotIds = new Set(
+  allSpots.map((spot) => spot.id)
+);
 
 export default function ChatPage() {
   const {
@@ -42,9 +47,25 @@ export default function ChatPage() {
   const [budget, setBudget] = useState("");
   const [interests, setInterests] = useState("");
   const [specialRequest, setSpecialRequest] = useState("");
+  const [selectedSpotIds, setSelectedSpotIds] = useState<string[]>([]);
 
   const [currentLocation, setCurrentLocation] =
     useState<CurrentLocation | null>(null);
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      const receivedSpotIds = new URLSearchParams(
+        window.location.search
+      ).getAll("spotId");
+      const validatedSpotIds = [...new Set(receivedSpotIds)].filter(
+        (spotId) => availableSpotIds.has(spotId)
+      );
+
+      setSelectedSpotIds(validatedSpotIds);
+    }, 0);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   useEffect(() => {
     if (!navigator.geolocation) {
@@ -121,6 +142,9 @@ ${specialRequest || "なし"}
         shouldUseCurrentLocation
           ? currentLocation
           : null,
+      ...(selectedSpotIds.length > 0
+        ? { requiredSpotIds: selectedSpotIds }
+        : {}),
     }),
   });
 
@@ -200,6 +224,14 @@ return (
                 <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
                   {defaultMessages.chatPage.description}
                 </p>
+
+                {selectedSpotIds.length > 0 && (
+                  <p className="mt-3 inline-flex rounded-full bg-blue-100 px-3 py-1.5 text-sm font-bold text-blue-700">
+                    {locale === "en"
+                      ? `Selected spots: ${selectedSpotIds.length}`
+                      : `選択したスポット：${selectedSpotIds.length}件`}
+                  </p>
+                )}
               </div>
 
               <div className="flex flex-wrap gap-3">

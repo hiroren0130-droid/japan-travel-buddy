@@ -59,12 +59,19 @@ import {
   hasLimitedScheduleRequest,
 } from "./planCompleteness";
 
+import {
+  getRequiredSpotsByIds,
+  mergeRequiredSpots,
+  validateRequiredSpotIds,
+} from "./requiredSpots";
+
 type RequestBody = {
   message: string;
   days: number;
   locale: Locale;
   specialRequest?: string;
   currentLocation?: CurrentLocation;
+  requiredSpotIds?: string[];
 };
 
 const MAX_REQUEST_BODY_BYTES =
@@ -364,6 +371,10 @@ function validateRequestBody(
         value.currentLocation == null
           ? null
           : value.currentLocation,
+      requiredSpotIds:
+        validateRequiredSpotIds(
+          value.requiredSpotIds
+        ),
     },
   };
 }
@@ -535,6 +546,7 @@ export async function POST(
       locale,
       specialRequest = "",
       currentLocation = null,
+      requiredSpotIds = [],
     } = validation.body;
 
     const spots =
@@ -572,6 +584,21 @@ ${specialRequest}
       limit: 12,
     });
 
+    const discoverRequiredSpots =
+      getRequiredSpotsByIds(
+        requiredSpotIds
+      );
+    const requiredSpots =
+      mergeRequiredSpots(
+        discoverRequiredSpots,
+        mentionedSpots
+      );
+    const candidateSpotsWithRequired =
+      mergeRequiredSpots(
+        requiredSpots,
+        candidateSpots
+      );
+
     if (
       process.env.NODE_ENV ===
       "development"
@@ -596,7 +623,7 @@ ${specialRequest}
       );
 
       console.log(
-        mentionedSpots.map(
+        requiredSpots.map(
           (spot) => spot.name
         )
       );
@@ -628,7 +655,7 @@ ${specialRequest}
      */
     const spotList =
       createSpotList(
-        candidateSpots
+        candidateSpotsWithRequired
       );
 
     if (
@@ -671,8 +698,7 @@ ${specialRequest}
       locale,
       specialRequest,
       currentLocation,
-      requiredSpots:
-        mentionedSpots,
+      requiredSpots,
       requestedStartSpotName,
     });
 
@@ -737,7 +763,7 @@ ${specialRequest}
     if (
       !containsRequiredSpots(
         generatedPlan,
-        mentionedSpots
+        requiredSpots
       )
     ) {
       return jsonResponse(
@@ -767,7 +793,7 @@ ${specialRequest}
       generatedPlan,
 
     requiredSpotNames:
-      mentionedSpots.map(
+      requiredSpots.map(
         (spot) =>
           spot.name
       ),
@@ -797,7 +823,7 @@ ${specialRequest}
     generatedPlan =
       containsRequiredSpots(
         locallyPrunedPlan,
-        mentionedSpots
+        requiredSpots
       )
         ? locallyPrunedPlan
         : requiredCompletePlan;
@@ -836,8 +862,7 @@ ${specialRequest}
         specialRequest,
         currentLocation,
 
-        requiredSpots:
-          mentionedSpots,
+        requiredSpots,
 
         requestedStartSpotName,
       });
@@ -845,7 +870,7 @@ ${specialRequest}
     generatedPlan =
       containsRequiredSpots(
         improvedPlan,
-        mentionedSpots
+        requiredSpots
       )
         ? improvedPlan
         : planBeforeAiImprovement;
@@ -871,7 +896,7 @@ ${specialRequest}
       generatedPlan,
 
     requiredSpotNames:
-      mentionedSpots.map(
+      requiredSpots.map(
         (spot) =>
           spot.name
       ),
@@ -901,7 +926,7 @@ ${specialRequest}
     generatedPlan =
       containsRequiredSpots(
         finalPrunedPlan,
-        mentionedSpots
+        requiredSpots
       )
         ? finalPrunedPlan
         : generatedPlan;
@@ -919,7 +944,7 @@ ${specialRequest}
     if (
       !containsRequiredSpots(
         generatedPlan,
-        mentionedSpots
+        requiredSpots
       )
     ) {
       generatedPlan = requiredCompletePlan;
