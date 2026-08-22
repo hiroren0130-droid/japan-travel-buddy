@@ -2,7 +2,7 @@ import type {
   Spot,
   SpotTranslation,
 } from "@/data/types";
-import { kyotoSpotTranslationsEn } from "@/data/locales/en/kyoto";
+import { spotTranslationsEn } from "@/data/locales/en";
 import type { Locale } from "@/lib/locale";
 
 function getSpotTranslation(
@@ -13,7 +13,7 @@ function getSpotTranslation(
     return undefined;
   }
 
-  return kyotoSpotTranslationsEn[spot.id];
+  return spotTranslationsEn[spot.id];
 }
 
 function localizedValue(
