@@ -4,6 +4,10 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 import { useLocale } from "@/components/LocaleProvider";
+import {
+  getPrefectureDisplayName,
+  isPrefectureId,
+} from "@/data/regions";
 
 function setMetaContent(selector: string, content: string) {
   document
@@ -16,8 +20,33 @@ export default function LocaleMetadata() {
   const { locale, messages } = useLocale();
 
   useEffect(() => {
+    const discoverPrefectureId =
+      pathname.match(
+        /^\/discover\/([^/]+)$/
+      )?.[1];
+    const discoverRegionName =
+      discoverPrefectureId &&
+      isPrefectureId(
+        discoverPrefectureId
+      )
+        ? getPrefectureDisplayName(
+            discoverPrefectureId,
+            locale
+          )
+        : null;
     const pageMetadata =
-      pathname === "/about"
+      discoverRegionName
+        ? {
+            title:
+              locale === "en"
+                ? `Discover ${discoverRegionName} | Japan Travel Buddy`
+                : `${discoverRegionName}スポットを探す | Japan Travel Buddy`,
+            description:
+              locale === "en"
+                ? `Browse sightseeing spots in ${discoverRegionName}.`
+                : `${discoverRegionName}の観光スポットを一覧から探せます。`,
+          }
+        : pathname === "/about"
         ? messages.aboutPage.metadata
         : pathname === "/contact"
           ? messages.contactPage.metadata

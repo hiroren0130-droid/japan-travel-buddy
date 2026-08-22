@@ -19,6 +19,36 @@ export type PrefectureId =
 export type CityId =
   (typeof CITY_IDS)[keyof typeof CITY_IDS];
 
+const PREFECTURE_DISPLAY_NAMES = {
+  [PREFECTURE_IDS.KYOTO]: {
+    ja: "京都",
+    en: "Kyoto",
+  },
+} as const;
+
+type RegionDisplayLocale =
+  keyof (typeof PREFECTURE_DISPLAY_NAMES)[PrefectureId];
+
+export function isPrefectureId(
+  value: string
+): value is PrefectureId {
+  return Object.values(
+    PREFECTURE_IDS
+  ).some(
+    (prefectureId) =>
+      prefectureId === value
+  );
+}
+
+export function getPrefectureDisplayName(
+  prefectureId: PrefectureId,
+  locale: RegionDisplayLocale
+): string {
+  return PREFECTURE_DISPLAY_NAMES[
+    prefectureId
+  ][locale];
+}
+
 type PlacesCityContext = {
   searchContext: string;
   addressTerms: readonly string[];

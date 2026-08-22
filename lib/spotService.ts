@@ -1,5 +1,6 @@
 import type { Spot } from "@/data/types";
 import { allSpots } from "@/data";
+import type { PrefectureId } from "@/data/regions";
 
 const normalize = (value: string): string =>
   value
@@ -95,6 +96,16 @@ export function getSpotsByArea(
   return allSpots.filter(
     (spot) =>
       spot.area.trim() === normalizedArea
+  );
+}
+
+export function getSpotsByPrefectureId(
+  prefectureId: PrefectureId
+): Spot[] {
+  return allSpots.filter(
+    (spot) =>
+      spot.prefectureId ===
+      prefectureId
   );
 }
 
