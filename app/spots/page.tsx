@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import Header from "@/components/Header";
 import { useLocale } from "@/components/LocaleProvider";
 import SpotImage from "@/components/SpotImage";
 import { allSpots } from "@/data";
@@ -97,7 +98,10 @@ export default function SpotsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+    <>
+      <Header />
+
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-10">
         <p className="text-sm font-bold tracking-widest text-blue-600">
           {spotsPageMessages.eyebrow}
@@ -226,6 +230,7 @@ export default function SpotsPage() {
           );
         })}
       </div>
-    </main>
+      </main>
+    </>
   );
 }
