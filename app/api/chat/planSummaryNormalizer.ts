@@ -3,15 +3,30 @@ import type {
   AITravelPlan,
 } from "./travelValidator";
 import type { Locale } from "@/lib/locale";
+import { getLocalizedSpotName } from "@/lib/localizedSpot";
+import { getSpotByName } from "@/lib/spotService";
 
 function getSpotNames(
-  day: AIPlanDay
+  day: AIPlanDay,
+  locale: Locale
 ): string[] {
   return day.items
     .map((item) => item.spot.trim())
     .filter(
       (spot) => spot.length > 0
-    );
+    )
+    .map((spotName) => {
+      if (locale !== "en") {
+        return spotName;
+      }
+
+      const spot =
+        getSpotByName(spotName);
+
+      return spot
+        ? getLocalizedSpotName(spot, "en")
+        : spotName;
+    });
 }
 
 function createDaySummary(
@@ -19,7 +34,7 @@ function createDaySummary(
   locale: Locale
 ): string {
   const spotNames =
-    getSpotNames(day);
+    getSpotNames(day, locale);
 
   if (spotNames.length === 0) {
     return locale === "en"
