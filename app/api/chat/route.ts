@@ -936,6 +936,7 @@ ${specialRequest}
     protectedStartSpotName:
       requestedStartSpotName,
     startTime,
+    endTime,
     enforceFullDayCoverage,
       });
 
@@ -1003,6 +1004,7 @@ ${specialRequest}
 
         requestedStartSpotName,
         startTime,
+        endTime,
       });
 
     generatedPlan =
@@ -1042,6 +1044,7 @@ ${specialRequest}
     protectedStartSpotName:
       requestedStartSpotName,
     startTime,
+    endTime,
     enforceFullDayCoverage,
       });
 

@@ -35,6 +35,7 @@ import {
 
 import {
   calculateEarlyEndCount,
+  calculateEndTimeViolationCount,
   hasLimitedScheduleRequest,
 } from "./planCompleteness";
 
@@ -50,6 +51,7 @@ type ImproveTravelPlanOptions = {
   requiredSpots: Spot[];
   requestedStartSpotName: string | null;
   startTime?: string;
+  endTime?: string;
 };
 
 export async function improveTravelPlan({
@@ -64,6 +66,7 @@ export async function improveTravelPlan({
   requiredSpots,
   requestedStartSpotName,
   startTime,
+  endTime,
 }: ImproveTravelPlanOptions): Promise<AITravelPlan> {
   const initialRouteScore =
     calculateRouteScore(plan);
@@ -76,6 +79,12 @@ export async function improveTravelPlan({
   const businessHoursViolationCount =
     calculateBusinessHoursViolationCount(
       plan
+    );
+
+  const endTimeViolationCount =
+    calculateEndTimeViolationCount(
+      plan,
+      endTime
     );
 
   const broadAreaOverloadCount =
@@ -103,7 +112,8 @@ export async function improveTravelPlan({
   longDistanceMoveCount > 0 ||
   broadAreaOverloadCount > 0 ||
   lunchBreakMissingCount > 0 ||
-  businessHoursViolationCount > 0;
+  businessHoursViolationCount > 0 ||
+  endTimeViolationCount > 0;
 
   if (
     !shouldImproveRoute ||
@@ -161,6 +171,7 @@ ${requiredSpotText}`,
       locale,
       specialRequest,
       startTime,
+      endTime,
       currentLocation,
     });
 

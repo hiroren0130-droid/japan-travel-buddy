@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 import { pruneOptionalSpots } from "@/app/api/chat/optionalSpotPruner";
 import {
   calculateEarlyEndCount,
+  calculateEndTimeViolationCount,
   getEstimatedDayEndMinutes,
   hasLimitedScheduleRequest,
 } from "@/app/api/chat/planCompleteness";
@@ -196,4 +197,62 @@ test("明示的な半日希望を通常1日の完成度判定から除外でき�
       "京都を1日観光したい"
     )
   ).toBe(false);
+});
+
+test("endTime違反を厳密なHH:mmで全Day判定する", () => {
+  const plan = createPlan([
+    "莨剰ｦ狗ｨｲ闕ｷ螟ｧ遉ｾ",
+  ]);
+
+  plan.days.push({
+    ...plan.days[0],
+    day: 2,
+    items: plan.days[0].items.map(
+      (item) => ({ ...item })
+    ),
+  });
+
+  const estimatedEndMinutes =
+    getEstimatedDayEndMinutes(
+      plan.days[0]
+    );
+
+  expect(estimatedEndMinutes).not.toBeNull();
+
+  const endTimeMinutes =
+    estimatedEndMinutes ?? 0;
+  const exactEndTime = `${String(
+    Math.floor(endTimeMinutes / 60)
+  ).padStart(2, "0")}:${String(
+    endTimeMinutes % 60
+  ).padStart(2, "0")}`;
+  const earlierEndTimeMinutes =
+    endTimeMinutes - 1;
+  const earlierEndTime = `${String(
+    Math.floor(earlierEndTimeMinutes / 60)
+  ).padStart(2, "0")}:${String(
+    earlierEndTimeMinutes % 60
+  ).padStart(2, "0")}`;
+
+  expect(
+    calculateEndTimeViolationCount(
+      plan,
+      exactEndTime
+    )
+  ).toBe(0);
+  expect(
+    calculateEndTimeViolationCount(
+      plan,
+      earlierEndTime
+    )
+  ).toBe(2);
+  expect(
+    calculateEndTimeViolationCount(plan)
+  ).toBe(0);
+  expect(
+    calculateEndTimeViolationCount(
+      plan,
+      "9:00"
+    )
+  ).toBe(0);
 });

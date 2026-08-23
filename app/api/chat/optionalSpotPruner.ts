@@ -20,6 +20,7 @@ import {
 
 import {
   calculateEarlyEndCount,
+  calculateEndTimeViolationCount,
 } from "./planCompleteness";
 
 import type {
@@ -33,6 +34,7 @@ type PlanQuality = {
   scheduleConflictCount: number;
   lateEndCount: number;
   longDistanceMoveCount: number;
+  endTimeViolationCount: number;
   earlyEndCount: number;
   score: number;
 };
@@ -42,6 +44,7 @@ type PruneOptionalSpotsParams = {
   requiredSpotNames: string[];
   protectedStartSpotName?: string | null;
   startTime?: string;
+  endTime?: string;
   enforceFullDayCoverage?: boolean;
 };
 
@@ -76,7 +79,8 @@ function containsRequiredSpotNames(
 
 function evaluatePlan(
   plan: AITravelPlan,
-  enforceFullDayCoverage: boolean
+  enforceFullDayCoverage: boolean,
+  endTime?: string
 ): PlanQuality {
   return {
     businessHoursViolationCount:
@@ -97,6 +101,12 @@ function evaluatePlan(
     longDistanceMoveCount:
       calculateLongDistanceMoveCount(
         plan
+      ),
+
+    endTimeViolationCount:
+      calculateEndTimeViolationCount(
+        plan,
+        endTime
       ),
 
     earlyEndCount:
@@ -122,6 +132,8 @@ function hasCriticalIssue(
     quality.lateEndCount >
       0 ||
     quality.longDistanceMoveCount >
+      0 ||
+    quality.endTimeViolationCount >
       0
   );
 }
@@ -187,6 +199,16 @@ function isBetterQuality(
     return (
       candidate.longDistanceMoveCount <
       current.longDistanceMoveCount
+    );
+  }
+
+  if (
+    candidate.endTimeViolationCount !==
+    current.endTimeViolationCount
+  ) {
+    return (
+      candidate.endTimeViolationCount <
+      current.endTimeViolationCount
     );
   }
 
@@ -281,6 +303,7 @@ export function pruneOptionalSpots({
   requiredSpotNames,
   protectedStartSpotName = null,
   startTime,
+  endTime,
   enforceFullDayCoverage = true,
 }: PruneOptionalSpotsParams): AITravelPlan {
   const requiredSpotNameSet =
@@ -301,7 +324,8 @@ export function pruneOptionalSpots({
   let currentQuality =
     evaluatePlan(
       currentPlan,
-      enforceFullDayCoverage
+      enforceFullDayCoverage,
+      endTime
     );
 
   if (
@@ -312,7 +336,22 @@ export function pruneOptionalSpots({
     return currentPlan;
   }
 
-  const maximumRemovals = 3;
+  const legacyMaximumRemovals = 3;
+  const maximumRemovals = endTime
+    ? currentPlan.days.reduce(
+        (count, day) =>
+          count +
+          day.items.filter(
+            (item) =>
+              !requiredSpotNameSet.has(
+                normalizeSpotName(
+                  item.spot
+                )
+              )
+          ).length,
+        0
+      )
+    : legacyMaximumRemovals;
 
   for (
     let removalCount = 0;
@@ -391,7 +430,8 @@ export function pruneOptionalSpots({
         const candidateQuality =
           evaluatePlan(
             candidatePlan,
-            enforceFullDayCoverage
+            enforceFullDayCoverage,
+            endTime
           );
 
         
@@ -438,6 +478,15 @@ export function pruneOptionalSpots({
       !shouldTryPruning(
         currentQuality
       )
+    ) {
+      break;
+    }
+
+    if (
+      removalCount + 1 >=
+        legacyMaximumRemovals &&
+      currentQuality
+        .endTimeViolationCount === 0
     ) {
       break;
     }

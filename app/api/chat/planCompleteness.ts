@@ -90,6 +90,38 @@ export function getEstimatedDayEndMinutes(
   );
 }
 
+export function calculateEndTimeViolationCount(
+  plan: AITravelPlan,
+  endTime?: string
+): number {
+  if (!endTime) {
+    return 0;
+  }
+
+  const match = endTime.match(
+    /^([01]\d|2[0-3]):([0-5]\d)$/
+  );
+
+  if (!match) {
+    return 0;
+  }
+
+  const endTimeMinutes =
+    Number(match[1]) * 60 +
+    Number(match[2]);
+
+  return plan.days.filter((day) => {
+    const estimatedEndMinutes =
+      getEstimatedDayEndMinutes(day);
+
+    return (
+      estimatedEndMinutes !== null &&
+      estimatedEndMinutes >
+        endTimeMinutes
+    );
+  }).length;
+}
+
 export function calculateEarlyEndCount(
   plan: AITravelPlan
 ): number {
