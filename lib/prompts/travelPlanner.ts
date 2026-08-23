@@ -211,6 +211,16 @@ ${
 
 ${spotList}
 
+Start/end Location rules:
+- startLocation / endLocation are travel boundary locations, not sightseeing itinerary items.
+- Do not include them as Plan items solely because they were specified as start/end locations.
+- If the same place is explicitly required by the user as a required sightseeing Spot, it may remain as an itinerary item.
+
+開始・終了地点のルール:
+- startLocation / endLocation は旅程外の出発・帰着地点であり、観光Plan itemではありません。
+- 開始・終了地点として指定されたことだけを理由に、Plan itemsへ含めないでください。
+- 同じ場所がrequired Spotとして明示指定されている場合は、Plan itemとして保持して構いません。
+
 ────────────────────────
 【ユーザーの希望】
 ────────────────────────

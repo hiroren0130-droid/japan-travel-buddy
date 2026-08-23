@@ -935,6 +935,8 @@ ${specialRequest}
 
     protectedStartSpotName:
       requestedStartSpotName,
+    startLocation,
+    endLocation,
     startTime,
     endTime,
     enforceFullDayCoverage,
@@ -974,6 +976,12 @@ ${specialRequest}
           requestedStartSpotName,
         locale,
         startTime,
+        startLocation,
+        endLocation,
+        requiredSpotNames:
+          requiredSpots.map(
+            (spot) => spot.name
+          ),
       });
 
     /*
@@ -1003,6 +1011,8 @@ ${specialRequest}
         requiredSpots,
 
         requestedStartSpotName,
+        startLocation,
+        endLocation,
         startTime,
         endTime,
       });
@@ -1043,6 +1053,8 @@ ${specialRequest}
 
     protectedStartSpotName:
       requestedStartSpotName,
+    startLocation,
+    endLocation,
     startTime,
     endTime,
     enforceFullDayCoverage,
@@ -1082,6 +1094,12 @@ ${specialRequest}
           requestedStartSpotName,
         locale,
         startTime,
+        startLocation,
+        endLocation,
+        requiredSpotNames:
+          requiredSpots.map(
+            (spot) => spot.name
+          ),
       });
 
     if (

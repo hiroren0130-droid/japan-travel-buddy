@@ -22,6 +22,10 @@ import {
   optimizeTravelPlanTimes,
 } from "./timeOptimizer";
 
+import {
+  filterLocationPlanItems,
+} from "./locationPlanItemFilter";
+
 import type {
   AITravelPlan,
 } from "./travelValidator";
@@ -32,6 +36,9 @@ type OptimizeGeneratedPlanOptions = {
   startSpotName: string | null;
   locale: Locale;
   startTime?: string;
+  startLocation?: string;
+  endLocation?: string;
+  requiredSpotNames?: string[];
   normalizeDescriptions?: boolean;
 };
 
@@ -59,6 +66,9 @@ export function optimizeGeneratedPlan({
   startSpotName,
   locale,
   startTime,
+  startLocation,
+  endLocation,
+  requiredSpotNames = [],
   normalizeDescriptions = true,
 }: OptimizeGeneratedPlanOptions): AITravelPlan {
   logSpotCount(
@@ -67,8 +77,23 @@ export function optimizeGeneratedPlan({
   );
 
   let optimizedPlan =
-    optimizeStartPoint({
+    filterLocationPlanItems({
       plan,
+      startLocation,
+      endLocation,
+      requiredSpotNames,
+      protectedStartSpotName:
+        startSpotName,
+    });
+
+  logSpotCount(
+    "After Location Plan Item Filter",
+    optimizedPlan
+  );
+
+  optimizedPlan =
+    optimizeStartPoint({
+      plan: optimizedPlan,
       startSpotName,
       startTime:
         startTime ?? "09:00",
@@ -105,7 +130,8 @@ export function optimizeGeneratedPlan({
   optimizedPlan =
     optimizeTravelPlanTimes(
       optimizedPlan,
-      startTime
+      startTime,
+      startLocation
     );
 
   logSpotCount(
@@ -117,7 +143,8 @@ export function optimizeGeneratedPlan({
   optimizeDayImbalance(
     optimizedPlan,
     startSpotName,
-    startTime
+    startTime,
+    startLocation
   );
 
   logSpotCount(

@@ -1,5 +1,9 @@
 import { getSpotByName } from "@/lib/spotService";
 
+import {
+  estimateLocationTravel,
+} from "./locationTravelEstimator";
+
 import type {
   AIPlanDay,
   AITravelPlan,
@@ -90,9 +94,39 @@ export function getEstimatedDayEndMinutes(
   );
 }
 
+export function getEstimatedArrivalAtEndLocationMinutes(
+  day: AIPlanDay,
+  endLocation?: string
+): number | null {
+  const estimatedDayEndMinutes =
+    getEstimatedDayEndMinutes(day);
+
+  if (estimatedDayEndMinutes === null) {
+    return null;
+  }
+
+  const lastItem = day.items.at(-1);
+
+  if (!lastItem) {
+    return estimatedDayEndMinutes;
+  }
+
+  const endTravelMinutes =
+    estimateLocationTravel({
+      location: endLocation,
+      spotName: lastItem.spot,
+    })?.durationMinutes ?? 0;
+
+  return (
+    estimatedDayEndMinutes +
+    endTravelMinutes
+  );
+}
+
 export function calculateEndTimeViolationCount(
   plan: AITravelPlan,
-  endTime?: string
+  endTime?: string,
+  endLocation?: string
 ): number {
   if (!endTime) {
     return 0;
@@ -110,16 +144,28 @@ export function calculateEndTimeViolationCount(
     Number(match[1]) * 60 +
     Number(match[2]);
 
-  return plan.days.filter((day) => {
-    const estimatedEndMinutes =
-      getEstimatedDayEndMinutes(day);
+  return plan.days.filter(
+    (day, dayIndex) => {
+      const isFinalDay =
+        dayIndex ===
+        plan.days.length - 1;
+      const estimatedEndMinutes =
+        isFinalDay
+          ? getEstimatedArrivalAtEndLocationMinutes(
+              day,
+              endLocation
+            )
+          : getEstimatedDayEndMinutes(
+              day
+            );
 
-    return (
-      estimatedEndMinutes !== null &&
-      estimatedEndMinutes >
-        endTimeMinutes
-    );
-  }).length;
+      return (
+        estimatedEndMinutes !== null &&
+        estimatedEndMinutes >
+          endTimeMinutes
+      );
+    }
+  ).length;
 }
 
 export function calculateEarlyEndCount(

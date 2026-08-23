@@ -44,7 +44,9 @@ type PruneOptionalSpotsParams = {
   requiredSpotNames: string[];
   protectedStartSpotName?: string | null;
   startTime?: string;
+  startLocation?: string;
   endTime?: string;
+  endLocation?: string;
   enforceFullDayCoverage?: boolean;
 };
 
@@ -80,7 +82,8 @@ function containsRequiredSpotNames(
 function evaluatePlan(
   plan: AITravelPlan,
   enforceFullDayCoverage: boolean,
-  endTime?: string
+  endTime?: string,
+  endLocation?: string
 ): PlanQuality {
   return {
     businessHoursViolationCount:
@@ -106,7 +109,8 @@ function evaluatePlan(
     endTimeViolationCount:
       calculateEndTimeViolationCount(
         plan,
-        endTime
+        endTime,
+        endLocation
       ),
 
     earlyEndCount:
@@ -278,7 +282,8 @@ function removeSpotFromPlan({
 function optimizeAfterRemoval(
   plan: AITravelPlan,
   protectedStartSpotName: string | null,
-  startTime?: string
+  startTime?: string,
+  startLocation?: string
 ): AITravelPlan {
   const routeOptimizedPlan =
     optimizeTravelPlanRoute(
@@ -288,13 +293,15 @@ function optimizeAfterRemoval(
   const timeOptimizedPlan =
     optimizeTravelPlanTimes(
       routeOptimizedPlan,
-      startTime
+      startTime,
+      startLocation
     );
 
   return optimizeDayImbalance(
     timeOptimizedPlan,
     protectedStartSpotName,
-    startTime
+    startTime,
+    startLocation
   );
 }
 
@@ -303,7 +310,9 @@ export function pruneOptionalSpots({
   requiredSpotNames,
   protectedStartSpotName = null,
   startTime,
+  startLocation,
   endTime,
+  endLocation,
   enforceFullDayCoverage = true,
 }: PruneOptionalSpotsParams): AITravelPlan {
   const requiredSpotNameSet =
@@ -325,7 +334,8 @@ export function pruneOptionalSpots({
     evaluatePlan(
       currentPlan,
       enforceFullDayCoverage,
-      endTime
+      endTime,
+      endLocation
     );
 
   if (
@@ -415,7 +425,8 @@ export function pruneOptionalSpots({
               itemIndex,
             }),
             protectedStartSpotName,
-            startTime
+            startTime,
+            startLocation
           );
 
         if (
@@ -431,7 +442,8 @@ export function pruneOptionalSpots({
           evaluatePlan(
             candidatePlan,
             enforceFullDayCoverage,
-            endTime
+            endTime,
+            endLocation
           );
 
         

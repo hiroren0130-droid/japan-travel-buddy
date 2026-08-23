@@ -52,11 +52,17 @@ function repairAndOptimizePlan({
   requestedStartSpotName,
   locale,
   startTime,
+  startLocation,
+  endLocation,
+  requiredSpots,
 }: {
   plan: AITravelPlan | null;
   requestedStartSpotName: string | null;
   locale: Locale;
   startTime?: string;
+  startLocation?: string;
+  endLocation?: string;
+  requiredSpots: Spot[];
 }): AITravelPlan | null {
   if (!plan) {
     return null;
@@ -81,6 +87,12 @@ function repairAndOptimizePlan({
       requestedStartSpotName,
     locale,
     startTime,
+    startLocation,
+    endLocation,
+    requiredSpotNames:
+      requiredSpots.map(
+        (spot) => spot.name
+      ),
   });
 }
 
@@ -123,6 +135,9 @@ export async function generateTravelPlan({
       requestedStartSpotName,
       locale,
       startTime,
+      startLocation,
+      endLocation,
+      requiredSpots,
     });
 
   const missingSpotNames =
@@ -256,6 +271,9 @@ ${
       requestedStartSpotName,
       locale,
       startTime,
+      startLocation,
+      endLocation,
+      requiredSpots,
     });
 
   return {

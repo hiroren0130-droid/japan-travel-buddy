@@ -2,13 +2,16 @@ import { getSpotByName } from "@/lib/spotService";
 
 import { getKyotoAreaGroup } from "./kyotoAreaGroups";
 
+import {
+  calculateDistanceKm,
+  estimateTravel,
+} from "./locationTravelEstimator";
+
 import type {
   AIPlanDay,
   AIPlanItem,
   AITravelPlan,
 } from "./travelValidator";
-
-const EARTH_RADIUS_KM = 6371;
 
 const DEFAULT_START_MINUTES = 9 * 60;
 const DEFAULT_STAY_MINUTES = 60;
@@ -72,11 +75,6 @@ type BusinessHours = {
   close: number;
 };
 
-type TravelEstimate = {
-  transport: string;
-  durationMinutes: number;
-};
-
 type RouteEvaluation = {
   score: number;
   items: AIPlanItem[];
@@ -111,63 +109,6 @@ function shouldPenalizeUnknownHours(
   }
 
   return true;
-}
-
-function degreesToRadians(
-  degrees: number
-): number {
-  return degrees * (Math.PI / 180);
-}
-
-function calculateDistanceKm(
-  latitudeA: number,
-  longitudeA: number,
-  latitudeB: number,
-  longitudeB: number
-): number {
-  const latitudeDifference =
-    degreesToRadians(
-      latitudeB - latitudeA
-    );
-
-  const longitudeDifference =
-    degreesToRadians(
-      longitudeB - longitudeA
-    );
-
-  const startLatitude =
-    degreesToRadians(
-      latitudeA
-    );
-
-  const endLatitude =
-    degreesToRadians(
-      latitudeB
-    );
-
-  const haversine =
-    Math.sin(
-      latitudeDifference / 2
-    ) ** 2 +
-    Math.cos(startLatitude) *
-      Math.cos(endLatitude) *
-      Math.sin(
-        longitudeDifference / 2
-      ) ** 2;
-
-  const centralAngle =
-    2 *
-    Math.atan2(
-      Math.sqrt(haversine),
-      Math.sqrt(
-        1 - haversine
-      )
-    );
-
-  return (
-    EARTH_RADIUS_KM *
-    centralAngle
-  );
 }
 
 function parseDurationMinutes(
@@ -514,67 +455,6 @@ function isDeparturePoint(
       "start"
     )
   );
-}
-
-function estimateTravel(
-  distanceKm: number
-): TravelEstimate {
-  if (
-    !Number.isFinite(
-      distanceKm
-    )
-  ) {
-    return {
-      transport: "電車",
-      durationMinutes: 30,
-    };
-  }
-
-  if (
-    distanceKm <= 1.2
-  ) {
-    return {
-      transport: "徒歩",
-
-      durationMinutes:
-        Math.max(
-          Math.round(
-            distanceKm * 15
-          ),
-          5
-        ),
-    };
-  }
-
-  if (
-    distanceKm <= 4
-  ) {
-    return {
-      transport: "バス",
-
-      durationMinutes:
-        Math.max(
-          Math.round(
-            distanceKm * 6 +
-            10
-          ),
-          15
-        ),
-    };
-  }
-
-  return {
-    transport: "電車",
-
-    durationMinutes:
-      Math.max(
-        Math.round(
-          distanceKm * 4 +
-          15
-        ),
-        25
-      ),
-  };
 }
 
 function createPermutations(

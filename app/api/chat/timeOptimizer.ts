@@ -1,5 +1,9 @@
 import { getSpotByName } from "@/lib/spotService";
 
+import {
+  estimateLocationTravel,
+} from "./locationTravelEstimator";
+
 import type {
   AIPlanDay,
   AIPlanItem,
@@ -365,7 +369,8 @@ function adjustArrivalToOpeningTime({
 
 function optimizeDayTimes(
   day: AIPlanDay,
-  startTime?: string
+  startTime?: string,
+  startLocation?: string
 ): AIPlanDay {
   if (day.items.length === 0) {
     return day;
@@ -388,10 +393,21 @@ function optimizeDayTimes(
       orderedItems[0].time
     );
 
+  const startTravelMinutes =
+    requestedStartTime !== null
+      ? estimateLocationTravel({
+          location: startLocation,
+          spotName:
+            orderedItems[0].spot,
+        })?.durationMinutes ?? 0
+      : 0;
+
   let currentArrival =
-    requestedStartTime ??
-    firstOriginalTime ??
-    DEFAULT_START_MINUTES;
+    requestedStartTime !== null
+      ? requestedStartTime +
+        startTravelMinutes
+      : firstOriginalTime ??
+        DEFAULT_START_MINUTES;
 
   let lunchInserted = false;
 
@@ -503,16 +519,20 @@ function optimizeDayTimes(
 
 export function optimizeTravelPlanTimes(
   plan: AITravelPlan,
-  startTime?: string
+  startTime?: string,
+  startLocation?: string
 ): AITravelPlan {
   return {
     ...plan,
     days:
       plan.days.map(
-        (day) =>
+        (day, dayIndex) =>
           optimizeDayTimes(
             day,
-            startTime
+            startTime,
+            dayIndex === 0
+              ? startLocation
+              : undefined
           )
       ),
   };

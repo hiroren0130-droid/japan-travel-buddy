@@ -50,6 +50,8 @@ type ImproveTravelPlanOptions = {
   currentLocation: CurrentLocation | null;
   requiredSpots: Spot[];
   requestedStartSpotName: string | null;
+  startLocation?: string;
+  endLocation?: string;
   startTime?: string;
   endTime?: string;
 };
@@ -65,6 +67,8 @@ export async function improveTravelPlan({
   currentLocation,
   requiredSpots,
   requestedStartSpotName,
+  startLocation,
+  endLocation,
   startTime,
   endTime,
 }: ImproveTravelPlanOptions): Promise<AITravelPlan> {
@@ -84,7 +88,8 @@ export async function improveTravelPlan({
   const endTimeViolationCount =
     calculateEndTimeViolationCount(
       plan,
-      endTime
+      endTime,
+      endLocation
     );
 
   const broadAreaOverloadCount =
@@ -172,6 +177,8 @@ ${requiredSpotText}`,
       specialRequest,
       startTime,
       endTime,
+      startLocation,
+      endLocation,
       currentLocation,
     });
 
@@ -199,6 +206,12 @@ ${requiredSpotText}`,
         requestedStartSpotName,
       locale,
       startTime,
+      startLocation,
+      endLocation,
+      requiredSpotNames:
+        requiredSpots.map(
+          (spot) => spot.name
+        ),
     });
 
   const hasUnrequestedEarlyEnd =
