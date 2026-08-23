@@ -49,6 +49,7 @@ type ImproveTravelPlanOptions = {
   currentLocation: CurrentLocation | null;
   requiredSpots: Spot[];
   requestedStartSpotName: string | null;
+  startTime?: string;
 };
 
 export async function improveTravelPlan({
@@ -62,6 +63,7 @@ export async function improveTravelPlan({
   currentLocation,
   requiredSpots,
   requestedStartSpotName,
+  startTime,
 }: ImproveTravelPlanOptions): Promise<AITravelPlan> {
   const initialRouteScore =
     calculateRouteScore(plan);
@@ -158,6 +160,7 @@ ${requiredSpotText}`,
       days: requestedDays,
       locale,
       specialRequest,
+      startTime,
       currentLocation,
     });
 
@@ -184,6 +187,7 @@ ${requiredSpotText}`,
       startSpotName:
         requestedStartSpotName,
       locale,
+      startTime,
     });
 
   const hasUnrequestedEarlyEnd =

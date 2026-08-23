@@ -273,7 +273,8 @@ function clonePlan(
 }
 
 function optimizeMovedPlan(
-  plan: AITravelPlan
+  plan: AITravelPlan,
+  startTime?: string
 ): AITravelPlan {
   return optimizeTravelPlanTimes(
     optimizeTravelPlanRoute(
@@ -281,7 +282,8 @@ function optimizeMovedPlan(
       {
         preserveFirstItem: false,
       }
-    )
+    ),
+    startTime
   );
 }
 
@@ -290,11 +292,13 @@ function moveItem({
   fromDayIndex,
   itemIndex,
   toDayIndex,
+  startTime,
 }: {
   plan: AITravelPlan;
   fromDayIndex: number;
   itemIndex: number;
   toDayIndex: number;
+  startTime?: string;
 }): AITravelPlan | null {
   if (
     fromDayIndex ===
@@ -360,7 +364,8 @@ function moveItem({
   });
 
   return optimizeMovedPlan(
-    movedPlan
+    movedPlan,
+    startTime
   );
 }
 
@@ -370,12 +375,14 @@ function swapItems({
   firstItemIndex,
   secondDayIndex,
   secondItemIndex,
+  startTime,
 }: {
   plan: AITravelPlan;
   firstDayIndex: number;
   firstItemIndex: number;
   secondDayIndex: number;
   secondItemIndex: number;
+  startTime?: string;
 }): AITravelPlan | null {
   if (
     firstDayIndex ===
@@ -434,7 +441,8 @@ function swapItems({
   };
 
   return optimizeMovedPlan(
-    swappedPlan
+    swappedPlan,
+    startTime
   );
 }
 
@@ -613,7 +621,8 @@ function createMoveCandidates(
 
 export function optimizeDayImbalance(
   plan: AITravelPlan,
-  protectedStartSpotName: string | null = null
+  protectedStartSpotName: string | null = null,
+  startTime?: string
 ): AITravelPlan {
   if (
     plan.days.length <= 1
@@ -674,6 +683,8 @@ export function optimizeDayImbalance(
           toDayIndex:
             candidate
               .toDayIndex,
+
+          startTime,
         });
 
       if (!candidatePlan) {
@@ -746,6 +757,8 @@ export function optimizeDayImbalance(
           secondItemIndex:
             swapCandidate
               .secondItemIndex,
+
+          startTime,
         });
 
       if (!candidatePlan) {

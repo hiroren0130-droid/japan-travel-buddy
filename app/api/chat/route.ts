@@ -935,6 +935,7 @@ ${specialRequest}
 
     protectedStartSpotName:
       requestedStartSpotName,
+    startTime,
     enforceFullDayCoverage,
       });
 
@@ -971,6 +972,7 @@ ${specialRequest}
         startSpotName:
           requestedStartSpotName,
         locale,
+        startTime,
       });
 
     /*
@@ -1000,6 +1002,7 @@ ${specialRequest}
         requiredSpots,
 
         requestedStartSpotName,
+        startTime,
       });
 
     generatedPlan =
@@ -1038,6 +1041,7 @@ ${specialRequest}
 
     protectedStartSpotName:
       requestedStartSpotName,
+    startTime,
     enforceFullDayCoverage,
       });
 
@@ -1074,6 +1078,7 @@ ${specialRequest}
         startSpotName:
           requestedStartSpotName,
         locale,
+        startTime,
       });
 
     if (

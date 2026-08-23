@@ -51,10 +51,12 @@ function repairAndOptimizePlan({
   plan,
   requestedStartSpotName,
   locale,
+  startTime,
 }: {
   plan: AITravelPlan | null;
   requestedStartSpotName: string | null;
   locale: Locale;
+  startTime?: string;
 }): AITravelPlan | null {
   if (!plan) {
     return null;
@@ -78,6 +80,7 @@ function repairAndOptimizePlan({
     startSpotName:
       requestedStartSpotName,
     locale,
+    startTime,
   });
 }
 
@@ -119,6 +122,7 @@ export async function generateTravelPlan({
       plan: generatedPlan,
       requestedStartSpotName,
       locale,
+      startTime,
     });
 
   const missingSpotNames =
@@ -251,6 +255,7 @@ ${
       plan: generatedPlan,
       requestedStartSpotName,
       locale,
+      startTime,
     });
 
   return {

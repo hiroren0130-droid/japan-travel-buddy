@@ -54,7 +54,7 @@ export function optimizeGeneratedPlan({
   plan,
   startSpotName,
   locale,
-  startTime = "09:00",
+  startTime,
   normalizeDescriptions = true,
 }: OptimizeGeneratedPlanOptions): AITravelPlan {
   logSpotCount(
@@ -66,7 +66,8 @@ export function optimizeGeneratedPlan({
     optimizeStartPoint({
       plan,
       startSpotName,
-      startTime,
+      startTime:
+        startTime ?? "09:00",
       locale,
     });
 
@@ -87,7 +88,8 @@ export function optimizeGeneratedPlan({
 
   optimizedPlan =
     optimizeTravelPlanTimes(
-      optimizedPlan
+      optimizedPlan,
+      startTime
     );
 
   logSpotCount(
@@ -98,7 +100,8 @@ export function optimizeGeneratedPlan({
   optimizedPlan =
   optimizeDayImbalance(
     optimizedPlan,
-    startSpotName
+    startSpotName,
+    startTime
   );
 
   logSpotCount(

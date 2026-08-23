@@ -364,7 +364,8 @@ function adjustArrivalToOpeningTime({
 }
 
 function optimizeDayTimes(
-  day: AIPlanDay
+  day: AIPlanDay,
+  startTime?: string
 ): AIPlanDay {
   if (day.items.length === 0) {
     return day;
@@ -377,12 +378,18 @@ function optimizeDayTimes(
   const orderedItems =
     [...day.items];
 
+  const requestedStartTime =
+    startTime
+      ? timeToMinutes(startTime)
+      : null;
+
   const firstOriginalTime =
     timeToMinutes(
       orderedItems[0].time
     );
 
   let currentArrival =
+    requestedStartTime ??
     firstOriginalTime ??
     DEFAULT_START_MINUTES;
 
@@ -495,13 +502,18 @@ function optimizeDayTimes(
 }
 
 export function optimizeTravelPlanTimes(
-  plan: AITravelPlan
+  plan: AITravelPlan,
+  startTime?: string
 ): AITravelPlan {
   return {
     ...plan,
     days:
       plan.days.map(
-        optimizeDayTimes
+        (day) =>
+          optimizeDayTimes(
+            day,
+            startTime
+          )
       ),
   };
 }

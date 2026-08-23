@@ -41,6 +41,7 @@ type PruneOptionalSpotsParams = {
   plan: AITravelPlan;
   requiredSpotNames: string[];
   protectedStartSpotName?: string | null;
+  startTime?: string;
   enforceFullDayCoverage?: boolean;
 };
 
@@ -254,7 +255,8 @@ function removeSpotFromPlan({
 
 function optimizeAfterRemoval(
   plan: AITravelPlan,
-  protectedStartSpotName: string | null
+  protectedStartSpotName: string | null,
+  startTime?: string
 ): AITravelPlan {
   const routeOptimizedPlan =
     optimizeTravelPlanRoute(
@@ -263,12 +265,14 @@ function optimizeAfterRemoval(
 
   const timeOptimizedPlan =
     optimizeTravelPlanTimes(
-      routeOptimizedPlan
+      routeOptimizedPlan,
+      startTime
     );
 
   return optimizeDayImbalance(
     timeOptimizedPlan,
-    protectedStartSpotName
+    protectedStartSpotName,
+    startTime
   );
 }
 
@@ -276,6 +280,7 @@ export function pruneOptionalSpots({
   plan,
   requiredSpotNames,
   protectedStartSpotName = null,
+  startTime,
   enforceFullDayCoverage = true,
 }: PruneOptionalSpotsParams): AITravelPlan {
   const requiredSpotNameSet =
@@ -370,7 +375,8 @@ export function pruneOptionalSpots({
               dayIndex,
               itemIndex,
             }),
-            protectedStartSpotName
+            protectedStartSpotName,
+            startTime
           );
 
         if (
