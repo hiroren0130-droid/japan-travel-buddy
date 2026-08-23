@@ -11,6 +11,10 @@ import {
 } from "./routeOptimizer";
 
 import {
+  optimizeRegionClusters,
+} from "./regionClusterOptimizer";
+
+import {
   optimizeStartPoint,
 } from "./startPointOptimizer";
 
@@ -73,6 +77,18 @@ export function optimizeGeneratedPlan({
 
   logSpotCount(
     "After Start Point Optimizer",
+    optimizedPlan
+  );
+
+  optimizedPlan =
+    optimizeRegionClusters({
+      plan: optimizedPlan,
+      protectedStartSpotName:
+        startSpotName,
+    });
+
+  logSpotCount(
+    "After Region Cluster Optimizer",
     optimizedPlan
   );
 

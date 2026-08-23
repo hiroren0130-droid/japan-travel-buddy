@@ -658,6 +658,93 @@ export function calculateCrossDayAreaSplitCount(
   return splitCount;
 }
 
+function getEvaluationCityId(
+  spotName: string
+): string | null {
+  const spot =
+    getSpotByName(
+      spotName
+    );
+
+  if (
+    !spot ||
+    spot.category === "駅" ||
+    spot.category === "空港"
+  ) {
+    return null;
+  }
+
+  const cityId =
+    spot.cityId?.trim();
+
+  return cityId || null;
+}
+
+export function calculateMixedCityDayCount(
+  plan: AITravelPlan
+): number {
+  return plan.days.filter((day) => {
+    const cityIds = new Set(
+      day.items
+        .map((item) =>
+          getEvaluationCityId(
+            item.spot
+          )
+        )
+        .filter(
+          (cityId): cityId is string =>
+            cityId !== null
+        )
+    );
+
+    return cityIds.size > 1;
+  }).length;
+}
+
+export function calculateCrossDayCitySplitCount(
+  plan: AITravelPlan
+): number {
+  const cityDayIndexes =
+    new Map<string, Set<number>>();
+
+  for (
+    let dayIndex = 0;
+    dayIndex < plan.days.length;
+    dayIndex += 1
+  ) {
+    for (
+      const item
+      of plan.days[dayIndex].items
+    ) {
+      const cityId =
+        getEvaluationCityId(
+          item.spot
+        );
+
+      if (!cityId) {
+        continue;
+      }
+
+      const dayIndexes =
+        cityDayIndexes.get(cityId) ??
+        new Set<number>();
+
+      dayIndexes.add(dayIndex);
+      cityDayIndexes.set(
+        cityId,
+        dayIndexes
+      );
+    }
+  }
+
+  return Array.from(
+    cityDayIndexes.values()
+  ).filter(
+    (dayIndexes) =>
+      dayIndexes.size > 1
+  ).length;
+}
+
 export function calculateShortStayCount(
   plan: AITravelPlan
 ): number {

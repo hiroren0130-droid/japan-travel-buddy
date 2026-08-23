@@ -3,10 +3,12 @@ import { getSpotByName } from "@/lib/spotService";
 import {
   calculateBroadAreaOverloadCount,
 calculateBusinessHoursViolationCount,
+  calculateCrossDayCitySplitCount,
   calculateCrossDayAreaSplitCount,
   calculateDayImbalanceCount,
   calculateLateEndCount,
   calculateLongDistanceMoveCount,
+  calculateMixedCityDayCount,
   calculateRouteScore,
   calculateScheduleConflictCount,
 } from "./routeEvaluator";
@@ -28,6 +30,8 @@ type PlanQuality = {
   businessHoursViolationCount: number;
   scheduleConflictCount: number;
   lateEndCount: number;
+  mixedCityDayCount: number;
+  crossDayCitySplitCount: number;
   dayImbalanceCount: number;
   crossDayAreaSplitCount: number;
   longDistanceMoveCount: number;
@@ -66,6 +70,16 @@ function evaluatePlan(
 
     lateEndCount:
       calculateLateEndCount(
+        plan
+      ),
+
+    mixedCityDayCount:
+      calculateMixedCityDayCount(
+        plan
+      ),
+
+    crossDayCitySplitCount:
+      calculateCrossDayCitySplitCount(
         plan
       ),
 
@@ -144,6 +158,26 @@ function isBetterQuality(
     return (
       candidate.lateEndCount <
       current.lateEndCount
+    );
+  }
+
+  if (
+    candidate.mixedCityDayCount !==
+    current.mixedCityDayCount
+  ) {
+    return (
+      candidate.mixedCityDayCount <
+      current.mixedCityDayCount
+    );
+  }
+
+  if (
+    candidate.crossDayCitySplitCount !==
+    current.crossDayCitySplitCount
+  ) {
+    return (
+      candidate.crossDayCitySplitCount <
+      current.crossDayCitySplitCount
     );
   }
 
@@ -284,6 +318,18 @@ function optimizeMovedPlan(
       }
     ),
     startTime
+  );
+}
+
+function doesCityQualityWorsen(
+  candidate: PlanQuality,
+  current: PlanQuality
+): boolean {
+  return (
+    candidate.mixedCityDayCount >
+      current.mixedCityDayCount ||
+    candidate.crossDayCitySplitCount >
+      current.crossDayCitySplitCount
   );
 }
 
@@ -700,6 +746,10 @@ export function optimizeDayImbalance(
        * 現在より悪くなる移動は採用しません。
        */
       if (
+        doesCityQualityWorsen(
+          candidateQuality,
+          currentQuality
+        ) ||
         !isBetterQuality(
           candidateQuality,
           currentQuality
@@ -775,6 +825,10 @@ export function optimizeDayImbalance(
        * 採用しません。
        */
       if (
+        doesCityQualityWorsen(
+          candidateQuality,
+          currentQuality
+        ) ||
         !isBetterQuality(
           candidateQuality,
           currentQuality
