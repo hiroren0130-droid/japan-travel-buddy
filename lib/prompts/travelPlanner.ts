@@ -9,6 +9,10 @@ type CreateTravelPlannerPromptParams = {
   spotList: string;
   message: string;
   specialRequest: string;
+  startLocation?: string;
+  startTime?: string;
+  endLocation?: string;
+  endTime?: string;
   currentLocation: CurrentLocation;
   days: number;
   locale: Locale;
@@ -18,6 +22,10 @@ export function createTravelPlannerPrompt({
   spotList,
   message,
   specialRequest,
+  startLocation,
+  startTime,
+  endLocation,
+  endTime,
   currentLocation,
   days,
   locale,
@@ -212,6 +220,18 @@ ${message || "指定なし"}
 
 追加の希望:
 ${specialRequest || "なし"}
+
+開始地点:
+${startLocation || "指定なし"}
+
+開始時刻:
+${startTime || "指定なし"}
+
+終了地点:
+${endLocation || "指定なし"}
+
+終了希望時刻:
+${endTime || "指定なし"}
 
 ────────────────────────
 【生成前チェック】

@@ -5,6 +5,11 @@ export interface TravelPlan {
   summary: string;
   days: TravelDay[];
 
+  startLocation?: string;
+  startTime?: string;
+  endLocation?: string;
+  endTime?: string;
+
   favorite?: boolean;
 }
 

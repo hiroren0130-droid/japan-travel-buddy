@@ -70,6 +70,10 @@ type RequestBody = {
   days: number;
   locale: Locale;
   specialRequest?: string;
+  startLocation?: string;
+  startTime?: string;
+  endLocation?: string;
+  endTime?: string;
   currentLocation?: CurrentLocation;
   requiredSpotIds?: string[];
 };
@@ -79,6 +83,10 @@ const MAX_REQUEST_BODY_BYTES =
 
 const MAX_MESSAGE_LENGTH = 2_000;
 const MAX_SPECIAL_REQUEST_LENGTH = 500;
+const MAX_LOCATION_LENGTH = 200;
+
+const TIME_PATTERN =
+  /^(?:[01]\d|2[0-3]):[0-5]\d$/;
 
 const RATE_LIMIT_WINDOW_MS =
   10 * 60 * 1_000;
@@ -335,6 +343,117 @@ function validateRequestBody(
     };
   }
 
+  const normalizeOptionalLocation = (
+    valueToNormalize: unknown,
+    fieldName: string
+  ):
+    | { value?: string }
+    | { error: string } => {
+    if (valueToNormalize === undefined) {
+      return {};
+    }
+
+    if (typeof valueToNormalize !== "string") {
+      return {
+        error: `${fieldName}は文字列で送信してください。`,
+      };
+    }
+
+    const normalizedValue =
+      valueToNormalize.trim();
+
+    if (!normalizedValue) {
+      return {};
+    }
+
+    if (
+      normalizedValue.length >
+      MAX_LOCATION_LENGTH
+    ) {
+      return {
+        error: `${fieldName}は${MAX_LOCATION_LENGTH}文字以内で入力してください。`,
+      };
+    }
+
+    return {
+      value: normalizedValue,
+    };
+  };
+
+  const normalizeOptionalTime = (
+    valueToNormalize: unknown,
+    fieldName: string
+  ):
+    | { value?: string }
+    | { error: string } => {
+    if (valueToNormalize === undefined) {
+      return {};
+    }
+
+    if (typeof valueToNormalize !== "string") {
+      return {
+        error: `${fieldName}はHH:mm形式の文字列で送信してください。`,
+      };
+    }
+
+    const normalizedValue =
+      valueToNormalize.trim();
+
+    if (!normalizedValue) {
+      return {};
+    }
+
+    if (!TIME_PATTERN.test(normalizedValue)) {
+      return {
+        error: `${fieldName}はHH:mm形式の有効な時刻で入力してください。`,
+      };
+    }
+
+    return {
+      value: normalizedValue,
+    };
+  };
+
+  const startLocationResult =
+    normalizeOptionalLocation(
+      value.startLocation,
+      "startLocation"
+    );
+
+  if ("error" in startLocationResult) {
+    return startLocationResult;
+  }
+
+  const startTimeResult =
+    normalizeOptionalTime(
+      value.startTime,
+      "startTime"
+    );
+
+  if ("error" in startTimeResult) {
+    return startTimeResult;
+  }
+
+  const endLocationResult =
+    normalizeOptionalLocation(
+      value.endLocation,
+      "endLocation"
+    );
+
+  if ("error" in endLocationResult) {
+    return endLocationResult;
+  }
+
+  const endTimeResult =
+    normalizeOptionalTime(
+      value.endTime,
+      "endTime"
+    );
+
+  if ("error" in endTimeResult) {
+    return endTimeResult;
+  }
+
   if (
     typeof value.days !== "number" ||
     !Number.isInteger(value.days) ||
@@ -367,6 +486,14 @@ function validateRequestBody(
         value.locale
       ),
       specialRequest,
+      startLocation:
+        startLocationResult.value,
+      startTime:
+        startTimeResult.value,
+      endLocation:
+        endLocationResult.value,
+      endTime:
+        endTimeResult.value,
       currentLocation:
         value.currentLocation == null
           ? null
@@ -545,6 +672,10 @@ export async function POST(
       days: requestedDays,
       locale,
       specialRequest = "",
+      startLocation,
+      startTime,
+      endLocation,
+      endTime,
       currentLocation = null,
       requiredSpotIds = [],
     } = validation.body;
@@ -697,6 +828,10 @@ ${specialRequest}
       requestedDays,
       locale,
       specialRequest,
+      startLocation,
+      startTime,
+      endLocation,
+      endTime,
       currentLocation,
       requiredSpots,
       requestedStartSpotName,

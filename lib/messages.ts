@@ -96,6 +96,24 @@ export type AppMessages = {
       placeholder: string;
       help: string;
     };
+    advancedConditions: {
+      label: string;
+      description: string;
+    };
+    startLocation: {
+      label: string;
+      placeholder: string;
+    };
+    startTime: {
+      label: string;
+    };
+    endLocation: {
+      label: string;
+      placeholder: string;
+    };
+    endTime: {
+      label: string;
+    };
     submit: {
       idle: string;
       loading: string;
@@ -723,6 +741,25 @@ export const messages: LocaleRecord<AppMessages> = {
         placeholder:
           "例：\n・抹茶スイーツを食べたい\n・人混みを避けたい\n・雨でも楽しめる場所がいい\n・歩く距離を少なくしたい",
         help: "食べたいもの、避けたい場所、移動方法、体力面の希望などを自由に入力できます。",
+      },
+      advancedConditions: {
+        label: "詳細条件",
+        description:
+          "開始地点や開始時刻、旅行後の到着地点・時刻が決まっている場合に入力できます。",
+      },
+      startLocation: {
+        label: "開始地点",
+        placeholder: "例：京都駅、Hotel Granvia Kyoto",
+      },
+      startTime: {
+        label: "開始時刻",
+      },
+      endLocation: {
+        label: "終了地点",
+        placeholder: "例：ホテル、京都駅、新大阪駅",
+      },
+      endTime: {
+        label: "終了希望時刻",
       },
       submit: {
         idle: "✨ AIで旅行プランを作成",
@@ -1391,6 +1428,25 @@ export const messages: LocaleRecord<AppMessages> = {
         placeholder:
           "e.g.\n• I want to try matcha sweets\n• I prefer to avoid crowds\n• I want places to enjoy on rainy days\n• I prefer shorter walking distances",
         help: "Share any preferences for food, places to avoid, transportation, accessibility, or pace.",
+      },
+      advancedConditions: {
+        label: "Advanced conditions",
+        description:
+          "Add a start point, start time, end point, or preferred end time when you already know them.",
+      },
+      startLocation: {
+        label: "Start location",
+        placeholder: "e.g. Kyoto Station, Hotel Granvia Kyoto",
+      },
+      startTime: {
+        label: "Start time",
+      },
+      endLocation: {
+        label: "End location",
+        placeholder: "e.g. Hotel, Kyoto Station, Shin-Osaka Station",
+      },
+      endTime: {
+        label: "End time",
       },
       submit: {
         idle: "✨ Create an AI Travel Plan",

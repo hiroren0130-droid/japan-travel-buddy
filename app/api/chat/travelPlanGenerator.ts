@@ -38,6 +38,10 @@ type GenerateTravelPlanOptions = {
   requestedDays: number;
   locale: Locale;
   specialRequest: string;
+  startLocation?: string;
+  startTime?: string;
+  endLocation?: string;
+  endTime?: string;
   currentLocation: CurrentLocation | null;
   requiredSpots: Spot[];
   requestedStartSpotName: string | null;
@@ -83,6 +87,10 @@ export async function generateTravelPlan({
   requestedDays,
   locale,
   specialRequest,
+  startLocation,
+  startTime,
+  endLocation,
+  endTime,
   currentLocation,
   requiredSpots,
   requestedStartSpotName,
@@ -94,6 +102,10 @@ export async function generateTravelPlan({
       days: requestedDays,
       locale,
       specialRequest,
+      startLocation,
+      startTime,
+      endLocation,
+      endTime,
       currentLocation,
     });
 
@@ -222,6 +234,10 @@ ${
       days: requestedDays,
       locale,
       specialRequest,
+      startLocation,
+      startTime,
+      endLocation,
+      endTime,
       currentLocation,
     });
 

@@ -25,6 +25,18 @@ type Props = {
   specialRequest: string;
   setSpecialRequest: (value: string) => void;
 
+  startLocation: string;
+  setStartLocation: (value: string) => void;
+
+  startTime: string;
+  setStartTime: (value: string) => void;
+
+  endLocation: string;
+  setEndLocation: (value: string) => void;
+
+  endTime: string;
+  setEndTime: (value: string) => void;
+
   onSubmit: () => void;
   loading: boolean;
 };
@@ -77,6 +89,14 @@ export default function TravelForm({
   setInterests,
   specialRequest,
   setSpecialRequest,
+  startLocation,
+  setStartLocation,
+  startTime,
+  setStartTime,
+  endLocation,
+  setEndLocation,
+  endTime,
+  setEndTime,
   onSubmit,
   loading,
 }: Props) {
@@ -485,6 +505,111 @@ export default function TravelForm({
               })}
             </div>
           </fieldset>
+
+          {/* Advanced travel conditions */}
+          <details className="md:col-span-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
+            <summary className="cursor-pointer select-none text-sm font-semibold text-gray-800">
+              {defaultMessages.travelForm.advancedConditions.label}
+            </summary>
+
+            <p className="mt-2 text-xs leading-5 text-gray-500">
+              {defaultMessages.travelForm.advancedConditions.description}
+            </p>
+
+            <div className="mt-5 grid gap-5 md:grid-cols-2">
+              <div>
+                <label
+                  htmlFor="travel-start-location"
+                  className={labelClass}
+                >
+                  {defaultMessages.travelForm.startLocation.label}
+                </label>
+
+                <input
+                  id="travel-start-location"
+                  name="startLocation"
+                  type="text"
+                  value={startLocation}
+                  onChange={(event) =>
+                    setStartLocation(event.target.value)
+                  }
+                  placeholder={
+                    defaultMessages.travelForm.startLocation.placeholder
+                  }
+                  className={inputClass}
+                  disabled={loading}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="travel-start-time"
+                  className={labelClass}
+                >
+                  {defaultMessages.travelForm.startTime.label}
+                </label>
+
+                <input
+                  id="travel-start-time"
+                  name="startTime"
+                  type="time"
+                  value={startTime}
+                  onChange={(event) =>
+                    setStartTime(event.target.value)
+                  }
+                  className={inputClass}
+                  disabled={loading}
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="travel-end-location"
+                  className={labelClass}
+                >
+                  {defaultMessages.travelForm.endLocation.label}
+                </label>
+
+                <input
+                  id="travel-end-location"
+                  name="endLocation"
+                  type="text"
+                  value={endLocation}
+                  onChange={(event) =>
+                    setEndLocation(event.target.value)
+                  }
+                  placeholder={
+                    defaultMessages.travelForm.endLocation.placeholder
+                  }
+                  className={inputClass}
+                  disabled={loading}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="travel-end-time"
+                  className={labelClass}
+                >
+                  {defaultMessages.travelForm.endTime.label}
+                </label>
+
+                <input
+                  id="travel-end-time"
+                  name="endTime"
+                  type="time"
+                  value={endTime}
+                  onChange={(event) =>
+                    setEndTime(event.target.value)
+                  }
+                  className={inputClass}
+                  disabled={loading}
+                />
+              </div>
+            </div>
+          </details>
 
           {/* Special request */}
           <div className="md:col-span-3">

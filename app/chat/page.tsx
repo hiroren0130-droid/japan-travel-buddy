@@ -49,6 +49,12 @@ export default function ChatPage() {
   const [budget, setBudget] = useState("");
   const [interests, setInterests] = useState("");
   const [specialRequest, setSpecialRequest] = useState("");
+
+  const [startLocation, setStartLocation] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endLocation, setEndLocation] = useState("");
+  const [endTime, setEndTime] = useState("");
+
   const [selectedSpotIds, setSelectedSpotIds] = useState<string[]>([]);
 
   const [currentLocation, setCurrentLocation] =
@@ -163,6 +169,18 @@ ${specialRequest || "なし"}
       days: selectedDays,
       locale,
       specialRequest,
+      ...(startLocation.trim()
+        ? { startLocation: startLocation.trim() }
+        : {}),
+      ...(startTime
+        ? { startTime }
+        : {}),
+      ...(endLocation.trim()
+        ? { endLocation: endLocation.trim() }
+        : {}),
+      ...(endTime
+        ? { endTime }
+        : {}),
       currentLocation:
         shouldUseCurrentLocation
           ? currentLocation
@@ -357,6 +375,14 @@ return (
               setInterests={setInterests}
               specialRequest={specialRequest}
               setSpecialRequest={setSpecialRequest}
+              startLocation={startLocation}
+              setStartLocation={setStartLocation}
+              startTime={startTime}
+              setStartTime={setStartTime}
+              endLocation={endLocation}
+              setEndLocation={setEndLocation}
+              endTime={endTime}
+              setEndTime={setEndTime}
               onSubmit={sendMessage}
               loading={loading}
             />

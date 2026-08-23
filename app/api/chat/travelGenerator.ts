@@ -18,6 +18,10 @@ type GenerateAITravelPlanParams = {
   days: number;
   locale: Locale;
   specialRequest: string;
+  startLocation?: string;
+  startTime?: string;
+  endLocation?: string;
+  endTime?: string;
   currentLocation: CurrentLocation;
 };
 
@@ -46,6 +50,10 @@ export async function generateAITravelPlan({
   days,
   locale,
   specialRequest,
+  startLocation,
+  startTime,
+  endLocation,
+  endTime,
   currentLocation,
 }: GenerateAITravelPlanParams): Promise<AITravelPlan | null> {
   const normalizedSpotList =
@@ -89,6 +97,10 @@ export async function generateAITravelPlan({
     locale,
     specialRequest:
       normalizedSpecialRequest,
+    startLocation,
+    startTime,
+    endLocation,
+    endTime,
     currentLocation,
   });
 
