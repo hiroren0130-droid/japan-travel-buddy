@@ -82,6 +82,18 @@ function createCopyablePlan(plan: TravelPlan) {
     title: plan.title,
     summary: plan.summary,
     days: plan.days,
+    ...(plan.startLocation
+      ? { startLocation: plan.startLocation }
+      : {}),
+    ...(plan.startTime
+      ? { startTime: plan.startTime }
+      : {}),
+    ...(plan.endLocation
+      ? { endLocation: plan.endLocation }
+      : {}),
+    ...(plan.endTime
+      ? { endTime: plan.endTime }
+      : {}),
   };
 }
 
@@ -181,6 +193,14 @@ export default function TravelPlanCard({
       summary: plan.summary.trim(),
       days: plan.days,
       favorite: plan.favorite,
+      startLocation:
+        plan.startLocation?.trim() ||
+        undefined,
+      startTime: plan.startTime,
+      endLocation:
+        plan.endLocation?.trim() ||
+        undefined,
+      endTime: plan.endTime,
     };
 
     savingRef.current = true;
@@ -266,7 +286,15 @@ export default function TravelPlanCard({
         return;
       }
 
-      const url = createGoogleMapsRoute(spotNames);
+      const url = createGoogleMapsRoute(
+        spotNames,
+        {
+          startLocation:
+            plan.startLocation,
+          endLocation:
+            plan.endLocation,
+        }
+      );
 
       const openedWindow = window.open(
         url,
@@ -322,6 +350,34 @@ export default function TravelPlanCard({
   const totalSpots = plan.days.reduce(
     (sum, day) => sum + day.items.length,
     0
+  );
+
+  const travelConditions = [
+    {
+      label:
+        defaultMessages.travelForm.startLocation.label,
+      value: plan.startLocation,
+    },
+    {
+      label:
+        defaultMessages.travelForm.startTime.label,
+      value: plan.startTime,
+    },
+    {
+      label:
+        defaultMessages.travelForm.endLocation.label,
+      value: plan.endLocation,
+    },
+    {
+      label:
+        defaultMessages.travelForm.endTime.label,
+      value: plan.endTime,
+    },
+  ].filter(
+    (condition): condition is {
+      label: string;
+      value: string;
+    } => Boolean(condition.value)
   );
 
   const heroSummary =
@@ -618,6 +674,29 @@ export default function TravelPlanCard({
                   {plan.summary}
                 </p>
               </div>
+            </div>
+          </section>
+        )}
+
+        {travelConditions.length > 0 && (
+          <section className="rounded-[24px] border border-slate-200 bg-white px-5 py-5 shadow-sm sm:px-7">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              {travelConditions.map(
+                (condition) => (
+                  <div
+                    key={condition.label}
+                    className="rounded-2xl bg-slate-50 px-4 py-3"
+                  >
+                    <p className="text-xs font-bold text-slate-500">
+                      {condition.label}
+                    </p>
+
+                    <p className="mt-1 break-words text-sm font-semibold text-slate-900">
+                      {condition.value}
+                    </p>
+                  </div>
+                )
+              )}
             </div>
           </section>
         )}

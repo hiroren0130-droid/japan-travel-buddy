@@ -34,6 +34,10 @@ service cloud.firestore {
         "title",
         "summary",
         "days",
+        "startLocation",
+        "startTime",
+        "endLocation",
+        "endTime",
         "favorite",
         "createdAt"
       ]);
@@ -58,6 +62,23 @@ service cloud.firestore {
         && request.resource.data.favorite is bool;
     }
 
+    function hasValidTravelConditions() {
+      return (!request.resource.data.keys().hasAny(["startLocation"])
+          || (request.resource.data.startLocation is string
+            && request.resource.data.startLocation.size() >= 1
+            && request.resource.data.startLocation.size() <= 200))
+        && (!request.resource.data.keys().hasAny(["endLocation"])
+          || (request.resource.data.endLocation is string
+            && request.resource.data.endLocation.size() >= 1
+            && request.resource.data.endLocation.size() <= 200))
+        && (!request.resource.data.keys().hasAny(["startTime"])
+          || (request.resource.data.startTime is string
+            && request.resource.data.startTime.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')))
+        && (!request.resource.data.keys().hasAny(["endTime"])
+          || (request.resource.data.endTime is string
+            && request.resource.data.endTime.matches('^([01][0-9]|2[0-3]):[0-5][0-9]$')));
+    }
+
     function hasValidCreateValues() {
       return request.resource.data.uid.size() > 0
         && request.resource.data.title.size() >= 1
@@ -77,6 +98,10 @@ service cloud.firestore {
         .hasOnly([
           "title",
           "summary",
+          "startLocation",
+          "startTime",
+          "endLocation",
+          "endTime",
           "favorite"
         ]);
     }
@@ -103,6 +128,7 @@ service cloud.firestore {
         && hasAllowedFields()
         && hasRequiredFields()
         && hasValidTopLevelTypes()
+        && hasValidTravelConditions()
         && hasValidCreateValues();
 
       allow get, list: if isOwner();
@@ -113,6 +139,7 @@ service cloud.firestore {
         && hasAllowedFields()
         && hasRequiredFields()
         && hasValidTopLevelTypes()
+        && hasValidTravelConditions()
         && onlyUpdatesEditableFields()
         && hasValidUpdatedFields();
 

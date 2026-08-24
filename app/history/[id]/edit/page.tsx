@@ -4,11 +4,20 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { getTravelPlan, updateTravelPlan } from "@/lib/firestore";
+import { getTravelPlan, updateTravelPlanDetails } from "@/lib/firestore";
 import { useLocale } from "@/components/LocaleProvider";
 
 const CONTROL_CHARACTER_PATTERN =
   /[\u0000-\u001f\u007f-\u009f]/;
+
+function isOptionalString(
+  value: unknown
+): value is string | undefined {
+  return (
+    value === undefined ||
+    typeof value === "string"
+  );
+}
 
 function validatePlanId(value: string | string[] | undefined) {
   if (
@@ -34,6 +43,10 @@ function isOwnedEditablePlan(
   uid: string;
   title: string;
   summary: string;
+  startLocation?: string;
+  startTime?: string;
+  endLocation?: string;
+  endTime?: string;
 } {
   if (typeof value !== "object" || value === null) {
     return false;
@@ -45,13 +58,20 @@ function isOwnedEditablePlan(
     typeof plan.uid === "string" &&
     plan.uid === uid &&
     typeof plan.title === "string" &&
-    typeof plan.summary === "string"
+    typeof plan.summary === "string" &&
+    isOptionalString(
+      plan.startLocation
+    ) &&
+    isOptionalString(plan.startTime) &&
+    isOptionalString(plan.endLocation) &&
+    isOptionalString(plan.endTime)
   );
 }
 
 export default function EditTravelPlanPage() {
+  const { messages } = useLocale();
   const historyEditMessages =
-    useLocale().messages.historyEdit;
+    messages.historyEdit;
 
 const params = useParams();
 const router = useRouter();
@@ -60,6 +80,10 @@ const validatedId = validatePlanId(params.id);
 
 const [title, setTitle] = useState("");
 const [summary, setSummary] = useState("");
+const [startLocation, setStartLocation] = useState("");
+const [startTime, setStartTime] = useState("");
+const [endLocation, setEndLocation] = useState("");
+const [endTime, setEndTime] = useState("");
 const [loading, setLoading] = useState(true);
 const [saving, setSaving] = useState(false);
 const [loadedUid, setLoadedUid] = useState<string | null>(null);
@@ -85,6 +109,10 @@ useEffect(() => {
     const generation = ++requestGeneration;
     setTitle("");
     setSummary("");
+    setStartLocation("");
+    setStartTime("");
+    setEndLocation("");
+    setEndTime("");
     setLoadedUid(null);
     setLoadedId(null);
     setLoading(true);
@@ -118,6 +146,14 @@ useEffect(() => {
 
       setTitle(plan.title);
       setSummary(plan.summary);
+      setStartLocation(
+        plan.startLocation ?? ""
+      );
+      setStartTime(plan.startTime ?? "");
+      setEndLocation(
+        plan.endLocation ?? ""
+      );
+      setEndTime(plan.endTime ?? "");
       setLoadedUid(uid);
       setLoadedId(requestedId);
     } catch (error) {
@@ -154,6 +190,10 @@ useEffect(() => {
     requestGeneration++;
     setTitle("");
     setSummary("");
+    setStartLocation("");
+    setStartTime("");
+    setEndLocation("");
+    setEndTime("");
     setLoadedUid(null);
     setLoadedId(null);
     setLoading(false);
@@ -217,9 +257,13 @@ async function handleSave() {
   setSaving(true);
 
   try {
-    await updateTravelPlan(validatedId, {
+    await updateTravelPlanDetails(validatedId, {
       title: trimmedTitle,
       summary: trimmedSummary,
+      startLocation,
+      startTime,
+      endLocation,
+      endTime,
     });
 
     alert(historyEditMessages.saveSuccessAlert);
@@ -272,6 +316,67 @@ async function handleSave() {
             className="h-40 w-full rounded-lg border p-3"
           />
         </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="block font-semibold">
+            {messages.travelForm.startLocation.label}
+
+            <input
+              type="text"
+              maxLength={200}
+              value={startLocation}
+              onChange={(event) =>
+                setStartLocation(
+                  event.target.value
+                )
+              }
+              className="mt-2 w-full rounded-lg border p-3 font-normal"
+            />
+          </label>
+
+          <label className="block font-semibold">
+            {messages.travelForm.startTime.label}
+
+            <input
+              type="time"
+              value={startTime}
+              onChange={(event) =>
+                setStartTime(event.target.value)
+              }
+              className="mt-2 w-full rounded-lg border p-3 font-normal"
+            />
+          </label>
+
+          <label className="block font-semibold">
+            {messages.travelForm.endLocation.label}
+
+            <input
+              type="text"
+              maxLength={200}
+              value={endLocation}
+              onChange={(event) =>
+                setEndLocation(
+                  event.target.value
+                )
+              }
+              className="mt-2 w-full rounded-lg border p-3 font-normal"
+            />
+          </label>
+
+          <label className="block font-semibold">
+            {messages.travelForm.endTime.label}
+
+            <input
+              type="time"
+              value={endTime}
+              onChange={(event) =>
+                setEndTime(event.target.value)
+              }
+              className="mt-2 w-full rounded-lg border p-3 font-normal"
+            />
+          </label>
+        </div>
+
           <button
   onClick={handleSave}
   disabled={saving}

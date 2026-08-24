@@ -54,10 +54,24 @@ function buildEvaluation(
 }
 
 export function buildPlanResponse(
-  generatedPlan: AITravelPlan
+  generatedPlan: AITravelPlan,
+  conditions: {
+    startLocation?: string;
+    startTime?: string;
+    endLocation?: string;
+    endTime?: string;
+  } = {}
 ) {
   const response = {
     ...generatedPlan,
+    startLocation:
+      conditions.startLocation,
+    startTime:
+      conditions.startTime,
+    endLocation:
+      conditions.endLocation,
+    endTime:
+      conditions.endTime,
 
     days:
       generatedPlan.days.map(

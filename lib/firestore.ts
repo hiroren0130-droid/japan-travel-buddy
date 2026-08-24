@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -14,6 +15,10 @@ import {
 
 import { db } from "@/lib/firebase";
 import { SavedTravelPlan, TravelPlan } from "@/types/travel";
+import {
+  serializeTravelPlanConditions,
+  serializeTravelPlanConditionUpdates,
+} from "@/lib/travelPlanConditions";
 
 export async function saveTravelPlan(
   uid: string,
@@ -42,6 +47,9 @@ if (alreadyExists) {
     title: plan.title,
     summary: plan.summary,
     days: plan.days,
+    ...serializeTravelPlanConditions(
+      plan
+    ),
     favorite: false,
     createdAt: serverTimestamp(),
   });
@@ -84,4 +92,44 @@ export async function updateTravelPlan(
   const ref = doc(db, "travelPlans", id);
 
   await updateDoc(ref, data);
+}
+
+export async function updateTravelPlanDetails(
+  id: string,
+  data: Pick<
+    TravelPlan,
+    | "title"
+    | "summary"
+    | "startLocation"
+    | "startTime"
+    | "endLocation"
+    | "endTime"
+  >
+) {
+  const ref = doc(db, "travelPlans", id);
+  const conditions =
+    serializeTravelPlanConditionUpdates(
+      data
+    );
+
+  await updateDoc(ref, {
+    title: data.title,
+    summary: data.summary,
+    startLocation:
+      conditions.startLocation === null
+        ? deleteField()
+        : conditions.startLocation,
+    startTime:
+      conditions.startTime === null
+        ? deleteField()
+        : conditions.startTime,
+    endLocation:
+      conditions.endLocation === null
+        ? deleteField()
+        : conditions.endLocation,
+    endTime:
+      conditions.endTime === null
+        ? deleteField()
+        : conditions.endTime,
+  });
 }

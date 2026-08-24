@@ -1144,7 +1144,13 @@ ${specialRequest}
 
 const plan =
   buildPlanResponse(
-    normalizedPlan
+    normalizedPlan,
+    {
+      startLocation,
+      startTime,
+      endLocation,
+      endTime,
+    }
   );
 
     if (
