@@ -26,6 +26,15 @@ export type AppMessages = {
   };
   home: {
     badge: string;
+    discoverPlaces: string;
+    planWithAi: string;
+    regionSectionTitle: string;
+    regionSectionDescription: string;
+    regionCardDescription: string;
+    exploreRegion: string;
+    featuredPlacesTitle: string;
+    featuredPlacesDescription: string;
+    viewAllPlaces: string;
     hero: {
       title: string;
       titleAccent: string;
@@ -646,6 +655,18 @@ export const messages: LocaleRecord<AppMessages> = {
     },
     home: {
       badge: "AI Travel Planner",
+      discoverPlaces: "行きたい場所を見つける",
+      planWithAi: "AIで旅行プランを作る",
+      regionSectionTitle: "旅したい地域を選ぶ",
+      regionSectionDescription:
+        "まずは地域を選んで、行きたい観光スポットを見つけましょう。",
+      regionCardDescription:
+        "観光スポットを見つけて、あなただけの旅を始めましょう。",
+      exploreRegion: "スポットを見つける",
+      featuredPlacesTitle: "おすすめスポット",
+      featuredPlacesDescription:
+        "人気の場所を少しだけご紹介します。気になるスポットの詳細を見てみましょう。",
+      viewAllPlaces: "すべてのスポットを見る",
       hero: {
         title: "Discover Japan",
         titleAccent: "with AI",
@@ -672,10 +693,10 @@ export const messages: LocaleRecord<AppMessages> = {
           linkLabel: "プランを作成する",
         },
         map: {
-          title: "地図でチェック",
+          title: "観光スポットを探す",
           description:
-            "観光スポットや移動ルートを地図上で確認し、効率的な旅を計画できます。",
-          linkLabel: "地図を見る",
+            "地域を選び、行きたい観光スポットを見つけてから旅行プランを作れます。",
+          linkLabel: "地域を選ぶ",
         },
         save: {
           title: "旅行プランを保存",
@@ -1333,6 +1354,18 @@ export const messages: LocaleRecord<AppMessages> = {
     },
     home: {
       badge: "AI Travel Planner",
+      discoverPlaces: "Discover places",
+      planWithAi: "Let AI plan your trip",
+      regionSectionTitle: "Choose where to explore",
+      regionSectionDescription:
+        "Choose a region first, then find the places you want to visit.",
+      regionCardDescription:
+        "Discover sightseeing spots and start building a trip that is yours.",
+      exploreRegion: "Explore places",
+      featuredPlacesTitle: "Recommended places",
+      featuredPlacesDescription:
+        "Explore a few popular places and open any spot to learn more.",
+      viewAllPlaces: "View all places",
       hero: {
         title: "Discover Japan",
         titleAccent: "with AI",
@@ -1359,10 +1392,10 @@ export const messages: LocaleRecord<AppMessages> = {
           linkLabel: "Create a Plan",
         },
         map: {
-          title: "Explore on the Map",
+          title: "Discover Places",
           description:
-            "View attractions and travel routes on the map to plan an efficient trip.",
-          linkLabel: "View the Map",
+            "Choose a region, discover places you want to visit, and then create your travel plan.",
+          linkLabel: "Choose a Region",
         },
         save: {
           title: "Save Travel Plans",

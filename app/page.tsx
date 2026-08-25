@@ -12,9 +12,52 @@ import {
 
 import Header from "@/components/Header";
 import { useLocale } from "@/components/LocaleProvider";
+import SpotImage from "@/components/SpotImage";
+import SpotSummaryCard from "@/components/SpotSummaryCard";
+import {
+  getPrefectureDisplayName,
+} from "@/data/regions";
+import type { Spot } from "@/data/types";
+import {
+  featuredSpotIdsByPrefecture,
+  HOME_PREFECTURE_IDS,
+} from "@/lib/homePresentation";
+import {
+  getSpotById,
+  getSpotsByPrefectureId,
+} from "@/lib/spotService";
 
 export default function HomePage() {
-  const { messages: defaultMessages } = useLocale();
+  const {
+    locale,
+    messages: defaultMessages,
+  } = useLocale();
+  const homeRegions = HOME_PREFECTURE_IDS.map(
+    (prefectureId) => {
+      const featuredSpots =
+        featuredSpotIdsByPrefecture[
+          prefectureId
+        ]
+          .map((spotId) => getSpotById(spotId))
+          .filter(
+            (spot): spot is Spot =>
+              spot?.prefectureId === prefectureId
+          );
+      const representativeSpot =
+        featuredSpots[0] ??
+        getSpotsByPrefectureId(prefectureId)[0];
+
+      return {
+        prefectureId,
+        name: getPrefectureDisplayName(
+          prefectureId,
+          locale
+        ),
+        representativeSpot,
+        featuredSpots,
+      };
+    }
+  );
   const featureItems = [
     {
       icon: Bot,
@@ -46,7 +89,7 @@ export default function HomePage() {
       icon: Map,
       title: defaultMessages.home.cards.map.title,
       description: defaultMessages.home.cards.map.description,
-      href: "/chat",
+      href: "#discover-regions",
       linkLabel: defaultMessages.home.cards.map.linkLabel,
     },
     {
@@ -93,12 +136,12 @@ export default function HomePage() {
   className="
     mx-auto
     flex
-    min-h-[640px]
+    min-h-[560px]
     max-w-6xl
     flex-col
     items-center
     justify-center
-    py-16
+    py-12
     text-center
     sm:min-h-[680px]
     sm:py-20
@@ -193,7 +236,7 @@ export default function HomePage() {
 
             <div className="mt-10 flex w-full flex-col items-center justify-center gap-4 sm:w-auto sm:flex-row">
               <Link
-                href="/chat"
+                href="#discover-regions"
                 className="
                   group
                   inline-flex
@@ -230,7 +273,7 @@ export default function HomePage() {
               >
                 <Sparkles size={20} aria-hidden="true" />
 
-                <span>{defaultMessages.home.hero.primaryCta}</span>
+                <span>{defaultMessages.home.discoverPlaces}</span>
 
                 <span
                   className="transition-transform duration-300 group-hover:translate-x-1"
@@ -241,7 +284,7 @@ export default function HomePage() {
               </Link>
 
               <Link
-                href="/dashboard"
+                href="/chat"
                 className="
                   inline-flex
                   min-h-16
@@ -277,13 +320,13 @@ export default function HomePage() {
                   sm:text-lg
                 "
               >
-                <FolderOpen
+                <Bot
                   size={20}
-                  className="text-amber-500"
+                  className="text-blue-600"
                   aria-hidden="true"
                 />
 
-                <span>{defaultMessages.home.hero.secondaryCta}</span>
+                <span>{defaultMessages.home.planWithAi}</span>
               </Link>
             </div>
 
@@ -347,6 +390,117 @@ export default function HomePage() {
               );
             })}
           </div>
+
+          {/* Region entry points */}
+          <section
+            id="discover-regions"
+            aria-labelledby="discover-regions-title"
+            className="scroll-mt-28 pt-16 sm:pt-20"
+          >
+            <div className="mx-auto max-w-3xl text-center">
+              <h2
+                id="discover-regions-title"
+                className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl"
+              >
+                {defaultMessages.home.regionSectionTitle}
+              </h2>
+
+              <p className="mt-4 text-base leading-7 text-slate-600 sm:text-lg">
+                {defaultMessages.home.regionSectionDescription}
+              </p>
+            </div>
+
+            <div className="mt-8 grid min-w-0 gap-6 sm:grid-cols-2">
+              {homeRegions.map((region) => (
+                <article
+                  key={region.prefectureId}
+                  className="group min-w-0 overflow-hidden rounded-[32px] border border-white/80 bg-white/90 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  {region.representativeSpot && (
+                    <div className="h-56 w-full overflow-hidden">
+                      <SpotImage
+                        src={region.representativeSpot.image}
+                        alt={region.name}
+                        spotName={region.representativeSpot.name}
+                        spotId={region.representativeSpot.id}
+                        latitude={region.representativeSpot.latitude}
+                        longitude={region.representativeSpot.longitude}
+                        className="transition-transform duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+
+                  <div className="p-6 sm:p-7">
+                    <h3 className="break-words text-2xl font-black text-slate-950">
+                      {region.name}
+                    </h3>
+
+                    <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
+                      {defaultMessages.home.regionCardDescription}
+                    </p>
+
+                    <Link
+                      href={`/discover/${region.prefectureId}`}
+                      className="mt-5 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-5 text-sm font-extrabold text-white transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    >
+                      <span>{defaultMessages.home.exploreRegion}</span>
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          {/* Featured spots */}
+          <section
+            aria-labelledby="featured-places-title"
+            className="pt-16 sm:pt-20"
+          >
+            <div className="mx-auto max-w-3xl text-center">
+              <h2
+                id="featured-places-title"
+                className="text-3xl font-black tracking-tight text-slate-950 sm:text-4xl"
+              >
+                {defaultMessages.home.featuredPlacesTitle}
+              </h2>
+
+              <p className="mt-4 text-base leading-7 text-slate-600 sm:text-lg">
+                {defaultMessages.home.featuredPlacesDescription}
+              </p>
+            </div>
+
+            <div className="mt-10 space-y-12">
+              {homeRegions.map((region) => (
+                <div
+                  key={region.prefectureId}
+                  className="min-w-0"
+                >
+                  <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+                    <h3 className="text-2xl font-black text-slate-950">
+                      {region.name}
+                    </h3>
+
+                    <Link
+                      href={`/discover/${region.prefectureId}`}
+                      className="text-sm font-extrabold text-blue-600 hover:text-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                    >
+                      {defaultMessages.home.viewAllPlaces} →
+                    </Link>
+                  </div>
+
+                  <div className="grid min-w-0 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {region.featuredSpots.map((spot) => (
+                      <SpotSummaryCard
+                        key={spot.id}
+                        spot={spot}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
           {/* Feature cards */}
           <div className="mt-8 grid gap-6 md:grid-cols-3">
