@@ -268,7 +268,7 @@ export default function TravelPlanCard({
 
   function handleRoute() {
     try {
-      const spotNames = plan.days
+      const routePoints = plan.days
         .flatMap((day) => day.items)
         .map((item) => getSpotById(item.spotId))
         .filter(
@@ -277,9 +277,14 @@ export default function TravelPlanCard({
           ): spot is NonNullable<typeof spot> =>
             spot != null
         )
-        .map((spot) => spot.name);
+        .map((spot) => ({
+          name: spot.name,
+          address: spot.address,
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+        }));
 
-      if (spotNames.length === 0) {
+      if (routePoints.length === 0) {
         alert(
           defaultMessages.travelPlanCard.alerts.noRouteSpots
         );
@@ -287,7 +292,7 @@ export default function TravelPlanCard({
       }
 
       const url = createGoogleMapsRoute(
-        spotNames,
+        routePoints,
         {
           startLocation:
             plan.startLocation,

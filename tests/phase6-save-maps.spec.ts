@@ -102,6 +102,87 @@ test("Google Mapsは境界条件に応じてorigin destination waypointsを組�
   }
 });
 
+test("Google Mapsは大阪4Spotの名称と住所をPlan順のwaypointsとして使う", () => {
+  const url = new URL(
+    createGoogleMapsRoute(
+      [
+        {
+          name: "大阪城天守閣",
+          address: "大阪府大阪市中央区大阪城1-1",
+          latitude: 34.687257,
+          longitude: 135.525855,
+        },
+        {
+          name: "心斎橋筋商店街",
+          address: "大阪府大阪市中央区心斎橋筋1丁目〜2丁目",
+          latitude: 34.673385,
+          longitude: 135.501244,
+        },
+        {
+          name: "道頓堀",
+          address: "大阪府大阪市中央区道頓堀",
+          latitude: 34.668723,
+          longitude: 135.501295,
+        },
+        {
+          name: "黒門市場",
+          address: "大阪府大阪市中央区日本橋2丁目4-1",
+          latitude: 34.665421,
+          longitude: 135.506312,
+        },
+      ],
+      {
+        startLocation: "大阪駅",
+        endLocation: "大阪駅",
+      }
+    )
+  );
+
+  expect(url.searchParams.get("origin")).toBe("大阪駅");
+  expect(url.searchParams.get("destination")).toBe("大阪駅");
+  expect(url.searchParams.get("waypoints")).toBe(
+    [
+      "大阪城天守閣, 大阪府大阪市中央区大阪城1-1",
+      "心斎橋筋商店街, 大阪府大阪市中央区心斎橋筋1丁目〜2丁目",
+      "道頓堀, 大阪府大阪市中央区道頓堀",
+      "黒門市場, 大阪府大阪市中央区日本橋2丁目4-1",
+    ].join("|")
+  );
+  expect(url.searchParams.get("travelmode")).toBe("walking");
+});
+
+test("Google Mapsは住所なしなら座標、座標もなければ名称へフォールバックする", () => {
+  const url = new URL(
+    createGoogleMapsRoute(
+      [
+        {
+          name: "清水寺",
+          latitude: 34.994856,
+          longitude: 135.785046,
+        },
+        { name: "錦市場" },
+        {
+          name: "金閣寺",
+          address: "京都府京都市北区金閣寺町1",
+          latitude: 35.03937,
+          longitude: 135.729243,
+        },
+      ],
+      {
+        startLocation: "京都駅",
+        endLocation: "京都駅",
+      }
+    )
+  );
+
+  expect(url.searchParams.get("waypoints")).toBe(
+    "34.994856,135.785046|錦市場|金閣寺, 京都府京都市北区金閣寺町1"
+  );
+  expect(url.searchParams.get("origin")).toBe("京都駅");
+  expect(url.searchParams.get("destination")).toBe("京都駅");
+  expect(url.searchParams.get("travelmode")).toBe("walking");
+});
+
 test("Firestore create serializerはtrimし空値と不正時刻を保存しない", () => {
   expect(serializeTravelPlanConditions({
     startLocation: "  京都駅  ",

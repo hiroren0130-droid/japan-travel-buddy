@@ -3,17 +3,58 @@ type GoogleMapsRouteOptions = {
   endLocation?: string;
 };
 
+export type GoogleMapsRoutePoint = {
+  name: string;
+  address?: string;
+  latitude?: number;
+  longitude?: number;
+};
+
+type GoogleMapsRouteInput =
+  | string
+  | GoogleMapsRoutePoint;
+
+function toGoogleMapsPlace(
+  spot: GoogleMapsRouteInput
+): string {
+  if (typeof spot === "string") {
+    return spot;
+  }
+
+  const address = spot.address?.trim();
+
+  if (address) {
+    return `${spot.name}, ${address}`;
+  }
+
+  const { latitude, longitude } = spot;
+  const hasValidCoordinates =
+    latitude != null &&
+    longitude != null &&
+    Number.isFinite(latitude) &&
+    Number.isFinite(longitude) &&
+    latitude >= -90 &&
+    latitude <= 90 &&
+    longitude >= -180 &&
+    longitude <= 180;
+
+  return hasValidCoordinates
+    ? `${latitude},${longitude}`
+    : spot.name;
+}
+
 export function createGoogleMapsRoute(
-  spots: string[],
+  spots: GoogleMapsRouteInput[],
   options: GoogleMapsRouteOptions = {}
 ) {
+  const places = spots.map(toGoogleMapsPlace);
   const startLocation =
     options.startLocation?.trim();
   const endLocation =
     options.endLocation?.trim();
 
   if (
-    spots.length === 0 &&
+    places.length === 0 &&
     !startLocation &&
     !endLocation
   ) {
@@ -21,25 +62,25 @@ export function createGoogleMapsRoute(
   }
 
   if (
-    spots.length === 1 &&
+    places.length === 1 &&
     !startLocation &&
     !endLocation
   ) {
     return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-      spots[0]
+      places[0]
     )}`;
   }
 
   const origin =
-    startLocation ?? spots[0] ?? endLocation ?? "";
+    startLocation ?? places[0] ?? endLocation ?? "";
   const destination =
     endLocation ??
-    spots.at(-1) ??
+    places.at(-1) ??
     startLocation ??
     "";
-  const waypointSpots = spots.slice(
+  const waypointSpots = places.slice(
     startLocation ? 0 : 1,
-    endLocation ? spots.length : -1
+    endLocation ? places.length : -1
   );
   const waypoints = waypointSpots.join("|");
 
