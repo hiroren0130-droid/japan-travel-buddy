@@ -3,6 +3,7 @@ import {
   getAllSpots,
   getSpotByName,
 } from "@/lib/spotService";
+import { getLocalizedSpotName } from "@/lib/localizedSpot";
 
 export type TravelEstimate = {
   transport: string;
@@ -47,10 +48,15 @@ export function resolveLocationSpot(
   return (
     getAllSpots().find(
       (spot) =>
-        normalizeLocationName(
-          spot.name
-        ) === normalizedLocation &&
-        hasValidCoordinates(spot)
+        hasValidCoordinates(spot) &&
+        [
+          spot.name,
+          getLocalizedSpotName(spot, "en"),
+        ].some(
+          (name) =>
+            normalizeLocationName(name) ===
+            normalizedLocation
+        )
     ) ?? null
   );
 }

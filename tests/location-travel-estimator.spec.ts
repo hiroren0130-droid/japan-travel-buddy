@@ -33,10 +33,48 @@ function createPlan(
   };
 }
 
-test("locationはSpot DBの正規化完全一致だけで解決する", () => {
+test("locationはSpot DBの日本語名または英語localized名の正規化完全一致だけで解決する", () => {
   expect(resolveLocationSpot(" 京都 駅 ")?.name).toBe("京都駅");
+  expect(resolveLocationSpot("Kyoto Station")?.name).toBe("京都駅");
+  expect(resolveLocationSpot("  kYoTo   sTaTiOn  ")?.name).toBe("京都駅");
   expect(resolveLocationSpot("大阪駅")).toBeNull();
   expect(resolveLocationSpot("Hotel Granvia Kyoto")).toBeNull();
+  expect(resolveLocationSpot("Kyoto Stat")).toBeNull();
+});
+
+test("English startLocation移動を最初のSpot時刻へ反映する", () => {
+  const travel = estimateLocationTravel({
+    location: "Kyoto Station",
+    spotName: "錦市場",
+  });
+  expect(travel).not.toBeNull();
+
+  const result = optimizeTravelPlanTimes(
+    createPlan([[{ time: "09:00", spot: "錦市場" }]]),
+    "09:00",
+    "Kyoto Station"
+  );
+  const expectedFirstArrival = 9 * 60 + travel!.durationMinutes;
+
+  expect(result.days[0].items[0].time).toBe(
+    `${String(Math.floor(expectedFirstArrival / 60)).padStart(2, "0")}:${String(expectedFirstArrival % 60).padStart(2, "0")}`
+  );
+});
+
+test("English endLocation移動を帰着制約へ反映する", () => {
+  const plan = createPlan([[{ time: "16:00", spot: "錦市場" }]]);
+  const dayEnd = getEstimatedDayEndMinutes(plan.days[0]);
+  const finalArrival = getEstimatedArrivalAtEndLocationMinutes(
+    plan.days[0],
+    "Kyoto Station"
+  );
+
+  expect(finalArrival).toBeGreaterThan(dayEnd);
+  const earlier = finalArrival - 1;
+  const earlierTime = `${String(Math.floor(earlier / 60)).padStart(2, "0")}:${String(earlier % 60).padStart(2, "0")}`;
+  expect(
+    calculateEndTimeViolationCount(plan, earlierTime, "Kyoto Station")
+  ).toBe(1);
 });
 
 test("startLocation移動は明示startTimeがあるDay 1だけに加算する", () => {
