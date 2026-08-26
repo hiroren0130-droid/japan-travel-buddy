@@ -282,6 +282,7 @@ export default function TravelPlanCard({
           address: spot.address,
           latitude: spot.latitude,
           longitude: spot.longitude,
+          cityId: spot.cityId,
         }));
 
       if (routePoints.length === 0) {
