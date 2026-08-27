@@ -1,9 +1,14 @@
 import type { Spot } from "@/data/types";
 import {
   getAllSpots,
+  getSpotById,
   getSpotByName,
 } from "@/lib/spotService";
 import { getLocalizedSpotName } from "@/lib/localizedSpot";
+import {
+  getCityTravelProfile,
+  getIntercityTravelProfile,
+} from "@/data/intercityTravel";
 
 export type TravelEstimate = {
   transport: string;
@@ -153,7 +158,7 @@ export function estimateTravel(
   };
 }
 
-export function estimateTravelBetweenSpots(
+function estimateTravelBetweenLocalSpots(
   fromSpot: Spot,
   toSpot: Spot
 ): TravelEstimate {
@@ -165,6 +170,93 @@ export function estimateTravelBetweenSpots(
       toSpot.longitude
     )
   );
+}
+
+export function estimateTravelBetweenSpots(
+  fromSpot: Spot,
+  toSpot: Spot,
+  resolveHubSpot: (
+    spotId: string
+  ) => Spot | undefined = getSpotById
+): TravelEstimate {
+  const fallbackEstimate =
+    estimateTravelBetweenLocalSpots(
+      fromSpot,
+      toSpot
+    );
+
+  const fromCityId =
+    fromSpot.cityId?.trim();
+  const toCityId =
+    toSpot.cityId?.trim();
+
+  if (
+    !fromCityId ||
+    !toCityId ||
+    fromCityId === toCityId
+  ) {
+    return fallbackEstimate;
+  }
+
+  const intercityProfile =
+    getIntercityTravelProfile(
+      fromCityId,
+      toCityId
+    );
+  const fromCityProfile =
+    getCityTravelProfile(fromCityId);
+  const toCityProfile =
+    getCityTravelProfile(toCityId);
+
+  if (
+    !intercityProfile ||
+    !fromCityProfile ||
+    !toCityProfile
+  ) {
+    return fallbackEstimate;
+  }
+
+  const fromHub = resolveHubSpot(
+    fromCityProfile.hubSpotId
+  );
+  const toHub = resolveHubSpot(
+    toCityProfile.hubSpotId
+  );
+
+  if (
+    !fromHub ||
+    !toHub ||
+    fromHub.cityId !== fromSpot.cityId ||
+    toHub.cityId !== toSpot.cityId ||
+    !hasValidCoordinates(fromHub) ||
+    !hasValidCoordinates(toHub)
+  ) {
+    return fallbackEstimate;
+  }
+
+  const fromHubAccessMinutes =
+    fromSpot.id === fromHub.id
+      ? 0
+      : estimateTravelBetweenLocalSpots(
+          fromSpot,
+          fromHub
+        ).durationMinutes;
+  const toHubAccessMinutes =
+    toSpot.id === toHub.id
+      ? 0
+      : estimateTravelBetweenLocalSpots(
+          toHub,
+          toSpot
+        ).durationMinutes;
+
+  return {
+    transport:
+      intercityProfile.transport,
+    durationMinutes:
+      fromHubAccessMinutes +
+      intercityProfile.hubToHubMinutes +
+      toHubAccessMinutes,
+  };
 }
 
 export function estimateLocationTravel({
