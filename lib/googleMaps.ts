@@ -22,6 +22,13 @@ type GoogleMapsTravelMode =
   | "walking"
   | "transit";
 
+export type GoogleMapsRouteSegment = {
+  origin: string;
+  destination: string;
+  travelMode?: GoogleMapsTravelMode;
+  url: string;
+};
+
 function normalizeLocationName(
   value: string
 ): string {
@@ -54,6 +61,16 @@ function resolveLocationCityId(
   );
 
   return spot?.cityId;
+}
+
+function createLocationRoutePoint(
+  location: string
+): GoogleMapsRoutePoint {
+  return {
+    name: location,
+    cityId:
+      resolveLocationCityId(location),
+  };
 }
 
 export function determineGoogleMapsTravelMode(
@@ -115,6 +132,85 @@ function toGoogleMapsPlace(
   return hasValidCoordinates
     ? `${latitude},${longitude}`
     : spot.name;
+}
+
+function createGoogleMapsDirectionsUrl({
+  origin,
+  destination,
+  travelMode,
+}: {
+  origin: string;
+  destination: string;
+  travelMode?: GoogleMapsTravelMode;
+}): string {
+  let url =
+    `https://www.google.com/maps/dir/?api=1` +
+    `&origin=${encodeURIComponent(origin)}` +
+    `&destination=${encodeURIComponent(destination)}`;
+
+  if (travelMode) {
+    url += `&travelmode=${travelMode}`;
+  }
+
+  return url;
+}
+
+export function createGoogleMapsRouteSegments(
+  spots: GoogleMapsRoutePoint[],
+  options: GoogleMapsRouteOptions = {}
+): GoogleMapsRouteSegment[] {
+  const routePoints: GoogleMapsRoutePoint[] = [
+    ...(options.startLocation?.trim()
+      ? [
+          createLocationRoutePoint(
+            options.startLocation.trim()
+          ),
+        ]
+      : []),
+    ...spots,
+    ...(options.endLocation?.trim()
+      ? [
+          createLocationRoutePoint(
+            options.endLocation.trim()
+          ),
+        ]
+      : []),
+  ];
+
+  return routePoints.slice(0, -1).map(
+    (originPoint, index) => {
+      const destinationPoint =
+        routePoints[index + 1];
+      const originCityId =
+        originPoint.cityId?.trim();
+      const destinationCityId =
+        destinationPoint.cityId?.trim();
+      const travelMode =
+        originCityId && destinationCityId
+          ? originCityId === destinationCityId
+            ? "walking"
+            : "transit"
+          : undefined;
+      const origin =
+        toGoogleMapsPlace(originPoint);
+      const destination =
+        toGoogleMapsPlace(destinationPoint);
+
+      return {
+        origin: originPoint.name,
+        destination:
+          destinationPoint.name,
+        ...(travelMode
+          ? { travelMode }
+          : {}),
+        url: createGoogleMapsDirectionsUrl({
+          origin,
+          destination,
+          travelMode,
+        }),
+      };
+    }
+  );
 }
 
 export function createGoogleMapsRoute(

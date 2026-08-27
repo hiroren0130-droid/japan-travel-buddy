@@ -198,6 +198,17 @@ export type AppMessages = {
       share: string;
       shareTitle: string;
     };
+    routeSegments: {
+      title: string;
+      description: string;
+      fromLabel: string;
+      toLabel: string;
+      walking: string;
+      transit: string;
+      automatic: string;
+      open: string;
+      close: string;
+    };
     alerts: {
       copySuccess: string;
       copyFailed: string;
@@ -859,6 +870,17 @@ export const messages: LocaleRecord<AppMessages> = {
         mapsTitle: "Google Maps",
         share: "旅行プランを共有",
         shareTitle: "共有",
+      },
+      routeSegments: {
+        title: "区間別Google Mapsルート",
+        description: "開きたい区間を選択してください。",
+        fromLabel: "出発地点",
+        toLabel: "到着地点",
+        walking: "徒歩",
+        transit: "公共交通",
+        automatic: "Google Mapsで自動判定",
+        open: "Google Mapsで開く",
+        close: "区間ルートを閉じる",
       },
       alerts: {
         copySuccess: "旅行プランをコピーしました。",
@@ -1559,6 +1581,17 @@ export const messages: LocaleRecord<AppMessages> = {
         mapsTitle: "Google Maps",
         share: "Share travel plan",
         shareTitle: "Share",
+      },
+      routeSegments: {
+        title: "Google Maps route segments",
+        description: "Choose a segment to open.",
+        fromLabel: "From",
+        toLabel: "To",
+        walking: "Walking",
+        transit: "Transit",
+        automatic: "Let Google Maps choose",
+        open: "Open in Google Maps",
+        close: "Close route segments",
       },
       alerts: {
         copySuccess: "Travel plan copied.",
