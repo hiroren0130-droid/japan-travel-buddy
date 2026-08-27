@@ -6,7 +6,10 @@ import {
   calculateDistanceKm,
   estimateTravel,
   estimateTravelBetweenSpots,
+  resolveLocationSpot,
 } from "./locationTravelEstimator";
+
+import type { Spot } from "@/data/types";
 
 import type {
   AIPlanDay,
@@ -80,6 +83,29 @@ type RouteEvaluation = {
   score: number;
   items: AIPlanItem[];
 };
+
+function getAnchorTravelScore(
+  anchor: Spot,
+  spot: Spot
+): number {
+  const distanceKm =
+    calculateDistanceKm(
+      anchor.latitude,
+      anchor.longitude,
+      spot.latitude,
+      spot.longitude
+    );
+  const travelEstimate =
+    estimateTravelBetweenSpots(
+      anchor,
+      spot
+    );
+
+  return (
+    distanceKm * DISTANCE_WEIGHT +
+    travelEstimate.durationMinutes
+  );
+}
 
 function shouldPenalizeUnknownHours(
   item: AIPlanItem
@@ -616,9 +642,13 @@ function calculateLastLegPenalty(
 function evaluateRouteOrder({
   firstItem,
   orderedItems,
+  startAnchor,
+  endAnchor,
 }: {
   firstItem: AIPlanItem;
   orderedItems: AIPlanItem[];
+  startAnchor: Spot | null;
+  endAnchor: Spot | null;
 }): RouteEvaluation {
   const optimizedFirstItem:
     AIPlanItem = {
@@ -635,6 +665,19 @@ function evaluateRouteOrder({
 
   const routeDistances:
     number[] = [];
+
+  const firstSpot =
+    getSpotByName(
+      optimizedFirstItem.spot
+    );
+
+  if (startAnchor && firstSpot) {
+    routeScore +=
+      getAnchorTravelScore(
+        startAnchor,
+        firstSpot
+      );
+  }
 
   const firstArrival =
     timeToMinutes(
@@ -852,6 +895,22 @@ function evaluateRouteOrder({
       routeDistances
     );
 
+  const lastItem =
+    optimizedItems.at(-1);
+  const lastSpot = lastItem
+    ? getSpotByName(
+        lastItem.spot
+      )
+    : undefined;
+
+  if (endAnchor && lastSpot) {
+    routeScore +=
+      getAnchorTravelScore(
+        endAnchor,
+        lastSpot
+      );
+  }
+
   return {
     score: routeScore,
     items: optimizedItems,
@@ -860,7 +919,9 @@ function evaluateRouteOrder({
 
 function optimizeItemOrderExhaustively(
   items: AIPlanItem[],
-  preserveFirstItem: boolean
+  preserveFirstItem: boolean,
+  startAnchor: Spot | null,
+  endAnchor: Spot | null
 ): AIPlanItem[] {
   if (items.length <= 1) {
     return [
@@ -896,6 +957,8 @@ function optimizeItemOrderExhaustively(
           firstItem,
           orderedItems:
             permutation,
+          startAnchor,
+          endAnchor,
         });
 
       if (
@@ -950,6 +1013,8 @@ function optimizeItemOrderExhaustively(
       evaluateRouteOrder({
         firstItem,
         orderedItems,
+        startAnchor,
+        endAnchor,
       });
 
     if (
@@ -972,7 +1037,10 @@ function optimizeItemOrderExhaustively(
 }
 
 function optimizeItemOrderGreedy(
-  items: AIPlanItem[]
+  items: AIPlanItem[],
+  preserveFirstItem: boolean,
+  startAnchor: Spot | null,
+  endAnchor: Spot | null
 ): AIPlanItem[] {
   if (
     items.length <= 1
@@ -982,9 +1050,108 @@ function optimizeItemOrderGreedy(
     ];
   }
 
+  const remainingItems =
+    [...items];
+
+  const reservedEndItem =
+    endAnchor &&
+    remainingItems.length > 1
+      ? remainingItems
+          .slice(
+            preserveFirstItem
+              ? 1
+              : 0
+          )
+          .reduce(
+          (bestItem, item) => {
+            const bestSpot =
+              getSpotByName(
+                bestItem.spot
+              );
+            const itemSpot =
+              getSpotByName(item.spot);
+
+            if (!itemSpot) {
+              return bestItem;
+            }
+
+            if (!bestSpot) {
+              return item;
+            }
+
+            return getAnchorTravelScore(
+              endAnchor,
+              itemSpot
+            ) <
+              getAnchorTravelScore(
+                endAnchor,
+                bestSpot
+              )
+              ? item
+              : bestItem;
+          }
+        )
+      : null;
+
+  let firstIndex = 0;
+
+  if (
+    !preserveFirstItem &&
+    remainingItems[firstIndex] ===
+      reservedEndItem
+  ) {
+    firstIndex = 1;
+  }
+
+  if (
+    !preserveFirstItem &&
+    startAnchor
+  ) {
+    let bestScore =
+      Number.POSITIVE_INFINITY;
+
+    for (
+      let index = 0;
+      index < remainingItems.length;
+      index += 1
+    ) {
+      const item = remainingItems[index];
+
+      if (
+        item === reservedEndItem &&
+        remainingItems.length > 1
+      ) {
+        continue;
+      }
+
+      const spot =
+        getSpotByName(item.spot);
+
+      if (!spot) {
+        continue;
+      }
+
+      const score =
+        getAnchorTravelScore(
+          startAnchor,
+          spot
+        );
+
+      if (score < bestScore) {
+        bestScore = score;
+        firstIndex = index;
+      }
+    }
+  }
+
+  const [selectedFirstItem] =
+    remainingItems.splice(
+      firstIndex,
+      1
+    );
   const firstItem:
     AIPlanItem = {
-      ...items[0],
+      ...selectedFirstItem,
       duration: "0分",
     };
 
@@ -993,15 +1160,40 @@ function optimizeItemOrderGreedy(
       firstItem,
     ];
 
-  const remainingItems =
-    items.slice(1);
-
   let currentItem =
     firstItem;
 
   while (
     remainingItems.length > 0
   ) {
+    if (
+      reservedEndItem &&
+      remainingItems.length === 1
+    ) {
+      const selectedItem =
+        remainingItems[0];
+      const distanceKm =
+        getDistanceBetweenItems(
+          currentItem,
+          selectedItem
+        );
+      const travelEstimate =
+        estimateTravelBetweenItems(
+          currentItem,
+          selectedItem,
+          distanceKm
+        );
+
+      optimizedItems.push({
+        ...selectedItem,
+        transport:
+          travelEstimate.transport,
+        duration:
+          `${travelEstimate.durationMinutes}分`,
+      });
+      break;
+    }
+
     let bestIndex = 0;
 
     let bestDistance =
@@ -1013,6 +1205,14 @@ function optimizeItemOrderGreedy(
       remainingItems.length;
       index += 1
     ) {
+      if (
+        remainingItems[index] ===
+          reservedEndItem &&
+        remainingItems.length > 1
+      ) {
+        continue;
+      }
+
       const distanceKm =
         getDistanceBetweenItems(
           currentItem,
@@ -1071,7 +1271,9 @@ function optimizeItemOrderGreedy(
 
 function optimizeItemOrder(
   items: AIPlanItem[],
-  preserveFirstItem: boolean
+  preserveFirstItem: boolean,
+  startAnchor: Spot | null,
+  endAnchor: Spot | null
 ): AIPlanItem[] {
   if (
     items.length <=
@@ -1079,7 +1281,9 @@ function optimizeItemOrder(
   ) {
     return optimizeItemOrderExhaustively(
       items,
-      preserveFirstItem
+      preserveFirstItem,
+      startAnchor,
+      endAnchor
     );
   }
 
@@ -1088,17 +1292,25 @@ function optimizeItemOrder(
    * 現時点では既存Greedy処理を使用します。
    */
   return optimizeItemOrderGreedy(
-    items
+    items,
+    preserveFirstItem,
+    startAnchor,
+    endAnchor
   );
 }
 
 type OptimizeTravelPlanRouteOptions = {
   preserveFirstItem?: boolean;
+  startSpotName?: string | null;
+  startLocation?: string;
+  endLocation?: string;
 };
 
 function optimizeDayRoute(
   day: AIPlanDay,
-  preserveFirstItem: boolean
+  preserveFirstItem: boolean,
+  startAnchor: Spot | null,
+  endAnchor: Spot | null
 ): AIPlanDay {
   if (
     day.items.length <= 1
@@ -1112,7 +1324,9 @@ function optimizeDayRoute(
     items:
       optimizeItemOrder(
         day.items,
-        preserveFirstItem
+        preserveFirstItem,
+        startAnchor,
+        endAnchor
       ),
   };
 }
@@ -1124,18 +1338,54 @@ export function optimizeTravelPlanRoute(
 ): AITravelPlan {
   const {
     preserveFirstItem = true,
+    startSpotName = null,
+    startLocation,
+    endLocation,
   } = options;
 
+  const startAnchor =
+    startSpotName
+      ? null
+      : resolveLocationSpot(
+          startLocation
+        );
+  const endAnchor =
+    resolveLocationSpot(
+      endLocation
+    );
   return {
     ...plan,
 
     days:
       plan.days.map(
-        (day) =>
-          optimizeDayRoute(
+        (day, dayIndex) => {
+          const dayStartAnchor =
+            dayIndex === 0
+              ? startAnchor
+              : null;
+          const dayEndAnchor =
+            dayIndex ===
+              plan.days.length - 1
+              ? endAnchor
+              : null;
+          const hasDayAnchor =
+            dayStartAnchor !== null ||
+            dayEndAnchor !== null;
+          const preserveDayFirstItem =
+            startSpotName &&
+            dayIndex === 0
+              ? true
+              : hasDayAnchor
+                ? false
+                : preserveFirstItem;
+
+          return optimizeDayRoute(
             day,
-            preserveFirstItem
-          )
+            preserveDayFirstItem,
+            dayStartAnchor,
+            dayEndAnchor
+          );
+        }
       ),
   };
 }

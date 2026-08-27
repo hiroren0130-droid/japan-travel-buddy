@@ -119,7 +119,12 @@ export function optimizeGeneratedPlan({
 
   optimizedPlan =
     optimizeTravelPlanRoute(
-      optimizedPlan
+      optimizedPlan,
+      {
+        startSpotName,
+        startLocation,
+        endLocation,
+      }
     );
 
   logSpotCount(
