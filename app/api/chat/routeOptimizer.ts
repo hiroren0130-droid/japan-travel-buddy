@@ -5,6 +5,7 @@ import { getKyotoAreaGroup } from "./kyotoAreaGroups";
 import {
   calculateDistanceKm,
   estimateTravel,
+  estimateTravelBetweenSpots,
 } from "./locationTravelEstimator";
 
 import type {
@@ -361,6 +362,26 @@ function getDistanceBetweenItems(
   );
 }
 
+function estimateTravelBetweenItems(
+  fromItem: AIPlanItem,
+  toItem: AIPlanItem,
+  fallbackDistanceKm: number
+) {
+  const fromSpot =
+    getSpotByName(fromItem.spot);
+  const toSpot =
+    getSpotByName(toItem.spot);
+
+  return fromSpot && toSpot
+    ? estimateTravelBetweenSpots(
+        fromSpot,
+        toSpot
+      )
+    : estimateTravel(
+        fallbackDistanceKm
+      );
+}
+
 function getRecommendedStayMinutes(
   item: AIPlanItem
 ): number {
@@ -677,7 +698,9 @@ function evaluateRouteOrder({
     );
 
     const travelEstimate =
-      estimateTravel(
+      estimateTravelBetweenItems(
+        currentItem,
+        candidate,
         distanceKm
       );
 
@@ -1017,7 +1040,9 @@ function optimizeItemOrderGreedy(
       );
 
     const travelEstimate =
-      estimateTravel(
+      estimateTravelBetweenItems(
+        currentItem,
+        selectedItem,
         bestDistance
       );
 
