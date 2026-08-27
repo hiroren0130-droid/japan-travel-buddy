@@ -1,11 +1,17 @@
 "use client";
 
-import { useRef, useState } from "react";
+import {
+  useId,
+  useRef,
+  useState,
+} from "react";
 
 import {
   CalendarDays,
   Copy,
+  ExternalLink,
   FileText,
+  Footprints,
   Heart,
   Map,
   MapPin,
@@ -13,6 +19,8 @@ import {
   Save,
   Share2,
   Sparkles,
+  Train,
+  X,
 } from "lucide-react";
 
 import Button from "@/components/ui/Button";
@@ -30,16 +38,24 @@ import {
   saveFavorite,
 } from "@/lib/favorites";
 import { saveTravelPlan } from "@/lib/firestore";
-import { createGoogleMapsRoute } from "@/lib/googleMaps";
+import {
+  createGoogleMapsRoute,
+  createGoogleMapsRouteSegments,
+  determineGoogleMapsTravelMode,
+} from "@/lib/googleMaps";
 import {
   getLocalizedSpotArea,
   getLocalizedSpotName,
 } from "@/lib/localizedSpot";
 import { downloadTravelPlanPdf } from "@/lib/pdf";
-import { getSpotById } from "@/lib/spotService";
+import {
+  getSpotById,
+  getSpotByName,
+} from "@/lib/spotService";
 import { createTravelPlanShareText } from "@/lib/travelPlanExport";
 
 import type { TravelPlan } from "@/types/travel";
+import type { GoogleMapsRouteSegment } from "@/lib/googleMaps";
 
 type Props = {
   plan: TravelPlan;
@@ -125,6 +141,9 @@ export default function TravelPlanCard({
     isFavorite(plan.title)
   );
   const [saving, setSaving] = useState(false);
+  const [routeSegments, setRouteSegments] =
+    useState<GoogleMapsRouteSegment[]>([]);
+  const routeSegmentsTitleId = useId();
   const savingRef = useRef(false);
 
   function handleFavorite() {
@@ -292,14 +311,33 @@ export default function TravelPlanCard({
         return;
       }
 
+      const routeOptions = {
+        startLocation:
+          plan.startLocation,
+        endLocation:
+          plan.endLocation,
+      };
+
+      if (
+        determineGoogleMapsTravelMode(
+          routePoints,
+          routeOptions
+        ) === "transit"
+      ) {
+        setRouteSegments(
+          createGoogleMapsRouteSegments(
+            routePoints,
+            routeOptions
+          )
+        );
+        return;
+      }
+
+      setRouteSegments([]);
+
       const url = createGoogleMapsRoute(
         routePoints,
-        {
-          startLocation:
-            plan.startLocation,
-          endLocation:
-            plan.endLocation,
-        }
+        routeOptions
       );
 
       const openedWindow = window.open(
@@ -390,6 +428,16 @@ export default function TravelPlanCard({
     plan.summary.length > 85
       ? `${plan.summary.slice(0, 85)}...`
       : plan.summary;
+
+  function getRouteLocationDisplayName(
+    location: string
+  ): string {
+    const spot = getSpotByName(location);
+
+    return spot
+      ? getLocalizedSpotName(spot, locale)
+      : location;
+  }
 
   const actionButtonClass =
     "h-11 w-11 rounded-xl border border-white/80 bg-white text-slate-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-50 hover:text-blue-700";
@@ -653,6 +701,111 @@ export default function TravelPlanCard({
           </div>
         </div>
       </header>
+
+      {routeSegments.length > 0 && (
+        <section
+          aria-labelledby={routeSegmentsTitleId}
+          className="border-b border-blue-100 bg-blue-50/80 px-4 py-5 sm:px-5 lg:px-6"
+        >
+          <div className="mx-auto max-w-4xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2
+                  id={routeSegmentsTitleId}
+                  className="text-lg font-bold text-slate-900"
+                >
+                  {defaultMessages.travelPlanCard.routeSegments.title}
+                </h2>
+
+                <p className="mt-1 text-sm text-slate-600">
+                  {defaultMessages.travelPlanCard.routeSegments.description}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setRouteSegments([])}
+                aria-label={defaultMessages.travelPlanCard.routeSegments.close}
+                title={defaultMessages.travelPlanCard.routeSegments.close}
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+              >
+                <X size={18} aria-hidden="true" />
+              </button>
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              {routeSegments.map((segment, index) => {
+                const modeLabel =
+                  segment.travelMode === "walking"
+                    ? defaultMessages.travelPlanCard.routeSegments.walking
+                    : segment.travelMode === "transit"
+                      ? defaultMessages.travelPlanCard.routeSegments.transit
+                      : defaultMessages.travelPlanCard.routeSegments.automatic;
+                const ModeIcon =
+                  segment.travelMode === "walking"
+                    ? Footprints
+                    : segment.travelMode === "transit"
+                      ? Train
+                      : Map;
+
+                return (
+                  <article
+                    key={`${segment.origin}-${segment.destination}-${index}`}
+                    className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm"
+                  >
+                    <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                      <div className="min-w-0">
+                        <div className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3">
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-500">
+                              {defaultMessages.travelPlanCard.routeSegments.fromLabel}
+                            </p>
+                            <p className="mt-1 break-words text-sm font-semibold text-slate-900">
+                              {getRouteLocationDisplayName(
+                                segment.origin
+                              )}
+                            </p>
+                          </div>
+
+                          <span aria-hidden="true" className="text-slate-400">
+                            →
+                          </span>
+
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-slate-500">
+                              {defaultMessages.travelPlanCard.routeSegments.toLabel}
+                            </p>
+                            <p className="mt-1 break-words text-sm font-semibold text-slate-900">
+                              {getRouteLocationDisplayName(
+                                segment.destination
+                              )}
+                            </p>
+                          </div>
+                        </div>
+
+                        <p className="mt-3 flex items-center gap-2 text-xs font-bold text-blue-700">
+                          <ModeIcon size={16} aria-hidden="true" />
+                          {modeLabel}
+                        </p>
+                      </div>
+
+                      <a
+                        href={segment.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      >
+                        {defaultMessages.travelPlanCard.routeSegments.open}
+                        <ExternalLink size={16} aria-hidden="true" />
+                      </a>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Main content */}
       <div className="space-y-6 p-4 sm:p-5 lg:p-6">

@@ -7,10 +7,29 @@ import {
 } from "@/lib/travelPlanConditions";
 import {
   createGoogleMapsRoute,
+  createGoogleMapsRouteSegments,
   determineGoogleMapsTravelMode,
 } from "@/lib/googleMaps";
 
 import type { AITravelPlan } from "@/app/api/chat/travelValidator";
+import type { GoogleMapsRoutePoint } from "@/lib/googleMaps";
+
+const kiyomizudera: GoogleMapsRoutePoint = {
+  name: "清水寺",
+  cityId: "kyoto-city",
+};
+const gion: GoogleMapsRoutePoint = {
+  name: "祇園",
+  cityId: "kyoto-city",
+};
+const osakaCastle: GoogleMapsRoutePoint = {
+  name: "大阪城天守閣",
+  cityId: "osaka-city",
+};
+const dotonbori: GoogleMapsRoutePoint = {
+  name: "道頓堀",
+  cityId: "osaka-city",
+};
 
 const aiPlan: AITravelPlan = {
   title: "Phase 6 test",
@@ -134,6 +153,161 @@ test("Google Mapsは同一city内をwalking、複数cityをtransitにする", ()
     ])
   );
   expect(crossCityUrl.searchParams.get("travelmode")).toBe("transit");
+});
+
+test("区間ルートは京都市内と大阪市内をwalkingにする", () => {
+  for (const spots of [
+    [kiyomizudera, gion],
+    [osakaCastle, dotonbori],
+  ]) {
+    const segments =
+      createGoogleMapsRouteSegments(spots);
+
+    expect(segments).toHaveLength(1);
+    expect(segments[0].travelMode).toBe("walking");
+    expect(
+      new URL(segments[0].url).searchParams.get("waypoints")
+    ).toBeNull();
+  }
+});
+
+test("区間ルートは京都から大阪へのcity境界だけtransitにする", () => {
+  const segments =
+    createGoogleMapsRouteSegments([
+      kiyomizudera,
+      gion,
+      osakaCastle,
+    ]);
+
+  expect(
+    segments.map((segment) => ({
+      origin: segment.origin,
+      destination: segment.destination,
+      travelMode: segment.travelMode,
+    }))
+  ).toEqual([
+    {
+      origin: "清水寺",
+      destination: "祇園",
+      travelMode: "walking",
+    },
+    {
+      origin: "祇園",
+      destination: "大阪城天守閣",
+      travelMode: "transit",
+    },
+  ]);
+});
+
+test("区間ルートは京都・大阪・京都の境界ごとにmodeを切り替える", () => {
+  const segments =
+    createGoogleMapsRouteSegments([
+      kiyomizudera,
+      gion,
+      osakaCastle,
+      dotonbori,
+      kiyomizudera,
+    ]);
+
+  expect(
+    segments.map(
+      (segment) => segment.travelMode
+    )
+  ).toEqual([
+    "walking",
+    "transit",
+    "walking",
+    "transit",
+  ]);
+});
+
+test("区間ルートは解決可能な日本語とEnglish LocationのcityIdを利用する", () => {
+  const japaneseStart =
+    createGoogleMapsRouteSegments(
+      [kiyomizudera, osakaCastle],
+      { startLocation: "京都駅" }
+    );
+  const englishStart =
+    createGoogleMapsRouteSegments(
+      [kiyomizudera, osakaCastle],
+      { startLocation: "Kyoto Station" }
+    );
+  const japaneseEnd =
+    createGoogleMapsRouteSegments(
+      [osakaCastle],
+      { endLocation: "京都駅" }
+    );
+
+  expect(
+    japaneseStart.map(
+      (segment) => segment.travelMode
+    )
+  ).toEqual(["walking", "transit"]);
+  expect(
+    englishStart.map(
+      (segment) => segment.travelMode
+    )
+  ).toEqual(["walking", "transit"]);
+  expect(japaneseEnd[0].travelMode).toBe("transit");
+});
+
+test("区間ルートは未解決start/end Locationのtravelmodeを省略する", () => {
+  const segments =
+    createGoogleMapsRouteSegments(
+      [kiyomizudera, gion],
+      {
+        startLocation: "Unknown Hotel",
+        endLocation: "Unknown Station",
+      }
+    );
+
+  expect(
+    segments.map(
+      (segment) => segment.travelMode
+    )
+  ).toEqual([undefined, "walking", undefined]);
+  expect(
+    new URL(segments[0].url).searchParams.has("travelmode")
+  ).toBe(false);
+  expect(
+    new URL(segments[2].url).searchParams.has("travelmode")
+  ).toBe(false);
+});
+
+test("区間ルートはstart・Spot・endの順序を維持する", () => {
+  const segments =
+    createGoogleMapsRouteSegments(
+      [kiyomizudera, gion, osakaCastle],
+      {
+        startLocation: "京都駅",
+        endLocation: "道頓堀",
+      }
+    );
+
+  expect(
+    segments.map((segment) => [
+      segment.origin,
+      segment.destination,
+    ])
+  ).toEqual([
+    ["京都駅", "清水寺"],
+    ["清水寺", "祇園"],
+    ["祇園", "大阪城天守閣"],
+    ["大阪城天守閣", "道頓堀"],
+  ]);
+});
+
+test("区間ルートは空・1 Spotのfallbackを維持する", () => {
+  expect(createGoogleMapsRouteSegments([])).toEqual([]);
+  expect(
+    createGoogleMapsRouteSegments([kiyomizudera])
+  ).toEqual([]);
+  expect(
+    createGoogleMapsRouteSegments([], {
+      startLocation: "京都駅",
+      endLocation: "大阪城天守閣",
+    })[0].travelMode
+  ).toBe("transit");
 });
 
 test("Google Mapsは解決可能なstart/end LocationのcityIdを判定へ反映する", () => {
