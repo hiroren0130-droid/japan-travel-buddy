@@ -1,5 +1,4 @@
-import { getLocalizedSpotName } from "@/lib/localizedSpot";
-import { getAllSpots } from "@/lib/spotService";
+import { resolveLocationSpot } from "@/lib/locationResolver";
 
 type GoogleMapsRouteOptions = {
   startLocation?: string;
@@ -8,6 +7,7 @@ type GoogleMapsRouteOptions = {
 
 export type GoogleMapsRoutePoint = {
   name: string;
+  displayName?: string;
   address?: string;
   latitude?: number;
   longitude?: number;
@@ -29,47 +29,32 @@ export type GoogleMapsRouteSegment = {
   url: string;
 };
 
-function normalizeLocationName(
-  value: string
-): string {
-  return value
-    .normalize("NFKC")
-    .replace(/\s+/g, "")
-    .trim()
-    .toLowerCase();
-}
-
 function resolveLocationCityId(
   location: string | undefined
 ): string | undefined {
-  if (!location?.trim()) {
-    return undefined;
-  }
-
-  const normalizedLocation =
-    normalizeLocationName(location);
-  const spot = getAllSpots().find(
-    (candidate) =>
-      [
-        candidate.name,
-        getLocalizedSpotName(candidate, "en"),
-      ].some(
-        (name) =>
-          normalizeLocationName(name) ===
-          normalizedLocation
-      )
-  );
-
-  return spot?.cityId;
+  return resolveLocationSpot(location)?.cityId;
 }
 
 function createLocationRoutePoint(
   location: string
 ): GoogleMapsRoutePoint {
+  const spot = resolveLocationSpot(location);
+
   return {
-    name: location,
-    cityId:
-      resolveLocationCityId(location),
+    name: spot?.name ?? location,
+    ...(spot
+      ? { displayName: location }
+      : {}),
+    ...(spot?.address
+      ? { address: spot.address }
+      : {}),
+    ...(spot
+      ? {
+          latitude: spot.latitude,
+          longitude: spot.longitude,
+          cityId: spot.cityId,
+        }
+      : {}),
   };
 }
 
@@ -197,8 +182,11 @@ export function createGoogleMapsRouteSegments(
         toGoogleMapsPlace(destinationPoint);
 
       return {
-        origin: originPoint.name,
+        origin:
+          originPoint.displayName ??
+          originPoint.name,
         destination:
+          destinationPoint.displayName ??
           destinationPoint.name,
         ...(travelMode
           ? { travelMode }
@@ -222,6 +210,16 @@ export function createGoogleMapsRoute(
     options.startLocation?.trim();
   const endLocation =
     options.endLocation?.trim();
+  const startPlace = startLocation
+    ? toGoogleMapsPlace(
+        createLocationRoutePoint(startLocation)
+      )
+    : undefined;
+  const endPlace = endLocation
+    ? toGoogleMapsPlace(
+        createLocationRoutePoint(endLocation)
+      )
+    : undefined;
 
   if (
     places.length === 0 &&
@@ -242,11 +240,11 @@ export function createGoogleMapsRoute(
   }
 
   const origin =
-    startLocation ?? places[0] ?? endLocation ?? "";
+    startPlace ?? places[0] ?? endPlace ?? "";
   const destination =
-    endLocation ??
+    endPlace ??
     places.at(-1) ??
-    startLocation ??
+    startPlace ??
     "";
   const waypointSpots = places.slice(
     startLocation ? 0 : 1,

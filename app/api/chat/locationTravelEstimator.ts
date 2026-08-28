@@ -1,10 +1,12 @@
 import type { Spot } from "@/data/types";
 import {
-  getAllSpots,
   getSpotById,
   getSpotByName,
 } from "@/lib/spotService";
-import { getLocalizedSpotName } from "@/lib/localizedSpot";
+import {
+  hasValidLocationCoordinates,
+  resolveLocationSpot,
+} from "@/lib/locationResolver";
 import {
   getCityTravelProfile,
   getIntercityTravelProfile,
@@ -17,54 +19,13 @@ export type TravelEstimate = {
 
 const EARTH_RADIUS_KM = 6371;
 
-function normalizeLocationName(
-  value: string
-): string {
-  return value
-    .normalize("NFKC")
-    .replace(/\s+/g, "")
-    .trim()
-    .toLowerCase();
-}
-
 function hasValidCoordinates(
   spot: Spot
 ): boolean {
-  return (
-    Number.isFinite(spot.latitude) &&
-    spot.latitude >= -90 &&
-    spot.latitude <= 90 &&
-    Number.isFinite(spot.longitude) &&
-    spot.longitude >= -180 &&
-    spot.longitude <= 180
-  );
+  return hasValidLocationCoordinates(spot);
 }
 
-export function resolveLocationSpot(
-  location: string | undefined
-): Spot | null {
-  if (!location?.trim()) {
-    return null;
-  }
-
-  const normalizedLocation =
-    normalizeLocationName(location);
-
-  return (
-    getAllSpots().find(
-      (spot) =>
-        hasValidCoordinates(spot) &&
-        [
-          spot.name,
-          getLocalizedSpotName(spot, "en"),
-        ].some(
-          (name) =>
-            normalizeLocationName(name) ===
-            normalizedLocation
-        )
-    ) ?? null
-  );
-}
+export { resolveLocationSpot };
 
 function degreesToRadians(
   degrees: number
