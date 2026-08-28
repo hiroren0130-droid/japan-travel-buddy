@@ -33,11 +33,11 @@ function createPlan(
   };
 }
 
-test("locationはSpot DBの日本語名または英語localized名の正規化完全一致だけで解決する", () => {
+test("locationはSpot DBの正式名または登録aliasの正規化完全一致だけで解決する", () => {
   expect(resolveLocationSpot(" 京都 駅 ")?.name).toBe("京都駅");
   expect(resolveLocationSpot("Kyoto Station")?.name).toBe("京都駅");
   expect(resolveLocationSpot("  kYoTo   sTaTiOn  ")?.name).toBe("京都駅");
-  expect(resolveLocationSpot("大阪駅")).toBeNull();
+  expect(resolveLocationSpot("大阪駅")?.id).toBe("osaka-station-city");
   expect(resolveLocationSpot("Hotel Granvia Kyoto")).toBeNull();
   expect(resolveLocationSpot("Kyoto Stat")).toBeNull();
 });
@@ -105,7 +105,7 @@ test("startLocation未指定・解決不能・startTime未指定は既存時刻�
   const plan = createPlan([[{ time: "10:00", spot: "清水寺" }]]);
 
   expect(optimizeTravelPlanTimes(plan, "09:00").days[0].items[0].time).toBe("09:00");
-  expect(optimizeTravelPlanTimes(plan, "09:00", "大阪駅").days[0].items[0].time).toBe("09:00");
+  expect(optimizeTravelPlanTimes(plan, "09:00", "Umeda").days[0].items[0].time).toBe("09:00");
   expect(optimizeTravelPlanTimes(plan, undefined, "京都駅").days[0].items[0].time).toBe("10:00");
 });
 
@@ -124,7 +124,7 @@ test("endLocation移動は最終DayのendTime判定だけに加算する", () =>
   const boundary = `${String(Math.floor(finalArrival / 60)).padStart(2, "0")}:${String(finalArrival % 60).padStart(2, "0")}`;
   expect(calculateEndTimeViolationCount(plan, boundary, "京都駅")).toBe(0);
   expect(calculateEndTimeViolationCount(plan, boundary)).toBe(0);
-  expect(calculateEndTimeViolationCount(plan, boundary, "大阪駅")).toBe(0);
+  expect(calculateEndTimeViolationCount(plan, boundary, "Umeda")).toBe(0);
 
   const earlier = finalArrival - 1;
   const earlierTime = `${String(Math.floor(earlier / 60)).padStart(2, "0")}:${String(earlier % 60).padStart(2, "0")}`;
@@ -195,7 +195,7 @@ test("解決不能LocationではPlanを変更しない", () => {
   const result = filterLocationPlanItems({
     plan,
     startLocation: "Hotel Granvia Kyoto",
-    endLocation: "大阪駅",
+    endLocation: "Umeda",
     requiredSpotNames: [],
     protectedStartSpotName: null,
   });

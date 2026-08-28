@@ -10,6 +10,7 @@ import {
   createGoogleMapsRouteSegments,
   determineGoogleMapsTravelMode,
 } from "@/lib/googleMaps";
+import { getSpotById } from "@/lib/spotService";
 
 import type { AITravelPlan } from "@/app/api/chat/travelValidator";
 import type { GoogleMapsRoutePoint } from "@/lib/googleMaps";
@@ -30,6 +31,11 @@ const dotonbori: GoogleMapsRoutePoint = {
   name: "道頓堀",
   cityId: "osaka-city",
 };
+
+const kyotoStation = getSpotById("kyoto-station")!;
+const osakaStationCity = getSpotById("osaka-station-city")!;
+const kyotoStationPlace = `${kyotoStation.name}, ${kyotoStation.address}`;
+const osakaStationCityPlace = `${osakaStationCity.name}, ${osakaStationCity.address}`;
 
 const aiPlan: AITravelPlan = {
   title: "Phase 6 test",
@@ -88,14 +94,14 @@ test("Google Mapsは境界条件に応じてorigin destination waypointsを組�
     },
     {
       options: { startLocation: "京都駅" },
-      origin: "京都駅",
+      origin: kyotoStationPlace,
       destination: "金閣寺",
       waypoints: "清水寺|錦市場",
     },
     {
       options: { endLocation: "京都駅" },
       origin: "清水寺",
-      destination: "京都駅",
+      destination: kyotoStationPlace,
       waypoints: "錦市場|金閣寺",
     },
     {
@@ -104,7 +110,7 @@ test("Google Mapsは境界条件に応じてorigin destination waypointsを組�
         endLocation: "京都駅",
       },
       origin: "Hotel Granvia Kyoto",
-      destination: "京都駅",
+      destination: kyotoStationPlace,
       waypoints: "清水寺|錦市場|金閣寺",
     },
   ];
@@ -394,8 +400,8 @@ test("Google Mapsは大阪4Spotの名称と住所をPlan順のwaypointsとして
     )
   );
 
-  expect(url.searchParams.get("origin")).toBe("大阪駅");
-  expect(url.searchParams.get("destination")).toBe("大阪駅");
+  expect(url.searchParams.get("origin")).toBe(osakaStationCityPlace);
+  expect(url.searchParams.get("destination")).toBe(osakaStationCityPlace);
   expect(url.searchParams.get("waypoints")).toBe(
     [
       "大阪城天守閣, 大阪府大阪市中央区大阪城1-1",
@@ -434,8 +440,8 @@ test("Google Mapsは住所なしなら座標、座標もなければ名称へフ
   expect(url.searchParams.get("waypoints")).toBe(
     "34.994856,135.785046|錦市場|金閣寺, 京都府京都市北区金閣寺町1"
   );
-  expect(url.searchParams.get("origin")).toBe("京都駅");
-  expect(url.searchParams.get("destination")).toBe("京都駅");
+  expect(url.searchParams.get("origin")).toBe(kyotoStationPlace);
+  expect(url.searchParams.get("destination")).toBe(kyotoStationPlace);
   expect(url.searchParams.get("travelmode")).toBe("walking");
 });
 
