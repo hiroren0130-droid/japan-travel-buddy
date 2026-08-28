@@ -14,6 +14,7 @@ import {
   getLocalizedSpotName,
   getLocalizedSpotPrice,
 } from "@/lib/localizedSpot";
+import { getSpotImageCredit } from "@/lib/spotImageCredits";
 
 export default function SpotDetail({
   spot,
@@ -30,6 +31,7 @@ export default function SpotDetail({
     getLocalizedSpotHours(spot, locale);
   const localizedPrice =
     getLocalizedSpotPrice(spot, locale);
+  const imageCredit = getSpotImageCredit(spot.id);
 
   return (
     <main className="mx-auto max-w-5xl p-6 sm:p-8">
@@ -51,6 +53,17 @@ export default function SpotDetail({
             longitude={spot.longitude}
           />
         </div>
+
+        {imageCredit && (
+          <div className="border-t bg-gray-50 px-8 py-2 text-right text-xs text-gray-600">
+            <Link
+              href={`/image-credits#${spot.id}`}
+              className="font-medium hover:text-blue-600 hover:underline"
+            >
+              {locale === "en" ? "Photo credit" : "画像クレジット"}
+            </Link>
+          </div>
+        )}
 
         <div className="p-8">
           <h1 className="text-4xl font-bold">

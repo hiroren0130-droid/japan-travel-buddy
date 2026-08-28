@@ -46,7 +46,7 @@ test("missing local Spot images fall back to the placeholder", async ({
     }
   );
 
-  await page.goto("/spots/osaka-castle");
+  await page.goto("/spots/umeda-sky-building");
 
   const image = page.locator("main img").first();
   await expect(image).toBeVisible();
@@ -80,7 +80,7 @@ test("Home and Discover share the local-first rule", async ({
   await page.goto("/discover/osaka");
   await expect(
     page.locator(
-      'img[src$="/spots/placeholder.jpg"]'
+      'img[src$="/spots/osaka-castle.jpg"]'
     ).first()
   ).toBeVisible();
   expect(placesPhotoRequests).toBe(0);

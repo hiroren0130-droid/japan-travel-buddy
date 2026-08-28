@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useLocale } from "@/components/LocaleProvider";
 
 export default function Footer() {
-  const { messages } = useLocale();
+  const { locale, messages } = useLocale();
 
   return (
     <footer className="mt-20 border-t bg-gray-50">
@@ -39,6 +39,10 @@ export default function Footer() {
 
             <Link href="/terms" className="hover:underline">
               {messages.footer.links.termsOfService}
+            </Link>
+
+            <Link href="/image-credits" className="hover:underline">
+              {locale === "en" ? "Image Credits" : "画像クレジット"}
             </Link>
 
           </div>
