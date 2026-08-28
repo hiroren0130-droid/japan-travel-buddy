@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 type Props = {
   src: string;
@@ -13,111 +13,30 @@ type Props = {
   className?: string;
 };
 
-type ImageSource =
-  | "places"
-  | "local"
-  | "fallback";
-
 const FALLBACK_IMAGE =
   "/spots/placeholder.jpg";
-
-const KNOWN_PLACEHOLDER_IMAGES =
-  new Set([
-    "/spots/yasaka-shrine.jpg",
-  ]);
-
-function createPlacesPhotoUrl(
-  spotName: string,
-  spotId?: string,
-  latitude?: number,
-  longitude?: number
-): string {
-  const query = spotName.trim();
-  const searchParams = new URLSearchParams({
-    query,
-  });
-
-  if (spotId) {
-    searchParams.set("spotId", spotId);
-  }
-
-  if (
-    Number.isFinite(latitude) &&
-    Number.isFinite(longitude)
-  ) {
-    searchParams.set(
-      "latitude",
-      String(latitude)
-    );
-    searchParams.set(
-      "longitude",
-      String(longitude)
-    );
-  }
-
-  return `/api/places/photo?${searchParams.toString()}`;
-}
 
 export default function SpotImage({
   src,
   alt,
-  spotName,
-  spotId,
-  latitude,
-  longitude,
   className = "",
 }: Props) {
   const requestedLocalImage = src.trim();
   const localImage =
-    requestedLocalImage &&
-    !KNOWN_PLACEHOLDER_IMAGES.has(
-      requestedLocalImage
-    )
+    requestedLocalImage
       ? requestedLocalImage
       : FALLBACK_IMAGE;
-
-  const placesPhotoUrl = useMemo(
-    () =>
-      createPlacesPhotoUrl(
-        spotName ?? alt,
-        spotId,
-        latitude,
-        longitude
-      ),
-    [alt, latitude, longitude, spotId, spotName]
-  );
-
-  const [failedPlacesUrl, setFailedPlacesUrl] =
-    useState<string | null>(null);
 
   const [failedLocalImage, setFailedLocalImage] =
     useState<string | null>(null);
 
-  const imageSource: ImageSource =
-    failedPlacesUrl !== placesPhotoUrl
-      ? "places"
-      : failedLocalImage !== localImage &&
-          localImage !== FALLBACK_IMAGE
-        ? "local"
-        : "fallback";
-
   const currentImage =
-    imageSource === "places"
-      ? placesPhotoUrl
-      : imageSource === "local"
-        ? localImage
-        : FALLBACK_IMAGE;
+    failedLocalImage !== localImage
+      ? localImage
+      : FALLBACK_IMAGE;
 
   function handleImageError(): void {
-    if (imageSource === "places") {
-      setFailedPlacesUrl(
-        placesPhotoUrl
-      );
-
-      return;
-    }
-
-    if (imageSource === "local") {
+    if (currentImage !== FALLBACK_IMAGE) {
       setFailedLocalImage(
         localImage
       );
