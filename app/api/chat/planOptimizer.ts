@@ -26,6 +26,10 @@ import {
   filterLocationPlanItems,
 } from "./locationPlanItemFilter";
 
+import {
+  DEFAULT_EFFECTIVE_START_TIME,
+} from "./startTimePolicy";
+
 import type {
   AITravelPlan,
 } from "./travelValidator";
@@ -96,7 +100,8 @@ export function optimizeGeneratedPlan({
       plan: optimizedPlan,
       startSpotName,
       startTime:
-        startTime ?? "09:00",
+        startTime ??
+        DEFAULT_EFFECTIVE_START_TIME,
       locale,
     });
 

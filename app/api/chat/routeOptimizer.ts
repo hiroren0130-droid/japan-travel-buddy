@@ -9,6 +9,10 @@ import {
   resolveLocationSpot,
 } from "./locationTravelEstimator";
 
+import {
+  DEFAULT_EFFECTIVE_START_MINUTES,
+} from "./startTimePolicy";
+
 import type { Spot } from "@/data/types";
 
 import type {
@@ -17,7 +21,6 @@ import type {
   AITravelPlan,
 } from "./travelValidator";
 
-const DEFAULT_START_MINUTES = 9 * 60;
 const DEFAULT_STAY_MINUTES = 60;
 
 const MAX_EXHAUSTIVE_ROUTE_ITEMS = 8;
@@ -683,7 +686,7 @@ function evaluateRouteOrder({
     timeToMinutes(
       optimizedFirstItem.time
     ) ??
-    DEFAULT_START_MINUTES;
+    DEFAULT_EFFECTIVE_START_MINUTES;
 
   const firstStay =
     isDeparturePoint(

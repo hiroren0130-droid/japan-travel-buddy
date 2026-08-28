@@ -25,6 +25,11 @@ import {
   hasLimitedScheduleRequest,
 } from "./planCompleteness";
 
+import {
+  DEFAULT_EFFECTIVE_START_TIME,
+  resolveEffectiveStartTime,
+} from "./startTimePolicy";
+
 import type {
   Spot,
 } from "@/data/types";
@@ -124,6 +129,19 @@ export async function generateTravelPlan({
       currentLocation,
     });
 
+  const requestText =
+    `${message}\n${specialRequest}`;
+
+  const effectiveStartTime =
+    generatedPlan
+      ? resolveEffectiveStartTime({
+          plan: generatedPlan,
+          requestText,
+          startTime,
+        })
+      : startTime ??
+        DEFAULT_EFFECTIVE_START_TIME;
+
   /*
    * AI生成直後に、
    * 軽微なスポット重複を
@@ -134,7 +152,8 @@ export async function generateTravelPlan({
       plan: generatedPlan,
       requestedStartSpotName,
       locale,
-      startTime,
+      startTime:
+        effectiveStartTime,
       startLocation,
       endLocation,
       requiredSpots,
@@ -166,7 +185,7 @@ export async function generateTravelPlan({
 
   const hasLimitedSchedule =
     hasLimitedScheduleRequest(
-      `${message}\n${specialRequest}`
+      requestText
     );
 
   const hasEarlyEnd =
@@ -189,6 +208,7 @@ export async function generateTravelPlan({
     return {
       generatedPlan,
       didRegenerate: false,
+      effectiveStartTime,
     };
   }
 
@@ -254,7 +274,8 @@ ${
       locale,
       specialRequest,
       startLocation,
-      startTime,
+      startTime:
+        effectiveStartTime,
       endLocation,
       endTime,
       currentLocation,
@@ -270,7 +291,8 @@ ${
       plan: generatedPlan,
       requestedStartSpotName,
       locale,
-      startTime,
+      startTime:
+        effectiveStartTime,
       startLocation,
       endLocation,
       requiredSpots,
@@ -279,5 +301,6 @@ ${
   return {
     generatedPlan,
     didRegenerate: true,
+    effectiveStartTime,
   };
 }

@@ -13,16 +13,89 @@ const FULL_DAY_MINIMUM_END_MINUTES =
   15 * 60;
 const DEFAULT_STAY_MINUTES = 60;
 
-const LIMITED_SCHEDULE_PATTERNS = [
-  /半日/iu,
+const MORNING_SCHEDULE_PATTERNS = [
   /午前(?:中)?のみ/iu,
-  /午後のみ/iu,
   /昼まで/iu,
-  /half[\s-]?day/iu,
   /morning only/iu,
-  /afternoon only/iu,
   /until noon/iu,
 ];
+
+const AFTERNOON_SCHEDULE_PATTERNS = [
+  /午後のみ/iu,
+  /午後(?:から|開始|スタート)/iu,
+  /afternoon only/iu,
+  /(?:from|starting in the) afternoon/iu,
+];
+
+const EVENING_SCHEDULE_PATTERNS = [
+  /夕方(?:から|以降|中心|のみ)/iu,
+  /夜(?:から|中心|のみ)/iu,
+  /evening(?: only| focused)?/iu,
+  /night(?: only| focused)?/iu,
+];
+
+const GENERIC_LIMITED_SCHEDULE_PATTERNS = [
+  /半日/iu,
+  /half[\s-]?day/iu,
+];
+
+export type LimitedScheduleIntent =
+  | "none"
+  | "morning"
+  | "afternoon"
+  | "evening"
+  | "generic";
+
+function matchesAnyPattern(
+  requestText: string,
+  patterns: RegExp[]
+): boolean {
+  return patterns.some(
+    (pattern) => pattern.test(requestText)
+  );
+}
+
+export function getLimitedScheduleIntent(
+  requestText: string
+): LimitedScheduleIntent {
+  if (
+    matchesAnyPattern(
+      requestText,
+      AFTERNOON_SCHEDULE_PATTERNS
+    )
+  ) {
+    return "afternoon";
+  }
+
+  if (
+    matchesAnyPattern(
+      requestText,
+      EVENING_SCHEDULE_PATTERNS
+    )
+  ) {
+    return "evening";
+  }
+
+  if (
+    matchesAnyPattern(
+      requestText,
+      MORNING_SCHEDULE_PATTERNS
+    )
+  ) {
+    return "morning";
+  }
+
+  if (
+    matchesAnyPattern(
+      requestText,
+      GENERIC_LIMITED_SCHEDULE_PATTERNS
+    )
+  ) {
+    return "generic";
+  }
+
+  return "none";
+}
 
 function parseMinutes(
   value: string | undefined
@@ -186,7 +259,9 @@ export function calculateEarlyEndCount(
 export function hasLimitedScheduleRequest(
   requestText: string
 ): boolean {
-  return LIMITED_SCHEDULE_PATTERNS.some(
-    (pattern) => pattern.test(requestText)
+  return (
+    getLimitedScheduleIntent(
+      requestText
+    ) !== "none"
   );
 }
