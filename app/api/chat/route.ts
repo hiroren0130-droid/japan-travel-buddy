@@ -822,6 +822,7 @@ ${specialRequest}
       generatedPlan:
         generatedPlanResult,
       didRegenerate,
+      effectiveStartTime,
     } = await generateTravelPlan({
       spotList,
       message,
@@ -937,7 +938,8 @@ ${specialRequest}
       requestedStartSpotName,
     startLocation,
     endLocation,
-    startTime,
+    startTime:
+      effectiveStartTime,
     endTime,
     enforceFullDayCoverage,
       });
@@ -975,7 +977,8 @@ ${specialRequest}
         startSpotName:
           requestedStartSpotName,
         locale,
-        startTime,
+        startTime:
+          effectiveStartTime,
         startLocation,
         endLocation,
         requiredSpotNames:
@@ -1013,7 +1016,8 @@ ${specialRequest}
         requestedStartSpotName,
         startLocation,
         endLocation,
-        startTime,
+        startTime:
+          effectiveStartTime,
         endTime,
       });
 
@@ -1055,7 +1059,8 @@ ${specialRequest}
       requestedStartSpotName,
     startLocation,
     endLocation,
-    startTime,
+    startTime:
+      effectiveStartTime,
     endTime,
     enforceFullDayCoverage,
       });
@@ -1093,7 +1098,8 @@ ${specialRequest}
         startSpotName:
           requestedStartSpotName,
         locale,
-        startTime,
+        startTime:
+          effectiveStartTime,
         startLocation,
         endLocation,
         requiredSpotNames:

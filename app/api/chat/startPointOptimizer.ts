@@ -7,7 +7,9 @@ import type {
   AITravelPlan,
 } from "./travelValidator";
 
-const DEFAULT_START_TIME = "09:00";
+import {
+  DEFAULT_EFFECTIVE_START_TIME,
+} from "./startTimePolicy";
 
 function normalizeText(
   value: string
@@ -228,7 +230,8 @@ export function findRequestedStartSpotName({
 export function optimizeStartPoint({
   plan,
   startSpotName,
-  startTime = DEFAULT_START_TIME,
+  startTime =
+    DEFAULT_EFFECTIVE_START_TIME,
   locale,
 }: {
   plan: AITravelPlan;

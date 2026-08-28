@@ -4,13 +4,15 @@ import {
   estimateLocationTravel,
 } from "./locationTravelEstimator";
 
+import {
+  DEFAULT_EFFECTIVE_START_MINUTES,
+} from "./startTimePolicy";
+
 import type {
   AIPlanDay,
   AIPlanItem,
   AITravelPlan,
 } from "./travelValidator";
-
-const DEFAULT_START_MINUTES = 9 * 60;
 
 const LUNCH_START_MINUTES = 12 * 60;
 const LUNCH_END_MINUTES = 13 * 60 + 30;
@@ -407,7 +409,7 @@ function optimizeDayTimes(
       ? requestedStartTime +
         startTravelMinutes
       : firstOriginalTime ??
-        DEFAULT_START_MINUTES;
+        DEFAULT_EFFECTIVE_START_MINUTES;
 
   let lunchInserted = false;
 
