@@ -55,6 +55,10 @@ import {
 } from "./planSummaryNormalizer";
 
 import {
+  normalizePlanTitleForTimeline,
+} from "./planTitleNormalizer";
+
+import {
   getEstimatedDayEndMinutes,
   hasLimitedScheduleRequest,
 } from "./planCompleteness";
@@ -1148,9 +1152,15 @@ ${specialRequest}
     locale
   );
 
+const titleNormalizedPlan =
+  normalizePlanTitleForTimeline(
+    normalizedPlan,
+    locale
+  );
+
 const plan =
   buildPlanResponse(
-    normalizedPlan,
+    titleNormalizedPlan,
     {
       startLocation,
       startTime,

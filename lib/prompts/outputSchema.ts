@@ -1,3 +1,5 @@
+export const TRAVEL_PLAN_TITLE_MAX_LENGTH = 80;
+
 export const travelPlanSchema = {
   type: "object",
   additionalProperties: false,
@@ -6,7 +8,8 @@ export const travelPlanSchema = {
     title: {
       type: "string",
       minLength: 1,
-      maxLength: 80,
+      maxLength:
+        TRAVEL_PLAN_TITLE_MAX_LENGTH,
     },
 
     summary: {
