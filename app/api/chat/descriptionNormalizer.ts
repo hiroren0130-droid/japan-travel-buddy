@@ -7,10 +7,10 @@ import type {
 const LUNCH_DESCRIPTION_END_MINUTES =
   14 * 60;
 
-const MORNING_END_MINUTES =
+export const MORNING_END_MINUTES =
   12 * 60;
 
-const EVENING_START_MINUTES =
+export const EVENING_START_MINUTES =
   15 * 60;
 
 function timeToMinutes(
