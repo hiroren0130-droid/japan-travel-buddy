@@ -8,20 +8,9 @@ export interface FavoriteItem {
 }
 
 export function getFavorites(): TravelPlan[] {
-  if (typeof window === "undefined") return [];
-
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return [];
-
-  try {
-    const favorites: FavoriteItem[] = JSON.parse(raw);
-
-    return favorites
-      .sort((a, b) => b.savedAt - a.savedAt)
-      .map((item) => item.plan);
-  } catch {
-    return [];
-  }
+  return getFavoriteItems()
+    .sort((a, b) => b.savedAt - a.savedAt)
+    .map((item) => item.plan);
 }
 
 export function isFavorite(title: string): boolean {
