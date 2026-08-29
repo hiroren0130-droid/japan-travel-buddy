@@ -9,7 +9,9 @@ import { getMessages } from "@/lib/messages";
 const messages = getMessages(DEFAULT_LOCALE).siteMetadata;
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://japantravelbuddy.com"),
+  metadataBase: new URL(
+    "https://japan-travel-buddy-cmuv-psi.vercel.app"
+  ),
 
   title: {
     default: messages.defaultTitle,
@@ -38,7 +40,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ja_JP",
-    url: "https://japantravelbuddy.com",
+    url: "https://japan-travel-buddy-cmuv-psi.vercel.app",
     siteName: messages.openGraphSiteName,
     title: messages.openGraphTitle,
     description: messages.openGraphDescription,
