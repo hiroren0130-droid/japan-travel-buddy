@@ -81,6 +81,11 @@ export default function ImageCreditsPage() {
                 {isEnglish ? "Modifications" : "加工内容"}
               </dt>
               <dd>{credit.modifications}</dd>
+
+              <dt className="font-semibold text-gray-700">
+                {isEnglish ? "Notes" : "備考"}
+              </dt>
+              <dd>{credit.notes}</dd>
             </dl>
           </article>
         ))}
