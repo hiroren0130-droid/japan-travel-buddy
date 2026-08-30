@@ -34,6 +34,38 @@ jobs:
         NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
         NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
 
+  playwright-deterministic:
+    if: github.event_name == 'pull_request'
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    env:
+      PLAYWRIGHT_FIREBASE_MOCKS: "1"
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+    - uses: actions/setup-node@v4
+      with:
+        node-version: "24"
+    - name: Install dependencies
+      run: npm ci
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    - name: Run deterministic Playwright tests
+      run: |
+        npx playwright test \
+          tests/phase6a-local-spot-images.spec.ts \
+          tests/phase6c-image-credits.spec.ts \
+          tests/phase6-5-home-discover.spec.ts \
+          tests/phase6e-favorites-detail.spec.ts \
+          tests/phase6e-auth-saved-plans.spec.ts
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-deterministic-report
+        path: playwright-report/
+        retention-days: 30
+
   test:
     if: github.event_name != 'pull_request'
     timeout-minutes: 60
