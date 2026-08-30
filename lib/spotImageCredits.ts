@@ -206,6 +206,210 @@ export const SPOT_IMAGE_CREDITS: readonly SpotImageCredit[] = [
     notes:
       "This adapted image is licensed under CC BY-SA 4.0. The arcade, Nishiki Market signage, and shops on both sides were retained while reducing the prominence of foreground visitors.",
   },
+  {
+    spotId: "heian-shrine",
+    spotNameJa: "平安神宮",
+    spotNameEn: "Heian Shrine",
+    localFilename: "/spots/heian-shrine.jpg",
+    sourceTitle: "Heian Shrine @ Kyoto (13310604013).jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Heian_Shrine_@_Kyoto_(13310604013).jpg",
+    photographerName: "Guilhem Vellut",
+    licenseName: "CC BY 2.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/2.0/",
+    attributionRequired: true,
+    modifications:
+      "Cropped from x=1, y=100 at 3966 × 2644 pixels within the audited bounds, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "The crop retains the large vermilion torii while reducing excess sky and road.",
+  },
+  {
+    spotId: "nanzenji",
+    spotNameJa: "南禅寺",
+    spotNameEn: "Nanzen-ji",
+    localFilename: "/spots/nanzenji.jpg",
+    sourceTitle: "Nanzenji aqueduct 20211123.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Nanzenji_aqueduct_20211123.jpg",
+    photographerName: "Suicasmo",
+    licenseName: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Cropped from x=1404, y=0 at 3780 × 2520 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "This adapted image is licensed under CC BY-SA 4.0. The aqueduct arches were retained while excluding the large foreground trunk and reducing the prominence of visitors.",
+  },
+  {
+    spotId: "eikando",
+    spotNameJa: "永観堂",
+    spotNameEn: "Eikando",
+    localFilename: "/spots/eikando.jpg",
+    sourceTitle: "Eikando, Kyoto - Eikando7376.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Eikando,_Kyoto_-_Eikando7376.jpg",
+    photographerName: "lumoplank",
+    licenseName: "CC0 1.0",
+    licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
+    attributionRequired: false,
+    modifications:
+      "Cropped from x=684, y=0 at 4200 × 2800 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "The pagoda, temple buildings, autumn foliage, and Hojo pond were retained while excluding the lower image band.",
+  },
+  {
+    spotId: "kodaiji",
+    spotNameJa: "高台寺",
+    spotNameEn: "Kodai-ji",
+    localFilename: "/spots/kodaiji.jpg",
+    sourceTitle: "Kōdai-ji 20211123-1.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:K%C5%8Ddai-ji_20211123-1.jpg",
+    photographerName: "Suicasmo",
+    licenseName: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Resized and JPEG-compressed to 1200 × 800 pixels at quality 84; the original 3:2 composition was retained.",
+    notes:
+      "This adapted image is licensed under CC BY-SA 4.0. The Kaisan-do, Kangetsu-dai, covered corridor, garden, and pond were retained.",
+  },
+  {
+    spotId: "kenninji",
+    spotNameJa: "建仁寺",
+    spotNameEn: "Kennin-ji",
+    localFilename: "/spots/kenninji.jpg",
+    sourceTitle: "150124 Kenninji Kyoto Japan05s3.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:150124_Kenninji_Kyoto_Japan05s3.jpg",
+    photographerName: "663highland",
+    licenseName: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Cropped from x=1800, y=200 at 3600 × 2400 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "This adapted image is licensed under CC BY-SA 4.0. The Sanmon gate was centered while retaining its characteristic structure.",
+  },
+  {
+    spotId: "sanjusangendo",
+    spotNameJa: "三十三間堂",
+    spotNameEn: "Sanjusangen-do",
+    localFilename: "/spots/sanjusangendo.jpg",
+    sourceTitle: "Kyoto Sanjusangen-do Haupthalle 02.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Kyoto_Sanjusangen-do_Haupthalle_02.jpg",
+    photographerName: "Zairon",
+    licenseName: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Cropped from x=350, y=0 at 3348 × 2232 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "This adapted image is licensed under CC BY-SA 4.0. The long main hall, continuous columns, and eaves were retained while reducing the prominence of distant visitors at right.",
+  },
+  {
+    spotId: "toji",
+    spotNameJa: "東寺",
+    spotNameEn: "To-ji",
+    localFilename: "/spots/toji.jpg",
+    sourceTitle: "Tō-ji, Kyōto (Yozakura).jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:T%C5%8D-ji,_Ky%C5%8Dto_(Yozakura).jpg",
+    photographerName: "Jean-Michel Lapointe",
+    licenseName: "CC BY 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Cropped from x=500, y=0 at 3300 × 2200 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "The five-story pagoda and illuminated cherry blossoms were retained while excluding the lower group of visitors.",
+  },
+  {
+    spotId: "kyoto-station",
+    spotNameJa: "京都駅",
+    spotNameEn: "Kyoto Station",
+    localFilename: "/spots/kyoto-station.jpg",
+    sourceTitle: "Kyoto Station (50910224293).jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Kyoto_Station_(50910224293).jpg",
+    photographerName: "Dick Thomas Johnson",
+    licenseName: "CC BY 2.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/2.0/",
+    attributionRequired: true,
+    modifications:
+      "Cropped from x=0, y=0 at 4896 × 3264 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "The station atrium, grand staircase, and escalators were retained.",
+  },
+  {
+    spotId: "tofukuji",
+    spotNameJa: "東福寺",
+    spotNameEn: "Tofuku-ji",
+    localFilename: "/spots/tofukuji.jpg",
+    sourceTitle: "Tofuku-ji, Kyoto - Tofukuji6597.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Tofuku-ji,_Kyoto_-_Tofukuji6597.jpg",
+    photographerName: "lumoplank",
+    licenseName: "CC0 1.0",
+    licenseUrl: "https://creativecommons.org/publicdomain/zero/1.0/",
+    attributionRequired: false,
+    modifications:
+      "Cropped from x=0, y=0 at 5184 × 3456 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "The principal temple architecture and autumn foliage were retained.",
+  },
+  {
+    spotId: "shimogamo-shrine",
+    spotNameJa: "下鴨神社",
+    spotNameEn: "Shimogamo Shrine",
+    localFilename: "/spots/shimogamo-shrine.jpg",
+    sourceTitle: "Kyoto Shimogamo-jinja Romon 2.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Kyoto_Shimogamo-jinja_Romon_2.jpg",
+    photographerName: "Zairon",
+    licenseName: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Cropped from x=272, y=0 at 4038 × 2692 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "This adapted image is licensed under CC BY-SA 4.0. The full vermilion Romon gate and its characteristic structure were retained.",
+  },
+  {
+    spotId: "kamigamo-shrine",
+    spotNameJa: "上賀茂神社",
+    spotNameEn: "Kamigamo Shrine",
+    localFilename: "/spots/kamigamo-shrine.jpg",
+    sourceTitle: "Kamigamo Shrine-16.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Kamigamo_Shrine-16.jpg",
+    photographerName: "Immanuelle",
+    licenseName: "CC BY 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Cropped from x=0, y=0 at 4032 × 2688 pixels, resized, and JPEG-compressed to 1200 × 800 pixels at quality 84.",
+    notes:
+      "The shrine buildings and recognizable grounds were retained in the audited composition.",
+  },
+  {
+    spotId: "kyoto-gyoen",
+    spotNameJa: "京都御苑",
+    spotNameEn: "Kyoto Gyoen National Garden",
+    localFilename: "/spots/kyoto-gyoen.jpg",
+    sourceTitle: "KyotoGyoen (15233412330).jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:KyotoGyoen_(15233412330).jpg",
+    photographerName: "nobu3withfoxy",
+    licenseName: "CC BY 2.0",
+    licenseUrl: "https://creativecommons.org/licenses/by/2.0/",
+    attributionRequired: true,
+    modifications:
+      "Resized and JPEG-compressed to 1200 × 800 pixels at quality 84; the original 3:2 composition was retained.",
+    notes:
+      "The broad gravel avenue, trees, wall, gate, and distant mountain were retained.",
+  },
 ] as const;
 
 export function getSpotImageCredit(
