@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import FavoriteHeader from "@/components/favorite/FavoriteHeader";
 import FavoriteGrid from "@/components/favorite/FavoriteGrid";
@@ -10,6 +11,7 @@ import FavoriteSort, {
   FavoriteSortType,
 } from "@/components/favorite/FavoriteSort";
 import { useLocale } from "@/components/LocaleProvider";
+import TravelPlanCard from "@/components/TravelPlanCard";
 
 import {
   getFavoriteItems,
@@ -22,12 +24,42 @@ import type { TravelPlan } from "@/types/travel";
 export default function FavoritesPage() {
   const { locale } = useLocale();
   const intlLocale = getIntlLocale(locale);
-  const [favorites, setFavorites] = useState(getFavoriteItems());
+  const router = useRouter();
+  const [favorites, setFavorites] = useState<
+    ReturnType<typeof getFavoriteItems>
+  >([]);
+  const [selectedPlanTitle, setSelectedPlanTitle] =
+    useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sort, setSort] =
     useState<FavoriteSortType>("newest");
 
-  
+  useEffect(() => {
+    function syncSelectedPlanFromUrl() {
+      const planTitle = new URLSearchParams(
+        window.location.search
+      ).get("plan");
+
+      setSelectedPlanTitle(planTitle || null);
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setFavorites(getFavoriteItems());
+      syncSelectedPlanFromUrl();
+    }, 0);
+    window.addEventListener(
+      "popstate",
+      syncSelectedPlanFromUrl
+    );
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      window.removeEventListener(
+        "popstate",
+        syncSelectedPlanFromUrl
+      );
+    };
+  }, []);
 
   function handleRemove(plan: TravelPlan) {
     removeFavorite(plan.title);
@@ -35,10 +67,24 @@ export default function FavoritesPage() {
   }
 
   function handleCardClick(plan: TravelPlan) {
-    console.log(plan.title);
+    const searchParams = new URLSearchParams();
+    searchParams.set("plan", plan.title);
 
-    // router.push(...)
+    setSelectedPlanTitle(plan.title);
+    router.push(`/favorites?${searchParams.toString()}`);
   }
+
+  function handleBackToFavorites() {
+    window.history.pushState(null, "", "/favorites");
+    setSelectedPlanTitle(null);
+  }
+
+  const selectedPlan = selectedPlanTitle
+    ? favorites.find(
+        (favorite) =>
+          favorite.plan.title === selectedPlanTitle
+      )?.plan
+    : undefined;
 
   const filteredFavorites = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -69,6 +115,24 @@ export default function FavoritesPage() {
 
     return list.map((item) => item.plan);
   }, [favorites, intlLocale, search, sort]);
+
+  if (selectedPlan) {
+    return (
+      <main className="mx-auto max-w-6xl p-6">
+        <button
+          type="button"
+          onClick={handleBackToFavorites}
+          className="mb-6 rounded-lg bg-gray-200 px-4 py-2 font-semibold transition hover:bg-gray-300"
+        >
+          {locale === "en"
+            ? "Back to favorites"
+            : "お気に入り一覧に戻る"}
+        </button>
+
+        <TravelPlanCard plan={selectedPlan} />
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto max-w-6xl p-6">
