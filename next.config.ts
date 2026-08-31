@@ -1,18 +1,24 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
-const usePlaywrightFirebaseMocks =
-  process.env.PLAYWRIGHT_FIREBASE_MOCKS === "1";
+import { resolveFirebaseMockMode } from "./lib/testing/firebase-mock-mode";
 
-const nextConfig: NextConfig = usePlaywrightFirebaseMocks
-  ? {
-      turbopack: {
-        resolveAlias: {
-          "firebase/auth": "./tests/mocks/firebase-auth.ts",
-          "@/lib/firebase": "./tests/mocks/firebase.ts",
-          "@/lib/firestore": "./tests/mocks/firestore.ts",
+export default function createNextConfig(phase: string): NextConfig {
+  const usePlaywrightFirebaseMocks = resolveFirebaseMockMode({
+    env: process.env,
+    isDevelopmentServer: phase === PHASE_DEVELOPMENT_SERVER,
+  });
+
+  return usePlaywrightFirebaseMocks
+    ? {
+        turbopack: {
+          resolveAlias: {
+            "firebase/auth": "./tests/mocks/firebase-auth.ts",
+            "@/lib/firebase": "./tests/mocks/firebase.ts",
+            "@/lib/firebase-admin": "./tests/mocks/firebase-admin.ts",
+            "@/lib/firestore": "./tests/mocks/firestore.ts",
+          },
         },
-      },
-    }
-  : {};
-
-export default nextConfig;
+      }
+    : {};
+}

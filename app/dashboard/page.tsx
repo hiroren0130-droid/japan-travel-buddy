@@ -1,7 +1,7 @@
 "use client";
 
 import { SavedTravelPlan } from "@/types/travel";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -13,6 +13,7 @@ import {
 import { useLocale } from "@/components/LocaleProvider";
 import { getIntlLocale } from "@/lib/locale";
 import { createTravelPlanShareText } from "@/lib/travelPlanExport";
+import { clearAdminSession } from "@/lib/auth/client-logout";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -26,6 +27,7 @@ export default function DashboardPage() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [loggingOut, setLoggingOut] = useState(false);
+  const explicitLogoutRef = useRef(false);
 
   useEffect(() => {
   let active = true;
@@ -38,6 +40,10 @@ export default function DashboardPage() {
     setPlans([]);
 
     if (!user) {
+      if (explicitLogoutRef.current) {
+        return;
+      }
+
       router.replace("/login");
       return;
     }
@@ -100,11 +106,16 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     if (loggingOut) return;
 
+    explicitLogoutRef.current = true;
     setLoggingOut(true);
 
     try {
+      const adminSessionCleared = await clearAdminSession();
       await signOut(auth);
-      router.replace("/login");
+
+      router.replace(
+        adminSessionCleared ? "/login" : "/logout-incomplete"
+      );
     } catch (error) {
       if (process.env.NODE_ENV === "development") {
         console.error("ログアウトエラー:", error);
@@ -114,6 +125,7 @@ export default function DashboardPage() {
 
       alert(dashboardMessages.alerts.logoutFailed);
     } finally {
+      explicitLogoutRef.current = false;
       setLoggingOut(false);
     }
   };

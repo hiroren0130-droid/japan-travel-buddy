@@ -31,6 +31,12 @@ export default defineConfig({
   webServer: {
     command: "npm run dev",
     url: "http://localhost:3000",
+    env: {
+      ...process.env,
+      ADMIN_EMAILS:
+        process.env.ADMIN_EMAILS ??
+        "admin@example.com,cost-secret-sentinel@example.net",
+    },
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
