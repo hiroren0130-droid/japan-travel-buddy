@@ -68,7 +68,8 @@ jobs:
           tests/phase6-5-home-discover.spec.ts \
           tests/phase6e-favorites-detail.spec.ts \
           tests/phase6e-auth-saved-plans.spec.ts \
-          tests/admin-auth.spec.ts
+          tests/admin-auth.spec.ts \
+          tests/admin-costs.spec.ts
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
