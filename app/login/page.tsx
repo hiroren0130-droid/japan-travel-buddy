@@ -29,13 +29,32 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-  await signInWithEmailAndPassword(auth, trimmedEmail, password);
-  router.push("/dashboard");
-} catch {
-  alert(loginMessages.invalidCredentialsAlert);
-} finally {
-  setLoading(false);
-}
+      const credential = await signInWithEmailAndPassword(
+        auth,
+        trimmedEmail,
+        password
+      );
+
+      try {
+        const idToken = await credential.user.getIdToken(true);
+
+        await fetch("/api/auth/session", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${idToken}`,
+          },
+          cache: "no-store",
+        });
+      } catch {
+        // Admin session establishment must not break normal user login.
+      }
+
+      router.push("/dashboard");
+    } catch {
+      alert(loginMessages.invalidCredentialsAlert);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

@@ -33,6 +33,13 @@ jobs:
         NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
         NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
         NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+    - name: Verify production artifact excludes Firebase auth mocks
+      shell: bash
+      run: |
+        if grep -R -E "mock-(admin|user|invalid|expired|revoked|unverified)-(token|session)|mock-auth-time-|attacker-controlled-session" .next/static .next/server; then
+          echo "Production artifact contains Firebase auth mock markers."
+          exit 1
+        fi
 
   playwright-deterministic:
     if: github.event_name == 'pull_request'
@@ -40,6 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PLAYWRIGHT_FIREBASE_MOCKS: "1"
+      PLAYWRIGHT_FIREBASE_MOCK_SENTINEL: "jtb-deterministic-playwright-v1"
+      ADMIN_EMAILS: "admin@example.com,cost-secret-sentinel@example.net"
     steps:
     - uses: actions/checkout@v4
       with:
@@ -58,7 +67,8 @@ jobs:
           tests/phase6c-image-credits.spec.ts \
           tests/phase6-5-home-discover.spec.ts \
           tests/phase6e-favorites-detail.spec.ts \
-          tests/phase6e-auth-saved-plans.spec.ts
+          tests/phase6e-auth-saved-plans.spec.ts \
+          tests/admin-auth.spec.ts
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

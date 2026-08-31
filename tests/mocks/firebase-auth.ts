@@ -142,7 +142,15 @@ export async function signInWithEmailAndPassword(
     current.user = user;
   });
 
-  return { user };
+  return {
+    user: {
+      ...user,
+      getIdToken: async () =>
+        email.trim().toLowerCase() === "admin@example.com"
+          ? "mock-admin-token"
+          : "mock-user-token",
+    },
+  };
 }
 
 export async function createUserWithEmailAndPassword(
