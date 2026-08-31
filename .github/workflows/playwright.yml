@@ -33,11 +33,11 @@ jobs:
         NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: ${{ secrets.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET }}
         NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
         NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
-    - name: Verify production artifact excludes Firebase auth mocks
+    - name: Verify production artifact excludes admin auth test markers
       shell: bash
       run: |
-        if grep -R -E "mock-(admin|user|invalid|expired|revoked|unverified)-(token|session)|mock-auth-time-|attacker-controlled-session" .next/static .next/server; then
-          echo "Production artifact contains Firebase auth mock markers."
+        if grep -R -E "mock-(admin|user|invalid|expired|revoked|unverified)-(token|session)|mock-auth-time-|attacker-controlled-session|cost-secret-sentinel@example\.net" .next/static .next/server; then
+          echo "Production artifact contains admin auth test markers."
           exit 1
         fi
 
