@@ -5,7 +5,8 @@ export type CostServiceKey =
   | "github"
   | "vercel";
 
-export type CostCurrency = "JPY" | "USD";
+/** ISO-4217 currency code validated at the data-source boundary. */
+export type CostCurrency = string;
 
 export type CostDataSource = "manual" | "api-ready" | "future-api";
 
