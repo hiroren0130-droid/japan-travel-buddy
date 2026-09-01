@@ -10,6 +10,10 @@ export function calculateCurrentMonthTotal(
   overview: MonthlyCostOverview
 ): number {
   return overview.services.reduce((total, service) => {
+    if (!service.includedInTotal) {
+      return total;
+    }
+
     if (service.currency !== overview.reportingCurrency) {
       throw new TypeError(
         `Currency mismatch for ${service.service}: expected ${overview.reportingCurrency}.`
@@ -25,8 +29,6 @@ export function calculateCurrentMonthTotal(
       assertValidCost(service.estimatedCost, `${service.service}.estimatedCost`);
     }
 
-    return service.includedInTotal
-      ? total + service.currentMonthCost
-      : total;
+    return total + service.currentMonthCost;
   }, 0);
 }

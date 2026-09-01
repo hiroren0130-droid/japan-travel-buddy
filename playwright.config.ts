@@ -1,4 +1,15 @@
 import { defineConfig, devices } from "@playwright/test";
+import path from "node:path";
+
+const googlePlacesMockPath = path
+  .resolve("tests/helpers/google-places-fetch-mock.cjs")
+  .replaceAll("\\", "/");
+const playwrightNodeOptions = [
+  process.env.NODE_OPTIONS,
+  `--require=${googlePlacesMockPath}`,
+]
+  .filter(Boolean)
+  .join(" ");
 
 export default defineConfig({
   testDir: "./tests",
@@ -33,6 +44,11 @@ export default defineConfig({
     url: "http://localhost:3000",
     env: {
       ...process.env,
+      NODE_OPTIONS: playwrightNodeOptions,
+      GOOGLE_PLACES_API_KEY: "playwright-dummy-key-not-a-secret",
+      PLAYWRIGHT_GOOGLE_PLACES_MOCKS: "1",
+      PLAYWRIGHT_GOOGLE_PLACES_MOCK_SENTINEL:
+        "jtb-google-places-playwright-v1",
       ADMIN_EMAILS:
         process.env.ADMIN_EMAILS ??
         "admin@example.com,cost-secret-sentinel@example.net",
