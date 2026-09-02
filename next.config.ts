@@ -8,9 +8,11 @@ export default function createNextConfig(phase: string): NextConfig {
     env: process.env,
     isDevelopmentServer: phase === PHASE_DEVELOPMENT_SERVER,
   });
+  const transpilePackages = ["firebase-admin", "jwks-rsa", "jose"];
 
   return usePlaywrightFirebaseMocks
     ? {
+        transpilePackages,
         turbopack: {
           resolveAlias: {
             "firebase/auth": "./tests/mocks/firebase-auth.ts",
@@ -20,5 +22,5 @@ export default function createNextConfig(phase: string): NextConfig {
           },
         },
       }
-    : {};
+    : { transpilePackages };
 }
