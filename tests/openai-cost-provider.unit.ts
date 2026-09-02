@@ -5,6 +5,7 @@ import { calculateCurrentMonthTotal } from "../lib/costs/costCalculations";
 import {
   clearOpenAICostCacheForTests,
   getOpenAICostSnapshot,
+  getUtcMonth,
 } from "../lib/costs/openaiCostProvider";
 import type { ServiceCostSnapshot } from "../types/cost";
 
@@ -111,18 +112,40 @@ function successfulFetch(calls: URL[] = []): typeof fetch {
   });
 }
 
-async function getSnapshot(fetchImpl: typeof fetch): Promise<ServiceCostSnapshot> {
-  return getOpenAICostSnapshot(fixture, "2026-08", {
+async function getSnapshot(
+  fetchImpl: typeof fetch,
+  options: {
+    month?: string;
+    now?: () => Date;
+    sleep?: (delayMs: number) => Promise<void>;
+  } = {}
+): Promise<ServiceCostSnapshot> {
+  return getOpenAICostSnapshot(fixture, options.month ?? "2026-08", {
     env,
     fetch: fetchImpl,
-    now: () => new Date("2026-08-15T12:00:00.000Z"),
+    now: options.now ?? (() => new Date("2026-08-15T12:00:00.000Z")),
     timeoutMs: 20,
+    sleep: options.sleep ?? (async () => undefined),
   });
 }
 
 test.beforeEach(() => {
   clearOpenAICostCacheForTests();
 });
+
+test("uses the UTC September month regardless of local calendar time", () => {
+  expectUtcMonth("2026-09", "2026-08-31T20:30:00-07:00");
+  expectUtcMonth("2026-09", "2026-10-01T08:30:00+09:00");
+});
+
+test("rolls the UTC month from December into January", () => {
+  expectUtcMonth("2026-12", "2026-12-31T23:59:59.999Z");
+  expectUtcMonth("2027-01", "2027-01-01T00:00:00.000Z");
+});
+
+function expectUtcMonth(expected: string, value: string): void {
+  assert.equal(getUtcMonth(new Date(value)), expected);
+}
 
 test("returns the exact fixture without HTTP when the admin key is missing", async () => {
   let calls = 0;
@@ -174,6 +197,50 @@ test("aggregates one costs page and one completions usage page", async () => {
   }
 });
 
+test("queries September from UTC month start to the next UTC month start", async () => {
+  const calls: URL[] = [];
+  await getOpenAICostSnapshot(fixture, "2026-09", {
+    env,
+    fetch: successfulFetch(calls),
+    now: () => new Date("2026-09-15T12:00:00.000Z"),
+    timeoutMs: 20,
+    sleep: async () => undefined,
+  });
+
+  for (const url of calls) {
+    assert.equal(
+      url.searchParams.get("start_time"),
+      String(Date.UTC(2026, 8, 1) / 1_000)
+    );
+    assert.equal(
+      url.searchParams.get("end_time"),
+      String(Date.UTC(2026, 9, 1) / 1_000)
+    );
+  }
+});
+
+test("queries December through January using UTC boundaries", async () => {
+  const calls: URL[] = [];
+  await getOpenAICostSnapshot(fixture, "2026-12", {
+    env,
+    fetch: successfulFetch(calls),
+    now: () => new Date("2026-12-31T23:59:59.999Z"),
+    timeoutMs: 20,
+    sleep: async () => undefined,
+  });
+
+  for (const url of calls) {
+    assert.equal(
+      url.searchParams.get("start_time"),
+      String(Date.UTC(2026, 11, 1) / 1_000)
+    );
+    assert.equal(
+      url.searchParams.get("end_time"),
+      String(Date.UTC(2027, 0, 1) / 1_000)
+    );
+  }
+});
+
 test("paginates costs and usage with next_page cursors", async () => {
   const seenPages: string[] = [];
   const fetchImpl = asFetch(async (url) => {
@@ -207,6 +274,169 @@ for (const status of [401, 403, 429, 500]) {
     assert.equal(snapshot, fixture);
   });
 }
+
+for (const status of [401, 403]) {
+  test(`does not retry HTTP ${status}`, async () => {
+    let costCalls = 0;
+    const snapshot = await getSnapshot(
+      asFetch(async (url) => {
+        if (url.pathname.endsWith("/costs")) {
+          costCalls += 1;
+          return jsonResponse({}, status);
+        }
+        return jsonResponse(usagePage());
+      })
+    );
+
+    assert.equal(snapshot, fixture);
+    assert.equal(costCalls, 1);
+  });
+}
+
+test("retries 429 after Retry-After seconds without real sleep", async () => {
+  let costCalls = 0;
+  const delays: number[] = [];
+  const snapshot = await getSnapshot(
+    asFetch(async (url) => {
+      if (!url.pathname.endsWith("/costs")) {
+        return jsonResponse(usagePage());
+      }
+      costCalls += 1;
+      return costCalls === 1
+        ? new Response("", { status: 429, headers: { "Retry-After": "2" } })
+        : jsonResponse(costPage());
+    }),
+    { sleep: async (delayMs) => void delays.push(delayMs) }
+  );
+
+  assert.equal(snapshot.currentMonthCost, 1.25);
+  assert.equal(costCalls, 2);
+  assert.deepEqual(delays, [2_000]);
+});
+
+test("supports an HTTP-date Retry-After value", async () => {
+  let costCalls = 0;
+  const delays: number[] = [];
+  const now = () => new Date("2026-08-15T12:00:00.000Z");
+  const snapshot = await getSnapshot(
+    asFetch(async (url) => {
+      if (!url.pathname.endsWith("/costs")) {
+        return jsonResponse(usagePage());
+      }
+      costCalls += 1;
+      return costCalls === 1
+        ? new Response("", {
+            status: 429,
+            headers: {
+              "Retry-After": new Date(now().getTime() + 3_000).toUTCString(),
+            },
+          })
+        : jsonResponse(costPage());
+    }),
+    { now, sleep: async (delayMs) => void delays.push(delayMs) }
+  );
+
+  assert.equal(snapshot.currentMonthCost, 1.25);
+  assert.deepEqual(delays, [3_000]);
+});
+
+for (const retryAfter of ["invalid", "-1"]) {
+  test(`uses a safe default for Retry-After ${retryAfter}`, async () => {
+    let costCalls = 0;
+    const delays: number[] = [];
+    const snapshot = await getSnapshot(
+      asFetch(async (url) => {
+        if (!url.pathname.endsWith("/costs")) {
+          return jsonResponse(usagePage());
+        }
+        costCalls += 1;
+        return costCalls === 1
+          ? new Response("", {
+              status: 429,
+              headers: { "Retry-After": retryAfter },
+            })
+          : jsonResponse(costPage());
+      }),
+      { sleep: async (delayMs) => void delays.push(delayMs) }
+    );
+
+    assert.equal(snapshot.currentMonthCost, 1.25);
+    assert.deepEqual(delays, [1_000]);
+  });
+}
+
+test("caps an excessive Retry-After value", async () => {
+  let costCalls = 0;
+  const delays: number[] = [];
+  await getSnapshot(
+    asFetch(async (url) => {
+      if (!url.pathname.endsWith("/costs")) {
+        return jsonResponse(usagePage());
+      }
+      costCalls += 1;
+      return costCalls === 1
+        ? new Response("", {
+            status: 429,
+            headers: { "Retry-After": "999999" },
+          })
+        : jsonResponse(costPage());
+    }),
+    { sleep: async (delayMs) => void delays.push(delayMs) }
+  );
+
+  assert.deepEqual(delays, [8_000]);
+});
+
+test("falls back atomically after the bounded 429 retry fails", async () => {
+  let costCalls = 0;
+  const snapshot = await getSnapshot(
+    asFetch(async (url) => {
+      if (!url.pathname.endsWith("/costs")) {
+        return jsonResponse(usagePage());
+      }
+      costCalls += 1;
+      return new Response("", {
+        status: 429,
+        headers: { "Retry-After": "0" },
+      });
+    })
+  );
+
+  assert.equal(snapshot, fixture);
+  assert.equal(costCalls, 2);
+});
+
+test("retries a 5xx response within the existing bound", async () => {
+  let costCalls = 0;
+  const snapshot = await getSnapshot(
+    asFetch(async (url) => {
+      if (!url.pathname.endsWith("/costs")) {
+        return jsonResponse(usagePage());
+      }
+      costCalls += 1;
+      return jsonResponse({}, 500);
+    })
+  );
+
+  assert.equal(snapshot, fixture);
+  assert.equal(costCalls, 2);
+});
+
+test("retries a network failure within the existing bound", async () => {
+  let costCalls = 0;
+  const snapshot = await getSnapshot(
+    asFetch(async (url) => {
+      if (!url.pathname.endsWith("/costs")) {
+        return jsonResponse(usagePage());
+      }
+      costCalls += 1;
+      throw new TypeError("mock network failure");
+    })
+  );
+
+  assert.equal(snapshot, fixture);
+  assert.equal(costCalls, 2);
+});
 
 test("falls back on timeout", async () => {
   const fetchImpl = asFetch(

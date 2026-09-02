@@ -192,6 +192,15 @@ test("shows the repository fixture total", async ({ page }) => {
   expect(calculateCurrentMonthTotal(monthlyCostOverview)).toBe(0);
 });
 
+test("shows the current UTC month", async ({ page }) => {
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth() + 1;
+  await addSessionCookie(page, "mock-admin-session");
+  await page.goto("/admin/costs");
+  await expect(page.getByText(`対象月: ${year}年${month}月`)).toBeVisible();
+});
+
 test("shows manual, api-ready, and future-api labels", async ({ page }) => {
   await addSessionCookie(page, "mock-admin-session");
   await page.goto("/admin/costs");

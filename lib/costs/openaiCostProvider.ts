@@ -12,6 +12,8 @@ const REQUEST_TIMEOUT_MS = 8_000;
 const MAX_ATTEMPTS = 2;
 const MAX_PAGES = 12;
 const PAGE_LIMIT = 31;
+const DEFAULT_RETRY_DELAY_MS = 1_000;
+const MAX_RETRY_AFTER_MS = 8_000;
 
 type FetchLike = typeof fetch;
 
@@ -20,6 +22,7 @@ type ProviderOptions = {
   fetch?: FetchLike;
   now?: () => Date;
   timeoutMs?: number;
+  sleep?: (delayMs: number) => Promise<void>;
 };
 
 type CacheEntry = {
@@ -43,6 +46,15 @@ type UsageAggregate = {
   cachedInputTokens: number;
   requests: number;
 };
+
+class HttpResponseError extends Error {
+  constructor(
+    readonly status: number,
+    readonly retryAfter: string | null
+  ) {
+    super(`OpenAI Admin API returned HTTP ${status}.`);
+  }
+}
 
 const cache = new Map<string, CacheEntry>();
 const inFlight = new Map<string, Promise<ServiceCostSnapshot>>();
@@ -114,6 +126,46 @@ function periodForMonth(month: string): Period {
   };
 }
 
+export function getUtcMonth(date: Date): string {
+  if (!Number.isFinite(date.getTime())) {
+    throw new TypeError("date must be valid.");
+  }
+
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(
+    2,
+    "0"
+  )}`;
+}
+
+function retryAfterDelayMs(value: string | null, nowMs: number): number {
+  if (value === null) {
+    return DEFAULT_RETRY_DELAY_MS;
+  }
+
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) {
+    const seconds = Number(trimmed);
+    if (Number.isSafeInteger(seconds)) {
+      return Math.min(seconds * 1_000, MAX_RETRY_AFTER_MS);
+    }
+  }
+
+  const retryAtMs = Date.parse(trimmed);
+  if (Number.isFinite(retryAtMs) && retryAtMs >= nowMs) {
+    return Math.min(retryAtMs - nowMs, MAX_RETRY_AFTER_MS);
+  }
+
+  return DEFAULT_RETRY_DELAY_MS;
+}
+
+function isRetryable(error: unknown): boolean {
+  if (!(error instanceof HttpResponseError)) {
+    return true;
+  }
+
+  return error.status === 429 || error.status >= 500;
+}
+
 function buildUrl(
   endpoint: "costs" | "usage/completions",
   period: Period,
@@ -143,7 +195,9 @@ async function requestJson(
   url: URL,
   adminKey: string,
   fetchImpl: FetchLike,
-  timeoutMs: number
+  timeoutMs: number,
+  sleep: (delayMs: number) => Promise<void>,
+  now: () => Date
 ): Promise<unknown> {
   let lastError: unknown;
 
@@ -162,12 +216,23 @@ async function requestJson(
       });
 
       if (!response.ok) {
-        throw new Error(`OpenAI Admin API returned HTTP ${response.status}.`);
+        throw new HttpResponseError(
+          response.status,
+          response.headers.get("Retry-After")
+        );
       }
 
       return await response.json();
     } catch (error) {
       lastError = error;
+      const hasAnotherAttempt = attempt + 1 < MAX_ATTEMPTS;
+      if (!hasAnotherAttempt || !isRetryable(error)) {
+        throw error;
+      }
+
+      if (error instanceof HttpResponseError && error.status === 429) {
+        await sleep(retryAfterDelayMs(error.retryAfter, now().getTime()));
+      }
     } finally {
       clearTimeout(timeout);
     }
@@ -210,7 +275,9 @@ async function collectPages(
   projectId: string,
   adminKey: string,
   fetchImpl: FetchLike,
-  timeoutMs: number
+  timeoutMs: number,
+  sleep: (delayMs: number) => Promise<void>,
+  now: () => Date
 ): Promise<unknown[]> {
   const buckets: unknown[] = [];
   const cursors = new Set<string>();
@@ -221,7 +288,9 @@ async function collectPages(
       buildUrl(endpoint, period, projectId, page),
       adminKey,
       fetchImpl,
-      timeoutMs
+      timeoutMs,
+      sleep,
+      now
     );
     const parsed = parsePage(response);
     buckets.push(...parsed.buckets);
@@ -335,6 +404,11 @@ async function loadSnapshot(
   const period = periodForMonth(month);
   const fetchImpl = options.fetch ?? fetch;
   const timeoutMs = options.timeoutMs ?? REQUEST_TIMEOUT_MS;
+  const sleep =
+    options.sleep ??
+    ((delayMs: number) =>
+      new Promise<void>((resolve) => setTimeout(resolve, delayMs)));
+  const now = options.now ?? (() => new Date());
   const [costBuckets, usageBuckets] = await Promise.all([
     collectPages(
       "costs",
@@ -342,7 +416,9 @@ async function loadSnapshot(
       projectId,
       adminKey,
       fetchImpl,
-      timeoutMs
+      timeoutMs,
+      sleep,
+      now
     ),
     collectPages(
       "usage/completions",
@@ -350,12 +426,14 @@ async function loadSnapshot(
       projectId,
       adminKey,
       fetchImpl,
-      timeoutMs
+      timeoutMs,
+      sleep,
+      now
     ),
   ]);
   const costs = aggregateCosts(costBuckets, projectId);
   const usage = aggregateUsage(usageBuckets, projectId);
-  const updatedAt = (options.now ?? (() => new Date()))().toISOString();
+  const updatedAt = now().toISOString();
 
   return {
     ...fixture,
