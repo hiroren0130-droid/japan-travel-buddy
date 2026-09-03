@@ -6,6 +6,22 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useLocale } from "@/components/LocaleProvider";
 
+const ADMIN_SESSION_ERROR_MESSAGE =
+  "管理者セッションを確立できませんでした。もう一度お試しください。";
+
+function getSafeAdminNextPath(): string | null {
+  const nextPath = new URLSearchParams(window.location.search).get("next");
+
+  if (
+    nextPath === "/admin" ||
+    (nextPath?.startsWith("/admin/") && !nextPath.includes("\\"))
+  ) {
+    return nextPath;
+  }
+
+  return null;
+}
+
 export default function LoginPage() {
   const loginMessages = useLocale().messages.login;
   const router = useRouter();
@@ -13,6 +29,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [adminSessionError, setAdminSessionError] = useState("");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,6 +44,7 @@ export default function LoginPage() {
     }
 
     setLoading(true);
+    setAdminSessionError("");
 
     try {
       const credential = await signInWithEmailAndPassword(
@@ -35,21 +53,33 @@ export default function LoginPage() {
         password
       );
 
+      const adminNextPath = getSafeAdminNextPath();
+
+      if (!adminNextPath) {
+        router.push("/dashboard");
+        return;
+      }
+
       try {
         const idToken = await credential.user.getIdToken(true);
-
-        await fetch("/api/auth/session", {
+        const response = await fetch("/api/auth/session", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${idToken}`,
           },
           cache: "no-store",
         });
+
+        if (!response.ok || response.status !== 204) {
+          setAdminSessionError(ADMIN_SESSION_ERROR_MESSAGE);
+          return;
+        }
       } catch {
-        // Admin session establishment must not break normal user login.
+        setAdminSessionError(ADMIN_SESSION_ERROR_MESSAGE);
+        return;
       }
 
-      router.push("/dashboard");
+      router.push(adminNextPath);
     } catch {
       alert(loginMessages.invalidCredentialsAlert);
     } finally {
@@ -102,6 +132,12 @@ export default function LoginPage() {
           >
             {loading ? loginMessages.loadingLabel : loginMessages.submitLabel}
           </button>
+
+          {adminSessionError ? (
+            <p role="alert" className="text-sm text-red-600">
+              {adminSessionError}
+            </p>
+          ) : null}
         </form>
       </div>
     </main>

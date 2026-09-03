@@ -75,6 +75,17 @@ async function getAdminCookie(page: Page) {
   return cookies.find((cookie) => cookie.name === COOKIE_NAME);
 }
 
+async function logInFrom(
+  page: Page,
+  path: string,
+  email = "admin@example.com"
+): Promise<void> {
+  await page.goto(path);
+  await page.locator('input[type="email"]').fill(email);
+  await page.locator('input[type="password"]').fill("password");
+  await page.locator('button[type="submit"]').click();
+}
+
 async function installAuthenticatedState(page: Page): Promise<void> {
   await page.addInitScript(
     ({ key }) => {
@@ -227,6 +238,49 @@ test("session endpoint issues a secure-shape admin cookie", async ({ page }) => 
   expect(cookie?.secure).toBe(false);
   expect(cookie?.sameSite).toBe("Lax");
   expect(cookie?.path).toBe("/");
+});
+
+for (const adminPath of ["/admin", "/admin/costs"]) {
+  test(`login establishes an admin session before navigating to ${adminPath}`, async ({
+    page,
+  }) => {
+    await logInFrom(page, `/login?next=${encodeURIComponent(adminPath)}`);
+
+    await expect(page).toHaveURL(new URL(adminPath, BASE_URL).toString());
+    await expect.poll(() => getAdminCookie(page)).toBeTruthy();
+  });
+}
+
+for (const unsafeNextPath of [
+  "https://evil.example",
+  "//evil.example",
+  "/dashboard",
+]) {
+  test(`login ignores unsafe admin next path ${unsafeNextPath}`, async ({ page }) => {
+    await logInFrom(
+      page,
+      `/login?next=${encodeURIComponent(unsafeNextPath)}`
+    );
+
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect.poll(() => getAdminCookie(page)).toBeUndefined();
+  });
+}
+
+test("admin login remains on the page when session creation is rejected", async ({
+  page,
+}) => {
+  await logInFrom(
+    page,
+    "/login?next=%2Fadmin%2Fcosts",
+    "traveler@example.com"
+  );
+
+  await expect(page).toHaveURL(/\/login\?next=%2Fadmin%2Fcosts$/);
+  await expect(page.locator('p[role="alert"]')).toHaveText(
+    "管理者セッションを確立できませんでした。もう一度お試しください。"
+  );
+  await expect(getAdminCookie(page)).resolves.toBeUndefined();
 });
 
 test("an unset whitelist fails closed with 500", async ({ page }) => {
