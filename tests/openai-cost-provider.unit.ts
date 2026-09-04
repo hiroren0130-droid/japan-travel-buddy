@@ -18,6 +18,7 @@ const fixture: ServiceCostSnapshot = {
   usageSummary: [{ label: "API使用量", value: 0, unit: "未入力" }],
   freeTierSummary: "fixture",
   dataSource: "api-ready",
+  fetchStatus: "fallback",
   updatedAt: "2026-08-01T00:00:00.000Z",
   notes: "fixture",
   includedInTotal: true,
@@ -129,6 +130,13 @@ async function getSnapshot(
   });
 }
 
+function assertErrorFallback(snapshot: ServiceCostSnapshot): void {
+  assert.deepEqual(snapshot, {
+    ...fixture,
+    fetchStatus: "error",
+  });
+}
+
 test.beforeEach(() => {
   clearOpenAICostCacheForTests();
 });
@@ -158,6 +166,7 @@ test("returns the exact fixture without HTTP when the admin key is missing", asy
   });
 
   assert.equal(snapshot, fixture);
+  assert.equal(snapshot.fetchStatus, "fallback");
   assert.equal(calls, 0);
 });
 
@@ -172,6 +181,7 @@ test("returns the exact fixture without HTTP when the project is missing", async
   });
 
   assert.equal(snapshot, fixture);
+  assert.equal(snapshot.fetchStatus, "fallback");
   assert.equal(calls, 0);
 });
 
@@ -181,6 +191,7 @@ test("aggregates one costs page and one completions usage page", async () => {
 
   assert.equal(snapshot.currentMonthCost, 1.25);
   assert.equal(snapshot.currency, "USD");
+  assert.equal(snapshot.fetchStatus, "success");
   assert.equal(snapshot.updatedAt, "2026-08-15T12:00:00.000Z");
   assert.equal(snapshot.includedInTotal, false);
   assert.deepEqual(
@@ -195,6 +206,21 @@ test("aggregates one costs page and one completions usage page", async () => {
     assert.deepEqual(url.searchParams.getAll("project_ids[]"), ["proj_test"]);
     assert.equal(url.searchParams.get("limit"), "31");
   }
+});
+
+test("marks a successful zero-cost response as success", async () => {
+  const snapshot = await getSnapshot(
+    asFetch(async (url) =>
+      jsonResponse(
+        url.pathname.endsWith("/costs")
+          ? costPage({ amount: 0 })
+          : usagePage()
+      )
+    )
+  );
+
+  assert.equal(snapshot.currentMonthCost, 0);
+  assert.equal(snapshot.fetchStatus, "success");
 });
 
 test("queries September from UTC month start to the next UTC month start", async () => {
@@ -271,7 +297,7 @@ for (const status of [401, 403, 429, 500]) {
     const snapshot = await getSnapshot(
       asFetch(async () => jsonResponse({ error: "mock" }, status))
     );
-    assert.equal(snapshot, fixture);
+    assertErrorFallback(snapshot);
   });
 }
 
@@ -288,7 +314,7 @@ for (const status of [401, 403]) {
       })
     );
 
-    assert.equal(snapshot, fixture);
+    assertErrorFallback(snapshot);
     assert.equal(costCalls, 1);
   });
 }
@@ -402,7 +428,7 @@ test("falls back atomically after the bounded 429 retry fails", async () => {
     })
   );
 
-  assert.equal(snapshot, fixture);
+  assertErrorFallback(snapshot);
   assert.equal(costCalls, 2);
 });
 
@@ -418,7 +444,7 @@ test("retries a 5xx response within the existing bound", async () => {
     })
   );
 
-  assert.equal(snapshot, fixture);
+  assertErrorFallback(snapshot);
   assert.equal(costCalls, 2);
 });
 
@@ -434,7 +460,7 @@ test("retries a network failure within the existing bound", async () => {
     })
   );
 
-  assert.equal(snapshot, fixture);
+  assertErrorFallback(snapshot);
   assert.equal(costCalls, 2);
 });
 
@@ -448,12 +474,12 @@ test("falls back on timeout", async () => {
       })
   );
 
-  assert.equal(await getSnapshot(fetchImpl), fixture);
+  assertErrorFallback(await getSnapshot(fetchImpl));
 });
 
 test("falls back on malformed JSON", async () => {
   const fetchImpl = asFetch(async () => new Response("{", { status: 200 }));
-  assert.equal(await getSnapshot(fetchImpl), fixture);
+  assertErrorFallback(await getSnapshot(fetchImpl));
 });
 
 test("falls back on an invalid currency", async () => {
@@ -464,7 +490,7 @@ test("falls back on an invalid currency", async () => {
         : usagePage()
     )
   );
-  assert.equal(await getSnapshot(fetchImpl), fixture);
+  assertErrorFallback(await getSnapshot(fetchImpl));
 });
 
 for (const amount of [-1, Number.NaN, "1.00"]) {
@@ -474,7 +500,7 @@ for (const amount of [-1, Number.NaN, "1.00"]) {
         url.pathname.endsWith("/costs") ? costPage({ amount }) : usagePage()
       )
     );
-    assert.equal(await getSnapshot(fetchImpl), fixture);
+    assertErrorFallback(await getSnapshot(fetchImpl));
   });
 }
 
@@ -490,7 +516,7 @@ test("discards partial values when a later page fails", async () => {
   });
 
   const snapshot = await getSnapshot(fetchImpl);
-  assert.equal(snapshot, fixture);
+  assertErrorFallback(snapshot);
   assert.equal(snapshot.currentMonthCost, 0);
 });
 
@@ -506,7 +532,7 @@ test("falls back when pagination exceeds the maximum page count", async () => {
     );
   });
 
-  assert.equal(await getSnapshot(fetchImpl), fixture);
+  assertErrorFallback(await getSnapshot(fetchImpl));
   assert.equal(costPageNumber, 12);
 });
 
