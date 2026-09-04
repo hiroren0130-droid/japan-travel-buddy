@@ -10,6 +10,8 @@ export type CostCurrency = string;
 
 export type CostDataSource = "manual" | "api-ready" | "future-api";
 
+export type CostFetchStatus = "success" | "fallback" | "error";
+
 export interface CostUsageMetric {
   label: string;
   value: number;
@@ -25,6 +27,7 @@ export interface ServiceCostSnapshot {
   usageSummary: CostUsageMetric[];
   freeTierSummary: string;
   dataSource: CostDataSource;
+  fetchStatus?: CostFetchStatus;
   updatedAt: string;
   notes: string;
   includedInTotal: boolean;

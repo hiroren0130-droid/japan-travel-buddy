@@ -192,6 +192,23 @@ test("shows the repository fixture total", async ({ page }) => {
   expect(calculateCurrentMonthTotal(monthlyCostOverview)).toBe(0);
 });
 
+test("distinguishes the OpenAI fallback fixture from an actual zero cost", async ({
+  page,
+}) => {
+  await addSessionCookie(page, "mock-admin-session");
+  await page.goto("/admin/costs");
+
+  const openAICard = page.locator(
+    '[data-service="openai"][data-fetch-status="fallback"]'
+  );
+  await expect(openAICard).toContainText("OpenAI取得状態: 固定データ表示");
+  await expect(openAICard).toContainText("取得値なし");
+  await expect(openAICard).toContainText("固定データ: ￥0");
+  await expect(
+    page.getByRole("region", { name: "今月の合計費用" })
+  ).toContainText("今月の合計は固定データを含む参考値です");
+});
+
 test("shows the current UTC month", async ({ page }) => {
   const now = new Date();
   const year = now.getUTCFullYear();

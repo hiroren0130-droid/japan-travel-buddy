@@ -1,6 +1,7 @@
 import type {
   CostCurrency,
   CostDataSource,
+  CostFetchStatus,
   ServiceCostSnapshot,
 } from "@/types/cost";
 
@@ -12,6 +13,18 @@ const dataSourceLabels: Record<CostDataSource, string> = {
   manual: "手入力",
   "api-ready": "API連携準備済み",
   "future-api": "将来API連携",
+};
+
+const fetchStatusLabels: Record<CostFetchStatus, string> = {
+  success: "取得成功",
+  fallback: "固定データ表示",
+  error: "取得エラー",
+};
+
+const fetchStatusClasses: Record<CostFetchStatus, string> = {
+  success: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  fallback: "border-amber-200 bg-amber-50 text-amber-900",
+  error: "border-red-200 bg-red-50 text-red-800",
 };
 
 function formatCost(value: number, currency: CostCurrency): string {
@@ -50,11 +63,26 @@ export function formatUpdatedAt(value: string): UpdatedAtDisplay {
 
 export default function ServiceCostCard({ snapshot }: Props) {
   const formattedUpdatedAt = formatUpdatedAt(snapshot.updatedAt);
+  const fetchStatus =
+    snapshot.service === "openai"
+      ? (snapshot.fetchStatus ?? "fallback")
+      : null;
+  const hasActualCost = fetchStatus === null || fetchStatus === "success";
+
+  const fetchStatusMessage =
+    fetchStatus === "success"
+      ? snapshot.currentMonthCost === 0
+        ? "OpenAI Admin APIから取得済みです。実額は0円です。"
+        : "OpenAI Admin APIから実額を取得済みです。"
+      : fetchStatus === "error"
+        ? "OpenAI Admin APIから取得できなかったため、固定データを表示しています。表示額は実際の請求額ではありません。"
+        : "OpenAI Admin APIの設定が未完了のため、固定データを表示しています。表示額は実際の請求額ではありません。";
 
   return (
     <article
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
       data-service={snapshot.service}
+      data-fetch-status={fetchStatus ?? undefined}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -70,13 +98,32 @@ export default function ServiceCostCard({ snapshot }: Props) {
         </span>
       </div>
 
+      {fetchStatus ? (
+        <div
+          role={fetchStatus === "error" ? "alert" : "status"}
+          className={`mt-5 rounded-xl border px-4 py-3 ${fetchStatusClasses[fetchStatus]}`}
+        >
+          <p className="text-sm font-bold">
+            OpenAI取得状態: {fetchStatusLabels[fetchStatus]}
+          </p>
+          <p className="mt-1 text-xs leading-5">{fetchStatusMessage}</p>
+        </div>
+      ) : null}
+
       <dl className="mt-6 grid gap-5 sm:grid-cols-2">
         <div>
           <dt className="text-xs font-bold uppercase tracking-wider text-slate-500">
             Current Cost
           </dt>
           <dd className="mt-1 text-2xl font-extrabold text-slate-950">
-            {formatCost(snapshot.currentMonthCost, snapshot.currency)}
+            {hasActualCost
+              ? formatCost(snapshot.currentMonthCost, snapshot.currency)
+              : "取得値なし"}
+            {!hasActualCost ? (
+              <span className="mt-1 block text-xs font-semibold text-slate-500">
+                固定データ: {formatCost(snapshot.currentMonthCost, snapshot.currency)}
+              </span>
+            ) : null}
           </dd>
         </div>
         <div>
