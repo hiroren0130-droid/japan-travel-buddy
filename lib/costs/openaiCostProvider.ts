@@ -18,6 +18,37 @@ const MAX_RETRY_AFTER_MS = 8_000;
 
 type FetchLike = typeof fetch;
 
+type DiagnosticEndpoint = "costs" | "usage";
+type ValidationCode =
+  | "invalid_json"
+  | "response_schema"
+  | "cost_data"
+  | "usage_data"
+  | "repeated_cursor"
+  | "page_limit";
+type FailureDiagnostic = { endpoint: DiagnosticEndpoint } & (
+  | { category: "http"; status: number }
+  | { category: "timeout" | "network" }
+  | { category: "validation"; code: ValidationCode }
+);
+
+function logFailure(diagnostic: FailureDiagnostic): void {
+  console.error("OpenAI cost fetch failed", diagnostic);
+}
+
+function validateWithDiagnostic<T>(
+  endpoint: DiagnosticEndpoint,
+  code: ValidationCode,
+  validate: () => T
+): T {
+  try {
+    return validate();
+  } catch (error) {
+    logFailure({ endpoint, category: "validation", code });
+    throw error;
+  }
+}
+
 type ProviderOptions = {
   env?: Readonly<Record<string, string | undefined>>;
   fetch?: FetchLike;
@@ -203,6 +234,7 @@ function buildUrl(
 
 async function requestJson(
   url: URL,
+  endpoint: DiagnosticEndpoint,
   adminKey: string,
   fetchImpl: FetchLike,
   timeoutMs: number,
@@ -237,6 +269,15 @@ async function requestJson(
       lastError = error;
       const hasAnotherAttempt = attempt + 1 < MAX_ATTEMPTS;
       if (!hasAnotherAttempt || !isRetryable(error)) {
+        if (controller.signal.aborted) {
+          logFailure({ endpoint, category: "timeout" });
+        } else if (error instanceof HttpResponseError) {
+          logFailure({ endpoint, category: "http", status: error.status });
+        } else if (error instanceof SyntaxError) {
+          logFailure({ endpoint, category: "validation", code: "invalid_json" });
+        } else {
+          logFailure({ endpoint, category: "network" });
+        }
         throw error;
       }
 
@@ -289,6 +330,7 @@ async function collectPages(
   sleep: (delayMs: number) => Promise<void>,
   now: () => Date
 ): Promise<unknown[]> {
+  const diagnosticEndpoint = endpoint === "costs" ? "costs" : "usage";
   const buckets: unknown[] = [];
   const cursors = new Set<string>();
   let page: string | null = null;
@@ -296,25 +338,32 @@ async function collectPages(
   for (let pageCount = 0; pageCount < MAX_PAGES; pageCount += 1) {
     const response = await requestJson(
       buildUrl(endpoint, period, projectId, page),
+      diagnosticEndpoint,
       adminKey,
       fetchImpl,
       timeoutMs,
       sleep,
       now
     );
-    const parsed = parsePage(response);
+    const parsed = validateWithDiagnostic(
+      diagnosticEndpoint,
+      "response_schema",
+      () => parsePage(response)
+    );
     buckets.push(...parsed.buckets);
 
     if (parsed.nextPage === null) {
       return buckets;
     }
     if (cursors.has(parsed.nextPage)) {
+      logFailure({ endpoint: diagnosticEndpoint, category: "validation", code: "repeated_cursor" });
       throw new Error("OpenAI Admin API returned a repeated pagination cursor.");
     }
     cursors.add(parsed.nextPage);
     page = parsed.nextPage;
   }
 
+  logFailure({ endpoint: diagnosticEndpoint, category: "validation", code: "page_limit" });
   throw new Error("OpenAI Admin API pagination exceeded the safe page limit.");
 }
 
@@ -441,8 +490,12 @@ async function loadSnapshot(
       now
     ),
   ]);
-  const costs = aggregateCosts(costBuckets, projectId);
-  const usage = aggregateUsage(usageBuckets, projectId);
+  const costs = validateWithDiagnostic("costs", "cost_data", () =>
+    aggregateCosts(costBuckets, projectId)
+  );
+  const usage = validateWithDiagnostic("usage", "usage_data", () =>
+    aggregateUsage(usageBuckets, projectId)
+  );
   const updatedAt = now().toISOString();
 
   return {

@@ -567,3 +567,80 @@ test("does not add a non-JPY OpenAI snapshot to the JPY total", async () => {
     0
   );
 });
+
+for (const endpoint of ["costs", "usage"] as const) {
+  for (const failure of ["http", "timeout", "network", "json", "schema", "data", "cursor", "limit"] as const) {
+    test(`logs safe ${failure} diagnostics for ${endpoint}`, async (t) => {
+      const errorLog = t.mock.method(console, "error", () => undefined);
+      const warningLog = t.mock.method(console, "warn", () => undefined);
+      const secret = `${env.OPENAI_ADMIN_KEY} ${env.OPENAI_PROJECT_ID} Authorization Bearer secret-body`;
+      let attempts = 0;
+      const snapshot = await getSnapshot(asFetch(async (url, init) => {
+        const isCosts = url.pathname.endsWith("/costs");
+        if (isCosts !== (endpoint === "costs")) {
+          return jsonResponse(isCosts ? costPage() : usagePage());
+        }
+        attempts += 1;
+        switch (failure) {
+          case "http":
+            return jsonResponse({ error: secret }, 500);
+          case "timeout":
+            return new Promise<Response>((_resolve, reject) => {
+              init?.signal?.addEventListener("abort", () => reject(new Error(secret)), { once: true });
+            });
+          case "network":
+            throw new TypeError(secret);
+          case "json":
+            return new Response(`{${secret}`);
+          case "schema":
+            return jsonResponse({ data: secret });
+          case "data":
+            return jsonResponse({ data: [{ start_time: 1785542400, results: [{ project_id: secret }] }], has_more: false });
+          case "cursor":
+          case "limit":
+            return jsonResponse({ data: [], has_more: true, next_page: failure === "cursor" ? secret : `${secret}-${attempts}` });
+        }
+      }));
+
+      assertErrorFallback(snapshot);
+      const expected = failure === "http"
+        ? { endpoint, category: "http", status: 500 }
+        : failure === "timeout" || failure === "network"
+          ? { endpoint, category: failure }
+          : {
+              endpoint,
+              category: "validation",
+              code: failure === "json" ? "invalid_json"
+                : failure === "schema" ? "response_schema"
+                : failure === "data" ? (endpoint === "costs" ? "cost_data" : "usage_data")
+                : failure === "cursor" ? "repeated_cursor" : "page_limit",
+            };
+      assert.deepEqual(errorLog.mock.calls.map((call) => call.arguments), [
+        ["OpenAI cost fetch failed", expected],
+      ]);
+      assert.equal(warningLog.mock.callCount(), 0);
+      const output = JSON.stringify(errorLog.mock.calls.map((call) => call.arguments));
+      for (const value of [env.OPENAI_ADMIN_KEY, env.OPENAI_PROJECT_ID, "Authorization", "secret-body"]) {
+        assert.equal(output.includes(value), false);
+      }
+    });
+  }
+}
+
+test("does not log on success, cache hits, recovered retries or fallback", async (t) => {
+  const errorLog = t.mock.method(console, "error", () => undefined);
+  const warningLog = t.mock.method(console, "warn", () => undefined);
+  let costCalls = 0;
+  const fetchImpl = asFetch(async (url) => {
+    if (!url.pathname.endsWith("/costs")) return jsonResponse(usagePage());
+    costCalls += 1;
+    return costCalls === 1 ? jsonResponse({}, 500) : jsonResponse(costPage());
+  });
+  assert.equal((await getSnapshot(fetchImpl)).fetchStatus, "success");
+  assert.equal((await getSnapshot(fetchImpl)).fetchStatus, "success");
+  assert.equal(costCalls, 2);
+  assert.equal((await getOpenAICostSnapshot(fixture, "2026-08", { env: {} })).fetchStatus, "fallback");
+  assert.equal((await getSnapshot(fetchImpl, { month: "invalid" })).fetchStatus, "fallback");
+  assert.equal(errorLog.mock.callCount(), 0);
+  assert.equal(warningLog.mock.callCount(), 0);
+});
