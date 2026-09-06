@@ -2,6 +2,7 @@ import "server-only";
 
 import type {
   CostCurrency,
+  CostFetchStatus,
   CostUsageMetric,
   ServiceCostSnapshot,
 } from "@/types/cost";
@@ -58,6 +59,15 @@ class HttpResponseError extends Error {
 
 const cache = new Map<string, CacheEntry>();
 const inFlight = new Map<string, Promise<ServiceCostSnapshot>>();
+
+function withFetchStatus(
+  fixture: ServiceCostSnapshot,
+  fetchStatus: CostFetchStatus
+): ServiceCostSnapshot {
+  return fixture.fetchStatus === fetchStatus
+    ? fixture
+    : { ...fixture, fetchStatus };
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -443,6 +453,7 @@ async function loadSnapshot(
     usageSummary: usageSummary(usage),
     freeTierSummary: "OpenAI Admin APIでは無料枠を判定していません",
     dataSource: "api-ready",
+    fetchStatus: "success",
     updatedAt,
     notes: `OpenAI Admin APIから取得した${month}のプロジェクト別実績です。為替換算は行っていません。`,
     includedInTotal: false,
@@ -459,14 +470,14 @@ export async function getOpenAICostSnapshot(
   const projectId = env.OPENAI_PROJECT_ID?.trim();
 
   if (!adminKey || !projectId) {
-    return fixture;
+    return withFetchStatus(fixture, "fallback");
   }
 
   let period: Period;
   try {
     period = periodForMonth(month);
   } catch {
-    return fixture;
+    return withFetchStatus(fixture, "fallback");
   }
 
   const cacheKey = `${projectId}:${period.startTime}:${period.endTime}`;
@@ -495,7 +506,7 @@ export async function getOpenAICostSnapshot(
       });
       return snapshot;
     })
-    .catch(() => fixture)
+    .catch(() => withFetchStatus(fixture, "error"))
     .finally(() => {
       inFlight.delete(cacheKey);
     });

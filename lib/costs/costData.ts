@@ -13,6 +13,7 @@ export const monthlyCostOverview: MonthlyCostOverview = {
       usageSummary: [{ label: "API使用量", value: 0, unit: "未入力" }],
       freeTierSummary: "手入力前のため未確認",
       dataSource: "api-ready",
+      fetchStatus: "fallback",
       updatedAt: "2026-08-01T00:00:00.000Z",
       notes: "Phase 1B manual fixture。実際の請求額は未入力です。",
       includedInTotal: true,

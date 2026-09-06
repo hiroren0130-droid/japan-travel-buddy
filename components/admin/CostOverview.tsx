@@ -13,6 +13,11 @@ function formatMonth(month: string): string {
 
 export default function CostOverview({ overview }: Props) {
   const currentMonthTotal = calculateCurrentMonthTotal(overview);
+  const openAIFetchStatus = overview.services.find(
+    (service) => service.service === "openai"
+  )?.fetchStatus;
+  const usesOpenAIFixture =
+    openAIFetchStatus === "fallback" || openAIFetchStatus === "error";
   const formattedTotal = new Intl.NumberFormat("ja-JP", {
     style: "currency",
     currency: overview.reportingCurrency,
@@ -30,8 +35,8 @@ export default function CostOverview({ overview }: Props) {
             コスト管理
           </h1>
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
-            外部Billing APIを使用せず、repository内の固定データを表示しています。
-            金額と使用量は管理用の初期値であり、実際の請求情報ではありません。
+            OpenAIはAdmin APIの取得状態を明示し、取得できない場合はrepository内の固定データへ切り替えます。
+            その他サービスの金額と使用量は管理用の初期値です。
           </p>
         </header>
 
@@ -59,6 +64,17 @@ export default function CostOverview({ overview }: Props) {
               Firebaseの請求額はGoogle Cloud側に含め、二重加算しません。
             </p>
           </div>
+
+          {usesOpenAIFixture ? (
+            <p
+              role={openAIFetchStatus === "error" ? "alert" : "status"}
+              className="mt-5 rounded-xl border border-amber-300/40 bg-amber-300/10 px-4 py-3 text-sm font-semibold leading-6 text-amber-100"
+            >
+              {openAIFetchStatus === "error"
+                ? "OpenAIの取得に失敗したため、今月の合計は固定データを含む参考値です。"
+                : "OpenAI APIが未設定のため、今月の合計は固定データを含む参考値です。"}
+            </p>
+          ) : null}
         </section>
 
         <section aria-label="サービス別コスト" className="mt-8">
