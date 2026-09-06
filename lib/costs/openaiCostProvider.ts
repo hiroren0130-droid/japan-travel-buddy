@@ -26,11 +26,19 @@ type ValidationCode =
   | "usage_data"
   | "repeated_cursor"
   | "page_limit";
-type FailureDiagnostic = { endpoint: DiagnosticEndpoint } & (
+type FailureDiagnostic = { endpoint: DiagnosticEndpoint | "aggregate" } & (
   | { category: "http"; status: number }
   | { category: "timeout" | "network" }
   | { category: "validation"; code: ValidationCode }
+  | { category: "internal"; code: "unhandled_failure" }
 );
+
+// Internal marker: never retain or log the original exception or secret values.
+class DiagnosedFailure extends Error {
+  constructor() {
+    super("OpenAI cost fetch failure already logged.");
+  }
+}
 
 function logFailure(diagnostic: FailureDiagnostic): void {
   console.error("OpenAI cost fetch failed", diagnostic);
@@ -43,9 +51,9 @@ function validateWithDiagnostic<T>(
 ): T {
   try {
     return validate();
-  } catch (error) {
+  } catch {
     logFailure({ endpoint, category: "validation", code });
-    throw error;
+    throw new DiagnosedFailure();
   }
 }
 
@@ -278,7 +286,7 @@ async function requestJson(
         } else {
           logFailure({ endpoint, category: "network" });
         }
-        throw error;
+        throw new DiagnosedFailure();
       }
 
       if (error instanceof HttpResponseError && error.status === 429) {
@@ -357,14 +365,14 @@ async function collectPages(
     }
     if (cursors.has(parsed.nextPage)) {
       logFailure({ endpoint: diagnosticEndpoint, category: "validation", code: "repeated_cursor" });
-      throw new Error("OpenAI Admin API returned a repeated pagination cursor.");
+      throw new DiagnosedFailure();
     }
     cursors.add(parsed.nextPage);
     page = parsed.nextPage;
   }
 
   logFailure({ endpoint: diagnosticEndpoint, category: "validation", code: "page_limit" });
-  throw new Error("OpenAI Admin API pagination exceeded the safe page limit.");
+  throw new DiagnosedFailure();
 }
 
 function aggregateCosts(buckets: unknown[], projectId: string): CostAggregate {
@@ -559,7 +567,16 @@ export async function getOpenAICostSnapshot(
       });
       return snapshot;
     })
-    .catch(() => withFetchStatus(fixture, "error"))
+    .catch((error: unknown) => {
+      if (!(error instanceof DiagnosedFailure)) {
+        logFailure({
+          endpoint: "aggregate",
+          category: "internal",
+          code: "unhandled_failure",
+        });
+      }
+      return withFetchStatus(fixture, "error");
+    })
     .finally(() => {
       inFlight.delete(cacheKey);
     });

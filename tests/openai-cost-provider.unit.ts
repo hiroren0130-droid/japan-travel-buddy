@@ -569,7 +569,7 @@ test("does not add a non-JPY OpenAI snapshot to the JPY total", async () => {
 });
 
 for (const endpoint of ["costs", "usage"] as const) {
-  for (const failure of ["http", "timeout", "network", "json", "schema", "data", "cursor", "limit"] as const) {
+  for (const failure of ["http", "timeout", "network", "network_primitive", "json", "schema", "data", "cursor", "limit"] as const) {
     test(`logs safe ${failure} diagnostics for ${endpoint}`, async (t) => {
       const errorLog = t.mock.method(console, "error", () => undefined);
       const warningLog = t.mock.method(console, "warn", () => undefined);
@@ -590,6 +590,8 @@ for (const endpoint of ["costs", "usage"] as const) {
             });
           case "network":
             throw new TypeError(secret);
+          case "network_primitive":
+            throw secret;
           case "json":
             return new Response(`{${secret}`);
           case "schema":
@@ -605,8 +607,8 @@ for (const endpoint of ["costs", "usage"] as const) {
       assertErrorFallback(snapshot);
       const expected = failure === "http"
         ? { endpoint, category: "http", status: 500 }
-        : failure === "timeout" || failure === "network"
-          ? { endpoint, category: failure }
+        : failure === "timeout" || failure === "network" || failure === "network_primitive"
+          ? { endpoint, category: failure === "network_primitive" ? "network" : failure }
           : {
               endpoint,
               category: "validation",
@@ -644,3 +646,42 @@ test("does not log on success, cache hits, recovered retries or fallback", async
   assert.equal(errorLog.mock.callCount(), 0);
   assert.equal(warningLog.mock.callCount(), 0);
 });
+
+for (const failure of ["invalid_date", "exception", "primitive", "retry_wait"] as const) {
+  test(`logs one safe internal diagnostic for unrecorded ${failure}`, async (t) => {
+    const errorLog = t.mock.method(console, "error", () => undefined);
+    const warningLog = t.mock.method(console, "warn", () => undefined);
+    const secret = `${env.OPENAI_ADMIN_KEY} ${env.OPENAI_PROJECT_ID} Authorization secret-body`;
+    let nowCalls = 0;
+    const snapshot = await getSnapshot(
+      failure === "retry_wait"
+        ? asFetch(async (url) => jsonResponse(
+            url.pathname.endsWith("/costs") ? { error: secret } : usagePage(),
+            url.pathname.endsWith("/costs") ? 429 : 200
+          ))
+        : successfulFetch(),
+      {
+        now: () => {
+          nowCalls += 1;
+          if (nowCalls === 1 || failure === "retry_wait") {
+            return new Date("2026-08-15T12:00:00.000Z");
+          }
+          if (failure === "invalid_date") return new Date(Number.NaN);
+          if (failure === "primitive") throw secret;
+          throw new Error(secret);
+        },
+        sleep: async () => { throw new Error(secret); },
+      }
+    );
+
+    assertErrorFallback(snapshot);
+    assert.deepEqual(errorLog.mock.calls.map((call) => call.arguments), [
+      ["OpenAI cost fetch failed", {
+        endpoint: "aggregate",
+        category: "internal",
+        code: "unhandled_failure",
+      }],
+    ]);
+    assert.equal(warningLog.mock.callCount(), 0);
+  });
+}
