@@ -58,6 +58,9 @@ export default function HomePage() {
       };
     }
   );
+  const firstFeaturedRegion = homeRegions.find(
+    (region) => region.featuredSpots.length > 0
+  );
   const featureItems = [
     {
       icon: Bot,
@@ -490,10 +493,15 @@ export default function HomePage() {
                   </div>
 
                   <div className="grid min-w-0 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {region.featuredSpots.map((spot) => (
+                    {region.featuredSpots.map((spot, index) => (
                       <SpotSummaryCard
                         key={spot.id}
                         spot={spot}
+                        loading={
+                          region === firstFeaturedRegion && index === 0
+                            ? "eager"
+                            : undefined
+                        }
                       />
                     ))}
                   </div>

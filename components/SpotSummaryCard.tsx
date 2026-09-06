@@ -14,6 +14,7 @@ import {
 
 type Props = {
   spot: Spot;
+  loading?: "eager" | "lazy";
   selectable?: boolean;
   selected?: boolean;
   onSelectionChange?: () => void;
@@ -21,6 +22,7 @@ type Props = {
 
 export default function SpotSummaryCard({
   spot,
+  loading,
   selectable = false,
   selected = false,
   onSelectionChange,
@@ -58,6 +60,7 @@ export default function SpotSummaryCard({
       >
         <div className="h-56 w-full overflow-hidden">
           <SpotImage
+            loading={loading}
             src={spot.image}
             alt={localizedName}
             spotName={spot.name}
