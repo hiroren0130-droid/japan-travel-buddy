@@ -1,4 +1,14 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Locator } from "@playwright/test";
+
+async function expectOnlyFirstImageEager(images: Locator): Promise<void> {
+  await expect.poll(async () => images.evaluateAll((elements) => ({
+    hasMultiple: elements.length > 1,
+    first: elements[0]?.getAttribute("loading"),
+    restLazy: elements.slice(1).every((image) =>
+      image.getAttribute("loading") === "lazy"
+    ),
+  }))).toEqual({ hasMultiple: true, first: "eager", restLazy: true });
+}
 
 test.beforeEach(async ({ page }) => {
   await page.route(
@@ -79,8 +89,13 @@ test("Home and Discover share the local-first rule", async ({
     ).first()
   ).toBeVisible();
 
+  await expectOnlyFirstImageEager(
+    page.locator('section[aria-labelledby="featured-places-title"] img')
+  );
+  await expect(page.locator('#discover-regions img').first())
+    .toHaveAttribute("loading", "lazy");
   await expect(
-    page.locator('img[src*="/spots/"]:not([loading="lazy"])')
+    page.locator('#discover-regions img:not([loading="lazy"])')
   ).toHaveCount(0);
 
   await page.goto("/discover/osaka");
@@ -89,8 +104,6 @@ test("Home and Discover share the local-first rule", async ({
       'img[src$="/spots/osaka-castle.jpg"]'
     ).first()
   ).toBeVisible();
-  await expect(
-    page.locator('img[src*="/spots/"]:not([loading="lazy"])')
-  ).toHaveCount(0);
+  await expectOnlyFirstImageEager(page.locator('main article img'));
   expect(placesPhotoRequests).toBe(0);
 });

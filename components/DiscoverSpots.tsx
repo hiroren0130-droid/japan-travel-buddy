@@ -189,7 +189,7 @@ export default function DiscoverSpots({
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {spots.map((spot) => {
+          {spots.map((spot, index) => {
             const isSelected =
               selectedSpotIds.has(
                 spot.id
@@ -199,6 +199,7 @@ export default function DiscoverSpots({
               <SpotSummaryCard
                 key={spot.id}
                 spot={spot}
+                loading={index === 0 ? "eager" : undefined}
                 selectable
                 selected={isSelected}
                 onSelectionChange={() =>
