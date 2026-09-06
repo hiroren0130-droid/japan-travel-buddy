@@ -26,9 +26,10 @@ test("local Spot images render without requesting Places photos", async ({
 
   const image = page.locator("main img").first();
   await expect(image).toBeVisible();
+  await expect(image).toHaveAttribute("loading", "eager");
   await expect(image).toHaveAttribute(
     "src",
-    "/spots/kiyomizudera.jpg"
+    /^(?:http:\/\/localhost:3000)?\/spots\/kiyomizudera\.jpg$/
   );
   expect(placesPhotoRequests).toBe(0);
 });
@@ -54,6 +55,7 @@ test("missing local Spot images fall back to the placeholder", async ({
     "src",
     /\/spots\/placeholder\.jpg$/
   );
+  await expect(image).toHaveAttribute("loading", "eager");
   expect(placesPhotoRequests).toBe(0);
 });
 
@@ -77,11 +79,18 @@ test("Home and Discover share the local-first rule", async ({
     ).first()
   ).toBeVisible();
 
+  await expect(
+    page.locator('img[src*="/spots/"]:not([loading="lazy"])')
+  ).toHaveCount(0);
+
   await page.goto("/discover/osaka");
   await expect(
     page.locator(
       'img[src$="/spots/osaka-castle.jpg"]'
     ).first()
   ).toBeVisible();
+  await expect(
+    page.locator('img[src*="/spots/"]:not([loading="lazy"])')
+  ).toHaveCount(0);
   expect(placesPhotoRequests).toBe(0);
 });

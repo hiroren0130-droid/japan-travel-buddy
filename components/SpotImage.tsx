@@ -11,6 +11,7 @@ type Props = {
   latitude?: number;
   longitude?: number;
   className?: string;
+  loading?: "eager" | "lazy";
 };
 
 const FALLBACK_IMAGE =
@@ -20,6 +21,7 @@ export default function SpotImage({
   src,
   alt,
   className = "",
+  loading,
 }: Props) {
   const requestedLocalImage = src.trim();
   const localImage =
@@ -53,6 +55,7 @@ export default function SpotImage({
       className={`h-full w-full object-cover ${className}`}
       sizes="(max-width: 768px) 100vw, 400px"
       unoptimized
+      loading={loading}
       onError={handleImageError}
     />
   );

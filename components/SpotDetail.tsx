@@ -45,6 +45,7 @@ export default function SpotDetail({
       <div className="overflow-hidden rounded-2xl border bg-white shadow-lg">
         <div className="relative h-80 w-full">
           <SpotImage
+            loading="eager"
             src={spot.image}
             alt={localizedName}
             spotName={spot.name}
