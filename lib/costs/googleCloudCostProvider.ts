@@ -2,20 +2,13 @@ import "server-only";
 
 import type { CostCurrency } from "@/types/cost";
 
-export type BillingQuery = {
-  query: string;
-  location: string;
-  useLegacySql: false;
-  params: { projectId: string; startTime: string; endTime: string };
-  types: { projectId: "STRING"; startTime: "TIMESTAMP"; endTime: "TIMESTAMP" };
-};
+import {
+  buildBigQueryBillingQuery,
+  readBigQueryBillingConfig,
+  type GoogleCloudBillingClient,
+} from "./googleCloudBigQueryAdapter";
 
-/** Adapter boundary: returns rows only, not the BigQuery SDK response tuple.
- * No default client or credentials are loaded; callers must inject an adapter.
- */
-export interface GoogleCloudBillingClient {
-  query(request: BillingQuery): Promise<unknown>;
-}
+export type { BillingQuery, GoogleCloudBillingClient } from "./googleCloudBigQueryAdapter";
 
 type Options = {
   env?: Readonly<Record<string, string | undefined>>;
@@ -103,38 +96,15 @@ export async function getGoogleCloudMonthlyCost(
   options: Options = {}
 ): Promise<GoogleCloudCostResult> {
   const env = options.env ?? process.env;
-  const projectId = env.GOOGLE_CLOUD_PROJECT_ID?.trim();
-  const dataset = env.GOOGLE_CLOUD_BILLING_BIGQUERY_DATASET?.trim();
-  const table = env.GOOGLE_CLOUD_BILLING_BIGQUERY_TABLE?.trim();
-  const location = env.GOOGLE_CLOUD_BILLING_BIGQUERY_LOCATION?.trim();
-  // Identifiers cannot be bound as query parameters: validate before interpolation.
-  if (!options.client || !projectId || !/^[a-z][a-z0-9-]{4,28}[a-z0-9]$/.test(projectId) ||
-      !dataset || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(dataset) ||
-      !table || !/^gcp_billing_export_v1_[A-Za-z0-9_]+$/.test(table) ||
-      !location || !/^[a-zA-Z0-9-]+$/.test(location)) {
+  const config = readBigQueryBillingConfig(env);
+  if (!options.client || !config) {
     return { fetchStatus: "fallback", reason: "not_configured", costs: null };
   }
+  const { projectId } = config;
 
   try {
     const period = monthToDate((options.now ?? (() => new Date()))());
-    const rows = await options.client.query({
-      query: `SELECT
-  project.id AS project_id,
-  currency,
-  COUNT(*) AS source_row_count,
-  CAST(SUM(CAST(cost AS NUMERIC)) +
-    SUM(IFNULL((SELECT SUM(CAST(credit.amount AS NUMERIC))
-      FROM UNNEST(credits) AS credit), 0)) AS STRING) AS amount
-FROM \`${projectId}.${dataset}.${table}\`
-WHERE project.id = @projectId
-  AND usage_start_time >= @startTime
-  AND usage_start_time < @endTime
-GROUP BY project.id, currency`,
-      location,
-      useLegacySql: false,
-      params: { projectId, startTime: period.startTime, endTime: period.endTime },
-      types: { projectId: "STRING", startTime: "TIMESTAMP", endTime: "TIMESTAMP" },
-    });
+    const rows = await options.client.query(buildBigQueryBillingQuery(config, period));
     const costs = parseRows(rows, projectId);
     const sourceRowCount = costs.reduce((sum, cost) => sum + cost.sourceRowCount, 0);
     if (!Number.isSafeInteger(sourceRowCount)) throw new TypeError("Invalid count");
