@@ -1,5 +1,7 @@
 import "server-only";
 
+import { BigQuery } from "@google-cloud/bigquery";
+
 export type BillingQuery = {
   query: string;
   location: string;
@@ -67,7 +69,7 @@ GROUP BY project.id, currency`,
   };
 }
 
-/** Inject an SDK-style query function later; this module has no network transport.
+/** Inject an SDK-style query function; no query runs until explicitly called.
  * The function must return the BigQuery response tuple [rows, ...metadata].
  * Wrap an SDK method in a closure to preserve its receiver.
  */
@@ -88,4 +90,50 @@ export function createGoogleCloudBigQueryAdapter(
       }
     },
   };
+}
+
+export type BigQueryClientConfig = {
+  projectId: string;
+  location: string;
+  credentials: { client_email: string; private_key: string };
+};
+
+/** Pure configuration reader. Never loads ADC or a JSON credential file. */
+export function readBigQueryClientConfig(
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): BigQueryClientConfig | undefined {
+  const billing = readBigQueryBillingConfig(env);
+  const clientEmail = env.FIREBASE_ADMIN_CLIENT_EMAIL?.trim();
+  const privateKey = env.FIREBASE_ADMIN_PRIVATE_KEY?.trim().replace(/\\n/g, "\n");
+  if (!billing ||
+      !clientEmail || !/^[^@\s]+@[^@\s]+\.iam\.gserviceaccount\.com$/i.test(clientEmail) ||
+      !privateKey || !privateKey.includes("-----BEGIN PRIVATE KEY-----") ||
+      !privateKey.includes("-----END PRIVATE KEY-----")) return undefined;
+  // The query project is explicit; FIREBASE_ADMIN_PROJECT_ID is not required.
+  return {
+    projectId: billing.projectId,
+    location: billing.location,
+    credentials: { client_email: clientEmail, private_key: privateKey },
+  };
+}
+
+/** Creates a client only when explicitly requested; construction does not query.
+ * Pass the result as the provider's client option (undefined means fallback).
+ * createClient can be replaced in tests without loading real credentials.
+ */
+export function createGoogleCloudBigQueryClient(
+  options: {
+    env?: Readonly<Record<string, string | undefined>>;
+    createClient?: (config: BigQueryClientConfig) => GoogleCloudBillingClient;
+  } = {},
+): GoogleCloudBillingClient | undefined {
+  const config = readBigQueryClientConfig(options.env);
+  if (!config) return undefined;
+  try {
+    const client = (options.createClient ?? ((settings) => new BigQuery(settings)))(config);
+    return createGoogleCloudBigQueryAdapter((request) => client.query(request));
+  } catch {
+    // Constructor errors may contain credentials. Expose only a fixed message.
+    throw new Error("BigQuery billing client creation failed");
+  }
 }
