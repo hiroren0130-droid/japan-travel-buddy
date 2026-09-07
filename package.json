@@ -16,6 +16,7 @@
     "update:websites": "tsx scripts/updateSpotWebsites.ts"
   },
   "dependencies": {
+    "@google-cloud/bigquery": "^9.0.3",
     "@vis.gl/react-google-maps": "^1.9.0",
     "firebase": "^12.16.0",
     "firebase-admin": "14.3.0",

@@ -4,6 +4,8 @@ import test from "node:test";
 import {
   buildBigQueryBillingQuery,
   createGoogleCloudBigQueryAdapter,
+  createGoogleCloudBigQueryClient,
+  readBigQueryClientConfig,
   readBigQueryBillingConfig,
   type BillingQuery,
 } from "../lib/costs/googleCloudBigQueryAdapter";
@@ -104,4 +106,83 @@ test("malformed SDK tuples and invalid rows become provider errors", async () =>
     const client = createGoogleCloudBigQueryAdapter(async () => response);
     assert.equal((await getGoogleCloudMonthlyCost({ env, now, client })).fetchStatus, "error");
   }
+});
+
+// Deliberately invalid key material: tests never authenticate or contact Google.
+const authEnv = {
+  ...env,
+  FIREBASE_ADMIN_PROJECT_ID: "different-firebase-project",
+  FIREBASE_ADMIN_CLIENT_EMAIL: "firebase-adminsdk-fbsvc@japan-travel-buddy-96590.iam.gserviceaccount.com",
+  FIREBASE_ADMIN_PRIVATE_KEY: "-----BEGIN PRIVATE KEY-----\\nTEST-ONLY-NOT-A-KEY\\n-----END PRIVATE KEY-----",
+};
+
+test("client config reuses credentials, restores newlines and uses the billing project", () => {
+  const settings = readBigQueryClientConfig(authEnv);
+  assert.deepEqual(settings, {
+    projectId: env.GOOGLE_CLOUD_PROJECT_ID,
+    location: env.GOOGLE_CLOUD_BILLING_BIGQUERY_LOCATION,
+    credentials: {
+      client_email: authEnv.FIREBASE_ADMIN_CLIENT_EMAIL,
+      private_key: authEnv.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    },
+  });
+  assert.deepEqual(readBigQueryClientConfig({
+    ...authEnv, FIREBASE_ADMIN_PROJECT_ID: undefined,
+    FIREBASE_ADMIN_PRIVATE_KEY: settings!.credentials.private_key,
+    GOOGLE_APPLICATION_CREDENTIALS: "must-not-be-read.json",
+  }), settings);
+});
+
+test("missing or invalid client configuration returns undefined and provider falls back", async () => {
+  const required = [...Object.keys(env), "FIREBASE_ADMIN_CLIENT_EMAIL", "FIREBASE_ADMIN_PRIVATE_KEY"];
+  for (const key of required) {
+    for (const value of [undefined, "", "   "]) {
+      const missing = { ...authEnv, [key]: value };
+      assert.equal(readBigQueryClientConfig(missing), undefined);
+      const client = createGoogleCloudBigQueryClient({
+        env: missing, createClient: () => assert.fail("Must not create client"),
+      });
+      assert.equal(client, undefined);
+      assert.equal((await getGoogleCloudMonthlyCost({ env: missing, now, client })).fetchStatus, "fallback");
+    }
+  }
+  for (const invalid of [
+    { FIREBASE_ADMIN_CLIENT_EMAIL: "not-an-email" },
+    { FIREBASE_ADMIN_PRIVATE_KEY: "not-a-key" },
+  ]) assert.equal(readBigQueryClientConfig({ ...authEnv, ...invalid }), undefined);
+});
+
+test("SDK factory is injectable, construction never queries, and query keeps its receiver", async () => {
+  let calls = 0;
+  const sdk = {
+    marker: "sdk-receiver",
+    async query(request: BillingQuery) {
+      assert.equal(this.marker, "sdk-receiver");
+      assert.deepEqual(request, buildBigQueryBillingQuery(config, period));
+      calls++;
+      return [[row], { metadata: "ignored" }];
+    },
+  };
+  const client = createGoogleCloudBigQueryClient({ env: authEnv, createClient: (settings) => {
+    assert.deepEqual(settings, readBigQueryClientConfig(authEnv));
+    return sdk;
+  } });
+  assert.equal(calls, 0);
+  const result = await getGoogleCloudMonthlyCost({ env: authEnv, now, client });
+  assert.equal(calls, 1);
+  assert.equal(result.fetchStatus, "success");
+});
+
+test("client construction failures and query failures never expose or log credentials", async (t) => {
+  const logs = (["log", "warn", "error", "info", "debug"] as const).map((method) =>
+    t.mock.method(console, method, () => undefined));
+  const fail = () => { throw new Error(authEnv.FIREBASE_ADMIN_PRIVATE_KEY); };
+  assert.throws(() => createGoogleCloudBigQueryClient({ env: authEnv, createClient: fail }), {
+    message: "BigQuery billing client creation failed",
+  });
+  const client = createGoogleCloudBigQueryClient({ env: authEnv, createClient: () => ({ query: async () => fail() }) });
+  assert.deepEqual(await getGoogleCloudMonthlyCost({ env: authEnv, now, client }), {
+    fetchStatus: "error", reason: "query_or_response_failed", costs: null,
+  });
+  for (const log of logs) assert.equal(log.mock.callCount(), 0);
 });
