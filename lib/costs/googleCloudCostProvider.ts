@@ -4,7 +4,9 @@ import type { CostCurrency } from "@/types/cost";
 
 import {
   buildBigQueryBillingQuery,
+  createGoogleCloudBigQueryClient,
   readBigQueryBillingConfig,
+  type BigQueryClientConfig,
   type GoogleCloudBillingClient,
 } from "./googleCloudBigQueryAdapter";
 
@@ -13,6 +15,8 @@ export type { BillingQuery, GoogleCloudBillingClient } from "./googleCloudBigQue
 type Options = {
   env?: Readonly<Record<string, string | undefined>>;
   client?: GoogleCloudBillingClient;
+  /** SDK-style client factory; query returns [rows, ...metadata]. */
+  createClient?: (config: BigQueryClientConfig) => GoogleCloudBillingClient;
   now?: () => Date;
 };
 
@@ -97,14 +101,20 @@ export async function getGoogleCloudMonthlyCost(
 ): Promise<GoogleCloudCostResult> {
   const env = options.env ?? process.env;
   const config = readBigQueryBillingConfig(env);
-  if (!options.client || !config) {
+  if (!config) {
     return { fetchStatus: "fallback", reason: "not_configured", costs: null };
   }
   const { projectId } = config;
 
   try {
+    const client = options.client ?? createGoogleCloudBigQueryClient({
+      env, createClient: options.createClient,
+    });
+    if (!client) {
+      return { fetchStatus: "fallback", reason: "not_configured", costs: null };
+    }
     const period = monthToDate((options.now ?? (() => new Date()))());
-    const rows = await options.client.query(buildBigQueryBillingQuery(config, period));
+    const rows = await client.query(buildBigQueryBillingQuery(config, period));
     const costs = parseRows(rows, projectId);
     const sourceRowCount = costs.reduce((sum, cost) => sum + cost.sourceRowCount, 0);
     if (!Number.isSafeInteger(sourceRowCount)) throw new TypeError("Invalid count");
