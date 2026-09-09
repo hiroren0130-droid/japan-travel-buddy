@@ -186,3 +186,74 @@ test("client construction failures and query failures never expose or log creden
   });
   for (const log of logs) assert.equal(log.mock.callCount(), 0);
 });
+
+test("provider creates the authenticated adapter from process.env and preserves the SDK receiver", async (t) => {
+  for (const [key, value] of Object.entries(authEnv)) {
+    const previous = process.env[key];
+    t.after(() => {
+      if (previous === undefined) delete process.env[key];
+      else process.env[key] = previous;
+    });
+    process.env[key] = value;
+  }
+  let calls = 0;
+  const sdk = {
+    marker: "receiver",
+    async query(request: BillingQuery) {
+      assert.equal(this.marker, "receiver");
+      assert.deepEqual(request, buildBigQueryBillingQuery(config, period));
+      calls++;
+      return [[], { secret: "metadata-must-not-escape" }];
+    },
+  };
+  const result = await getGoogleCloudMonthlyCost({ now, createClient: (settings) => {
+    assert.deepEqual(settings, readBigQueryClientConfig(authEnv));
+    return sdk;
+  } });
+  assert.equal(calls, 1);
+  assert.deepEqual(result, {
+    fetchStatus: "success", dataState: "empty", costs: null, sourceRowCount: 0,
+    period: { ...period, timeZone: "Asia/Tokyo" },
+  });
+});
+
+test("provider factory path returns only currency aggregates for real source rows", async () => {
+  const result = await getGoogleCloudMonthlyCost({ env: authEnv, now,
+    createClient: () => ({ query: async () => [[row, { ...row, currency: "USD", amount: "-1.25" }],
+      { secret: "metadata-must-not-escape" }] }),
+  });
+  assert.deepEqual(result, {
+    fetchStatus: "success", dataState: "available", sourceRowCount: 4,
+    costs: [
+      { currency: "JPY", amount: 0, sourceRowCount: 2 },
+      { currency: "USD", amount: -1.25, sourceRowCount: 2 },
+    ],
+    period: { ...period, timeZone: "Asia/Tokyo" },
+  });
+});
+
+test("provider skips SDK creation for missing configuration and prioritizes injected row clients", async () => {
+  const createClient = () => assert.fail("Must not create SDK client");
+  for (const key of [...Object.keys(env), "FIREBASE_ADMIN_CLIENT_EMAIL", "FIREBASE_ADMIN_PRIVATE_KEY"]) {
+    assert.deepEqual(await getGoogleCloudMonthlyCost({
+      env: { ...authEnv, [key]: "" }, now, createClient,
+    }), { fetchStatus: "fallback", reason: "not_configured", costs: null });
+  }
+  const result = await getGoogleCloudMonthlyCost({
+    env: authEnv, now, createClient, client: { query: async () => [row] },
+  });
+  assert.equal(result.fetchStatus, "success");
+});
+
+test("provider factory construction, query and response failures expose no secrets or logs", async (t) => {
+  const logs = (["log", "warn", "error", "info", "debug"] as const).map((method) =>
+    t.mock.method(console, method, () => undefined));
+  const fail = () => { throw new Error(`${authEnv.FIREBASE_ADMIN_PRIVATE_KEY} secret-api-key`); };
+  for (const createClient of [fail, () => ({ query: async () => fail() }),
+    () => ({ query: async () => ({ secret: authEnv.FIREBASE_ADMIN_PRIVATE_KEY }) })]) {
+    assert.deepEqual(await getGoogleCloudMonthlyCost({ env: authEnv, now, createClient }), {
+      fetchStatus: "error", reason: "query_or_response_failed", costs: null,
+    });
+  }
+  for (const log of logs) assert.equal(log.mock.callCount(), 0);
+});
