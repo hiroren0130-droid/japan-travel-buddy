@@ -15,14 +15,16 @@ const dataSourceLabels: Record<CostDataSource, string> = {
   "future-api": "将来API連携",
 };
 
-const fetchStatusLabels: Record<CostFetchStatus, string> = {
+const fetchStatusLabels: Record<CostFetchStatus | "empty", string> = {
   success: "取得成功",
+  empty: "取得成功・集計対象データなし（empty）",
   fallback: "固定データ表示",
   error: "取得エラー",
 };
 
-const fetchStatusClasses: Record<CostFetchStatus, string> = {
+const fetchStatusClasses: Record<CostFetchStatus | "empty", string> = {
   success: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  empty: "border-slate-200 bg-slate-50 text-slate-800",
   fallback: "border-amber-200 bg-amber-50 text-amber-900",
   error: "border-red-200 bg-red-50 text-red-800",
 };
@@ -62,15 +64,24 @@ export function formatUpdatedAt(value: string): UpdatedAtDisplay {
 }
 
 export default function ServiceCostCard({ snapshot }: Props) {
+  const isGoogleCloud = snapshot.service === "google-cloud";
   const formattedUpdatedAt = formatUpdatedAt(snapshot.updatedAt);
   const fetchStatus =
-    snapshot.service === "openai"
+    snapshot.service === "openai" || isGoogleCloud
       ? (snapshot.fetchStatus ?? "fallback")
       : null;
   const hasActualCost = fetchStatus === null || fetchStatus === "success";
 
   const fetchStatusMessage =
-    fetchStatus === "success"
+    isGoogleCloud
+      ? snapshot.dataState === "empty"
+        ? "取得成功ですが、Billing Exportに集計対象データがありません。実額0円を意味しません。"
+        : fetchStatus === "success"
+          ? "Billing Exportから通貨別の実績を取得済みです。JPY以外は円換算していません。"
+        : fetchStatus === "error"
+          ? "Google Cloud Billingの取得に失敗しました。実取得値なし。固定データへの置き換えは行っていません。"
+          : "Google Cloud Billingの取得設定が未完了です。実取得値なし。固定データへの置き換えは行っていません。"
+      : fetchStatus === "success"
       ? snapshot.currentMonthCost === 0
         ? "OpenAI Admin APIから取得済みです。実額は0円です。"
         : "OpenAI Admin APIから実額を取得済みです。"
@@ -83,6 +94,7 @@ export default function ServiceCostCard({ snapshot }: Props) {
       className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6"
       data-service={snapshot.service}
       data-fetch-status={fetchStatus ?? undefined}
+      data-state={isGoogleCloud ? snapshot.dataState : undefined}
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
@@ -94,7 +106,7 @@ export default function ServiceCostCard({ snapshot }: Props) {
           </h2>
         </div>
         <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-bold text-blue-700">
-          {dataSourceLabels[snapshot.dataSource]}
+          {isGoogleCloud ? "Billing Export連携" : dataSourceLabels[snapshot.dataSource]}
         </span>
       </div>
 
@@ -104,7 +116,11 @@ export default function ServiceCostCard({ snapshot }: Props) {
           className={`mt-5 rounded-xl border px-4 py-3 ${fetchStatusClasses[fetchStatus]}`}
         >
           <p className="text-sm font-bold">
-            OpenAI取得状態: {fetchStatusLabels[fetchStatus]}
+            {isGoogleCloud ? "Google Cloud" : "OpenAI"}取得状態: {isGoogleCloud
+              ? fetchStatus === "fallback" ? "未設定（fallback）"
+                : snapshot.dataState === "empty" ? "取得成功・集計対象データなし（empty）"
+                  : fetchStatusLabels[fetchStatus]
+              : fetchStatusLabels[fetchStatus]}
           </p>
           <p className="mt-1 text-xs leading-5">{fetchStatusMessage}</p>
         </div>
@@ -116,10 +132,18 @@ export default function ServiceCostCard({ snapshot }: Props) {
             Current Cost
           </dt>
           <dd className="mt-1 text-2xl font-extrabold text-slate-950">
-            {hasActualCost
+            {isGoogleCloud
+              ? fetchStatus === "success" && snapshot.dataState === "available" && snapshot.costs
+                ? snapshot.costs.map((cost) => (
+                  <span key={cost.currency} className="block">
+                    {formatCost(cost.amount, cost.currency)} <span className="text-sm">{cost.currency}</span>
+                  </span>
+                ))
+                : "実取得値なし"
+              : hasActualCost && snapshot.currentMonthCost !== null
               ? formatCost(snapshot.currentMonthCost, snapshot.currency)
               : "取得値なし"}
-            {!hasActualCost ? (
+            {!isGoogleCloud && !hasActualCost && snapshot.currentMonthCost !== null ? (
               <span className="mt-1 block text-xs font-semibold text-slate-500">
                 固定データ: {formatCost(snapshot.currentMonthCost, snapshot.currency)}
               </span>
@@ -178,7 +202,9 @@ export default function ServiceCostCard({ snapshot }: Props) {
             Total
           </dt>
           <dd className="mt-2 text-sm font-semibold text-slate-700">
-            {snapshot.includedInTotal ? "今月合計に含む" : "今月合計から除外"}
+            {snapshot.includedInTotal
+              ? isGoogleCloud ? "JPY実績のみ今月合計に含む" : "今月合計に含む"
+              : "今月合計から除外"}
           </dd>
         </div>
       </dl>

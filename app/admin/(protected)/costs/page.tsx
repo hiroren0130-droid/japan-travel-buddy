@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
 import CostOverview from "@/components/admin/CostOverview";
+import { requireAdminSession } from "@/lib/auth/admin";
 import { monthlyCostOverview } from "@/lib/costs/costData";
+import { getGoogleCloudCostSnapshot } from "@/lib/costs/googleCloudCostProvider";
 import {
   getOpenAICostSnapshot,
   getUtcMonth,
@@ -12,24 +14,22 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminCostsPage() {
+  await requireAdminSession();
   const currentMonth = getUtcMonth(new Date());
   const currentOverview = { ...monthlyCostOverview, month: currentMonth };
   const openAIFixture = currentOverview.services.find(
     (service) => service.service === "openai"
   );
 
-  if (!openAIFixture) {
-    return <CostOverview overview={currentOverview} />;
-  }
-
-  const openAISnapshot = await getOpenAICostSnapshot(
-    openAIFixture,
-    currentMonth
-  );
+  const [openAISnapshot, googleCloudSnapshot] = await Promise.all([
+    openAIFixture ? getOpenAICostSnapshot(openAIFixture, currentMonth) : undefined,
+    getGoogleCloudCostSnapshot(currentMonth),
+  ]);
   const overview = {
     ...currentOverview,
     services: currentOverview.services.map((service) =>
-      service.service === "openai" ? openAISnapshot : service
+      service.service === "google-cloud" ? googleCloudSnapshot
+        : service.service === "openai" && openAISnapshot ? openAISnapshot : service
     ),
   };
 
