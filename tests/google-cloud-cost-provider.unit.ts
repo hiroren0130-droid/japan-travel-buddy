@@ -142,7 +142,15 @@ test("Firebase remains excluded while Google Cloud is counted once", async () =>
   assert.equal(firebase.includedInTotal, false);
   assert.equal(calculateCurrentMonthTotal({
     month: "2026-09", reportingCurrency: "JPY", services: [
-      { ...google, currentMonthCost: result.costs[0].amount },
+      {
+        ...google,
+        currentMonthCost: result.costs[0].amount,
+        costs: result.costs,
+        fetchStatus: "success",
+        dataState: "available",
+        billingMonth: "2026-09",
+        includedInTotal: true,
+      },
       { ...firebase, currentMonthCost: 50 },
     ],
   }), 123.45);

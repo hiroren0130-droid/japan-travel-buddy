@@ -218,21 +218,35 @@ test("shows the current UTC month", async ({ page }) => {
   await expect(page.getByText(`対象月: ${year}年${month}月`)).toBeVisible();
 });
 
-test("shows manual, api-ready, and future-api labels", async ({ page }) => {
+test("shows manual, OpenAI and Billing Export labels", async ({ page }) => {
   await addSessionCookie(page, "mock-admin-session");
   await page.goto("/admin/costs");
   await expect(page.getByText("手入力", { exact: true })).toHaveCount(3);
   await expect(page.getByText("API連携準備済み", { exact: true })).toBeVisible();
-  await expect(page.getByText("将来API連携", { exact: true })).toBeVisible();
+  await expect(page.getByText("Billing Export連携", { exact: true })).toBeVisible();
 });
 
 test("shows the fixed update date", async ({ page }) => {
   await addSessionCookie(page, "mock-admin-session");
   await page.goto("/admin/costs");
   await expect(page.locator('time[datetime="2026-08-01T00:00:00.000Z"]')).toHaveCount(
-    5
+    4
   );
-  await expect(page.getByText("2026年8月1日", { exact: true })).toHaveCount(5);
+  await expect(page.getByText("2026年8月1日", { exact: true })).toHaveCount(4);
+});
+
+test("Google Cloud fallback has no fixture amount or stale fixture date", async ({ page }) => {
+  await addSessionCookie(page, "mock-admin-session");
+  await page.goto("/admin/costs");
+  const google = page.locator('[data-service="google-cloud"][data-fetch-status="fallback"]');
+  await expect(google).toContainText("未設定（fallback）");
+  await expect(google).toContainText("実取得値なし");
+  await expect(google).toContainText("今月合計から除外");
+  await expect(google).not.toContainText("￥0");
+  await expect(google).not.toContainText("Phase 1B");
+  await expect(google.locator("time")).toHaveCount(0);
+  await expect(page.getByRole("region", { name: "今月の合計費用" }))
+    .toContainText("Google Cloudの実額0円を示すものではありません");
 });
 
 test("formats a valid updatedAt value with the existing UTC policy", () => {

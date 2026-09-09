@@ -10,7 +10,7 @@ export type CostCurrency = string;
 
 export type CostDataSource = "manual" | "api-ready" | "future-api";
 
-export type CostFetchStatus = "success" | "fallback" | "error";
+export type CostFetchStatus = "success" | "empty" | "fallback" | "error";
 
 export interface CostUsageMetric {
   label: string;
@@ -22,7 +22,11 @@ export interface ServiceCostSnapshot {
   service: CostServiceKey;
   displayName: string;
   currency: CostCurrency;
-  currentMonthCost: number;
+  currentMonthCost: number | null;
+  /** Native Google Cloud aggregates. null means no actual billing data. */
+  costs?: { currency: CostCurrency; amount: number; sourceRowCount: number }[] | null;
+  dataState?: "empty" | "available";
+  billingMonth?: string;
   estimatedCost: number | null;
   usageSummary: CostUsageMetric[];
   freeTierSummary: string;

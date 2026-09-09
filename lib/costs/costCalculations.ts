@@ -14,6 +14,17 @@ export function calculateCurrentMonthTotal(
       return total;
     }
 
+    if (service.service === "google-cloud" && service.costs !== undefined) {
+      if (service.fetchStatus !== "success" || service.dataState !== "available" ||
+          service.billingMonth !== overview.month || overview.reportingCurrency !== "JPY") return total;
+      const jpy = service.costs?.find((cost) => cost.currency === "JPY");
+      if (!jpy) return total;
+      if (!Number.isFinite(jpy.amount)) throw new RangeError("Invalid Google Cloud cost.");
+      return total + jpy.amount;
+    }
+
+    if (service.currentMonthCost === null) return total;
+
     if (service.currency !== overview.reportingCurrency) {
       throw new TypeError(
         `Currency mismatch for ${service.service}: expected ${overview.reportingCurrency}.`
