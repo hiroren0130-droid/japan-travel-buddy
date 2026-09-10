@@ -240,14 +240,28 @@ test("session endpoint issues a secure-shape admin cookie", async ({ page }) => 
   expect(cookie?.path).toBe("/");
 });
 
-for (const adminPath of ["/admin", "/admin/costs"]) {
+for (const adminPath of ["/admin/auth-test", "/admin/costs"]) {
   test(`login establishes an admin session before navigating to ${adminPath}`, async ({
     page,
   }) => {
-    await logInFrom(page, `/login?next=${encodeURIComponent(adminPath)}`);
+    await page.goto(adminPath);
+    await expect(page).toHaveURL(
+      `${BASE_URL}/login?next=${encodeURIComponent(adminPath)}`
+    );
+    await page.waitForLoadState("networkidle");
+    await page.locator('input[type="email"]').fill("admin@example.com");
+    await page.locator('input[type="password"]').fill("password");
+    await page.locator('button[type="submit"]').click();
 
     await expect(page).toHaveURL(new URL(adminPath, BASE_URL).toString());
     await expect.poll(() => getAdminCookie(page)).toBeTruthy();
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: adminPath === "/admin/costs" ? "コスト管理" : "管理者認証済み",
+        exact: true,
+      })
+    ).toBeVisible();
   });
 }
 
@@ -296,7 +310,7 @@ test("an unset whitelist fails closed with 500", async ({ page }) => {
 test("an unauthenticated admin request redirects to login", async ({ page }) => {
   await page.goto("/admin/auth-test");
 
-  await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fadmin%2Fauth-test$/);
 });
 
 test("a non-admin session redirects to the forbidden page", async ({ page }) => {
@@ -325,7 +339,7 @@ test("a revoked admin session redirects to login", async ({ page }) => {
   await addSessionCookie(page, "mock-revoked-session");
   await page.goto("/admin/auth-test");
 
-  await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fadmin%2Fauth-test$/);
 });
 
 test("logout deletes the admin cookie", async ({ page }) => {

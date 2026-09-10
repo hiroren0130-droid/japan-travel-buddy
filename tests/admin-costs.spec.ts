@@ -106,7 +106,7 @@ test.afterEach(async ({ page }) => {
 
 test("unauthenticated users are redirected to login", async ({ page }) => {
   await page.goto("/admin/costs");
-  await expect(page).toHaveURL(/\/login\?next=%2Fadmin$/);
+  await expect(page).toHaveURL(/\/login\?next=%2Fadmin%2Fcosts$/);
 });
 
 test("non-admin users are redirected to forbidden", async ({ page }) => {
