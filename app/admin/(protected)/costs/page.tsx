@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminCostsPage() {
-  await requireAdminSession();
+  await requireAdminSession("/admin/costs");
   const currentMonth = getUtcMonth(new Date());
   const currentOverview = { ...monthlyCostOverview, month: currentMonth };
   const openAIFixture = currentOverview.services.find(
