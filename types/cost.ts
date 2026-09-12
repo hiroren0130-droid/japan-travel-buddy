@@ -19,6 +19,10 @@ export interface CostUsageMetric {
 }
 
 export interface ServiceCostSnapshot {
+  github?: {
+    targetRecordCount: number;
+    targetCosts: { currency: string | null; amount: number }[];
+  };
   service: CostServiceKey;
   displayName: string;
   currency: CostCurrency;

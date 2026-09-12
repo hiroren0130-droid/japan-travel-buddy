@@ -146,14 +146,14 @@ for (const serviceName of [
   });
 }
 
-test("calculates the total from included services only", () => {
+test("calculates the total from included services and excludes GitHub manual values", () => {
   const overview = createOverview([
     createSnapshot("openai", 100, true),
     createSnapshot("github", 50, true),
     createSnapshot("vercel", 25, false),
   ]);
 
-  expect(calculateCurrentMonthTotal(overview)).toBe(150);
+  expect(calculateCurrentMonthTotal(overview)).toBe(100);
 });
 
 test("does not double-count Firebase costs included in Google Cloud", () => {
@@ -221,7 +221,8 @@ test("shows the current UTC month", async ({ page }) => {
 test("shows manual, OpenAI and Billing Export labels", async ({ page }) => {
   await addSessionCookie(page, "mock-admin-session");
   await page.goto("/admin/costs");
-  await expect(page.getByText("手入力", { exact: true })).toHaveCount(3);
+  await expect(page.getByText("手入力", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("GitHub Billing連携", { exact: true })).toBeVisible();
   await expect(page.getByText("API連携準備済み", { exact: true })).toBeVisible();
   await expect(page.getByText("Billing Export連携", { exact: true })).toBeVisible();
 });
@@ -230,9 +231,9 @@ test("shows the fixed update date", async ({ page }) => {
   await addSessionCookie(page, "mock-admin-session");
   await page.goto("/admin/costs");
   await expect(page.locator('time[datetime="2026-08-01T00:00:00.000Z"]')).toHaveCount(
-    4
+    3
   );
-  await expect(page.getByText("2026年8月1日", { exact: true })).toHaveCount(4);
+  await expect(page.getByText("2026年8月1日", { exact: true })).toHaveCount(3);
 });
 
 test("Google Cloud fallback has no fixture amount or stale fixture date", async ({ page }) => {

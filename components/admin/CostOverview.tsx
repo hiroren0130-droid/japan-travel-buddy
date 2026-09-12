@@ -13,6 +13,7 @@ function formatMonth(month: string): string {
 
 export default function CostOverview({ overview }: Props) {
   const currentMonthTotal = calculateCurrentMonthTotal(overview);
+  const github = overview.services.find((service) => service.service === "github");
   const googleCloud = overview.services.find((service) => service.service === "google-cloud");
   const openAIFetchStatus = overview.services.find(
     (service) => service.service === "openai"
@@ -40,6 +41,7 @@ export default function CostOverview({ overview }: Props) {
           <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
             OpenAIはAdmin APIの取得状態を明示し、取得できない場合はrepository内の固定データへ切り替えます。
             Google CloudはBilling Exportの取得状態と通貨別実績を表示します。
+            GitHubはBilling APIの取得状態とJapan Travel Buddy対象usageを表示します。
             その他サービスの金額と使用量は管理用の初期値（参考値）です。
           </p>
         </header>
@@ -99,6 +101,14 @@ export default function CostOverview({ overview }: Props) {
                   : "Google CloudのJPY実取得値がないため、合計に含めていません。Google Cloudの実額0円を示すものではありません。"}
               {" "}JPY以外は元の通貨で各カードに表示し、円換算・加算しません。
               {" "}全サービスの確定請求額ではありません。OpenAIの対象月はUTC、Google CloudはJSTです。
+            </p>
+          ) : null}
+          {github?.github ? (
+            <p role="status" className="mt-5 rounded-xl border border-slate-500 px-4 py-3 text-sm leading-6 text-slate-200">
+              {github.includedInTotal
+                ? "GitHubは対象月のJapan Travel Buddy対象repositoryのJPY実績のみ合計に含めています。"
+                : "GitHubの対象repositoryのJPY実取得値がないため、合計に含めていません。GitHubの実額0円を示すものではありません。"}
+              {" "}通貨不明・非JPY・他repository・未所属の料金は加算しません。
             </p>
           ) : null}
         </section>

@@ -14,6 +14,15 @@ export function calculateCurrentMonthTotal(
       return total;
     }
 
+    if (service.service === "github") {
+      if (service.fetchStatus !== "success" || service.billingMonth !== overview.month ||
+          overview.reportingCurrency !== "JPY" || !service.github?.targetRecordCount) return total;
+      const jpy = service.github.targetCosts.find((cost) => cost.currency === "JPY");
+      if (!jpy) return total;
+      if (!Number.isFinite(jpy.amount)) throw new RangeError("Invalid GitHub cost.");
+      return total + jpy.amount;
+    }
+
     if (service.service === "google-cloud" && service.costs !== undefined) {
       if (service.fetchStatus !== "success" || service.dataState !== "available" ||
           service.billingMonth !== overview.month || overview.reportingCurrency !== "JPY") return total;

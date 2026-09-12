@@ -4,6 +4,7 @@ import CostOverview from "@/components/admin/CostOverview";
 import { requireAdminSession } from "@/lib/auth/admin";
 import { monthlyCostOverview } from "@/lib/costs/costData";
 import { getGoogleCloudCostSnapshot } from "@/lib/costs/googleCloudCostProvider";
+import { getGitHubCostSnapshot } from "@/lib/costs/githubCostSnapshot";
 import {
   getOpenAICostSnapshot,
   getUtcMonth,
@@ -21,14 +22,16 @@ export default async function AdminCostsPage() {
     (service) => service.service === "openai"
   );
 
-  const [openAISnapshot, googleCloudSnapshot] = await Promise.all([
+  const [openAISnapshot, googleCloudSnapshot, githubSnapshot] = await Promise.all([
     openAIFixture ? getOpenAICostSnapshot(openAIFixture, currentMonth) : undefined,
     getGoogleCloudCostSnapshot(currentMonth),
+    getGitHubCostSnapshot(currentMonth),
   ]);
   const overview = {
     ...currentOverview,
     services: currentOverview.services.map((service) =>
       service.service === "google-cloud" ? googleCloudSnapshot
+        : service.service === "github" ? githubSnapshot
         : service.service === "openai" && openAISnapshot ? openAISnapshot : service
     ),
   };
