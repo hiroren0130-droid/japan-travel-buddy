@@ -163,7 +163,7 @@ export default function ServiceCostCard({ snapshot }: Props) {
                 : "実取得値なし"
               : hasActualCost && snapshot.currentMonthCost !== null
               ? formatCost(snapshot.currentMonthCost, snapshot.currency)
-              : "取得値なし"}
+              : snapshot.service === "vercel" ? "実取得値なし" : "取得値なし"}
             {!isGoogleCloud && !isGitHub && !hasActualCost && snapshot.currentMonthCost !== null ? (
               <span className="mt-1 block text-xs font-semibold text-slate-500">
                 固定データ: {formatCost(snapshot.currentMonthCost, snapshot.currency)}
@@ -186,7 +186,7 @@ export default function ServiceCostCard({ snapshot }: Props) {
             Usage
           </dt>
           <dd className="mt-2 space-y-1 text-sm text-slate-700">
-            {snapshot.usageSummary.map((metric) => (
+            {snapshot.service === "vercel" ? <p>未取得（自動取得は現在使用していません）</p> : snapshot.usageSummary.map((metric) => (
               <p key={metric.label}>
                 <span className="font-semibold">{metric.label}:</span>{" "}
                 {metric.unit === "未入力"
