@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
@@ -139,6 +140,18 @@ export default function LoginPage() {
             </p>
           ) : null}
         </form>
+
+        <div className="mt-6 border-t border-gray-200 pt-6 text-center">
+          <p className="text-sm text-gray-600">
+            {loginMessages.signupPrompt}
+          </p>
+          <Link
+            href="/signup"
+            className="mt-2 inline-flex min-h-11 items-center rounded-lg px-4 py-2 font-semibold text-blue-600 hover:bg-blue-50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+          >
+            {loginMessages.signupLinkLabel}
+          </Link>
+        </div>
       </div>
     </main>
   );
