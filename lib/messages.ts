@@ -320,6 +320,8 @@ export type AppMessages = {
     loadingLabel: string;
     requiredAlert: string;
     invalidCredentialsAlert: string;
+    signupPrompt: string;
+    signupLinkLabel: string;
   };
   signup: {
     title: string;
@@ -1011,6 +1013,8 @@ export const messages: LocaleRecord<AppMessages> = {
       requiredAlert: "メールアドレスとパスワードを入力してください。",
       invalidCredentialsAlert:
         "メールアドレスまたはパスワードが正しくありません。",
+      signupPrompt: "アカウントをお持ちでない方",
+      signupLinkLabel: "新規登録",
     },
     signup: {
       title: "Create Account",
@@ -1721,6 +1725,8 @@ export const messages: LocaleRecord<AppMessages> = {
       loadingLabel: "Logging in...",
       requiredAlert: "Enter your email address and password.",
       invalidCredentialsAlert: "The email address or password is incorrect.",
+      signupPrompt: "Don't have an account?",
+      signupLinkLabel: "Sign up",
     },
     signup: {
       title: "Create Account",
