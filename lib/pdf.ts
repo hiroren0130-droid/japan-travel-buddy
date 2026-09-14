@@ -14,6 +14,20 @@ const PDF_PAGE_WIDTH = 1240;
 const PDF_PAGE_HEIGHT = 1754;
 const PDF_MARGIN = 100;
 
+/** These fields belong to the plan and apply to each day's itinerary. */
+function getDayBoundaryLines(plan: TravelPlan, locale: Locale): string[] {
+  const fields = ["startLocation", "startTime", "endLocation", "endTime"] as const;
+  const labels = locale === "ja"
+    ? ["出発", "出発時刻", "到着", "到着時刻"]
+    : ["Start", "Start time", "End", "End time"];
+  return fields.flatMap((field, index) => {
+    const value = plan[field];
+    // Saved/runtime data may contain null despite the optional string type.
+    return typeof value === "string" && value.trim()
+      ? [`${labels[index]}: ${value.trim()}`] : [];
+  });
+}
+
 function downloadJapaneseTravelPlanPdf(
   plan: TravelPlan,
   pdf: jsPDF,
@@ -150,6 +164,12 @@ function downloadJapaneseTravelPlanPdf(
     });
     y += 12;
 
+    const boundaryLines = getDayBoundaryLines(plan, "ja");
+    for (const line of boundaryLines) {
+      writeText(line, { fontSize: 22, lineHeight: 34, indent: 25 });
+    }
+    if (boundaryLines.length) y += 10;
+
     day.items.forEach((item) => {
       const spot = getSpotById(item.spotId);
       const spotName = spot
@@ -256,6 +276,13 @@ export function downloadTravelPlanPdf(
 
     y += 10;
 
+    const boundaryLines = getDayBoundaryLines(plan, locale);
+    pdf.setFontSize(11);
+    for (const line of boundaryLines) {
+      writeWrappedText(line, 25, 165, 7);
+    }
+    if (boundaryLines.length) y += 3;
+
     day.items.forEach((item) => {
       const spot = getSpotById(item.spotId);
       const spotName = spot
@@ -265,7 +292,7 @@ export function downloadTravelPlanPdf(
         item.transport
           ? (transportLabels[item.transport] ?? item.transport)
           : undefined,
-        item.duration,
+        item.duration?.replace(/^(\d+)分$/, "$1 min"),
       ]
         .filter(Boolean)
         .join(" · ");
