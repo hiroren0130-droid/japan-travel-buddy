@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 
 import FavoriteHeader from "@/components/favorite/FavoriteHeader";
 import FavoriteGrid from "@/components/favorite/FavoriteGrid";
@@ -13,38 +15,74 @@ import FavoriteSort, {
 import { useLocale } from "@/components/LocaleProvider";
 import TravelPlanCard from "@/components/TravelPlanCard";
 
-import {
-  getFavoriteItems,
-  removeFavorite,
-} from "@/lib/favorites";
+import { getTravelPlans, updateTravelPlan } from "@/lib/firestore";
 import { getIntlLocale } from "@/lib/locale";
 
-import type { TravelPlan } from "@/types/travel";
+import type { SavedTravelPlan, TravelPlan } from "@/types/travel";
 
 export default function FavoritesPage() {
-  const { locale } = useLocale();
+  const { locale, messages } = useLocale();
   const intlLocale = getIntlLocale(locale);
   const router = useRouter();
   const [favorites, setFavorites] = useState<
-    ReturnType<typeof getFavoriteItems>
+    Array<{ plan: SavedTravelPlan; savedAt: number }>
   >([]);
-  const [selectedPlanTitle, setSelectedPlanTitle] =
+  const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const requestGeneration = useRef(0);
+  const removing = useRef(new Set<string>());
+  const [selectedPlanId, setSelectedPlanId] =
     useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [sort, setSort] =
     useState<FavoriteSortType>("newest");
 
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      const generation = ++requestGeneration.current;
+      setFavorites([]);
+      setLoading(true);
+      setLoadFailed(false);
+      removing.current.clear();
+      if (!user) {
+        router.replace("/login");
+        return;
+      }
+      try {
+        const plans = await getTravelPlans(user.uid);
+        if (generation !== requestGeneration.current || auth.currentUser?.uid !== user.uid) return;
+        setFavorites(plans.filter((plan) => plan.favorite === true).map((plan) => ({
+          plan,
+          savedAt: plan.createdAt?.toMillis() ?? 0,
+        })));
+      } catch {
+        if (generation !== requestGeneration.current || auth.currentUser?.uid !== user.uid) return;
+        setLoadFailed(true);
+      } finally {
+        if (generation === requestGeneration.current && auth.currentUser?.uid === user.uid) setLoading(false);
+      }
+    }, () => {
+      requestGeneration.current += 1;
+      setFavorites([]);
+      setLoadFailed(true);
+      setLoading(false);
+    });
+    return () => {
+      requestGeneration.current += 1;
+      unsubscribe();
+    };
+  }, [router]);
+
+  useEffect(() => {
     function syncSelectedPlanFromUrl() {
-      const planTitle = new URLSearchParams(
+      const planId = new URLSearchParams(
         window.location.search
       ).get("plan");
 
-      setSelectedPlanTitle(planTitle || null);
+      setSelectedPlanId(planId || null);
     }
 
     const timeoutId = window.setTimeout(() => {
-      setFavorites(getFavoriteItems());
       syncSelectedPlanFromUrl();
     }, 0);
     window.addEventListener(
@@ -61,28 +99,48 @@ export default function FavoritesPage() {
     };
   }, []);
 
-  function handleRemove(plan: TravelPlan) {
-    removeFavorite(plan.title);
-    setFavorites(getFavoriteItems());
+  function handleFavoriteChange(id: string, favorite: boolean) {
+    if (!favorite) setFavorites((current) => current.filter((item) => item.plan.id !== id));
+  }
+
+  async function handleRemove(plan: TravelPlan) {
+    const savedPlan = favorites.find((item) => item.plan === plan)?.plan;
+    const user = auth.currentUser;
+    if (!savedPlan || !user || removing.current.has(savedPlan.id)) return;
+    const generation = requestGeneration.current;
+    removing.current.add(savedPlan.id);
+    try {
+      await updateTravelPlan(savedPlan.id, { favorite: false });
+      if (generation !== requestGeneration.current || auth.currentUser?.uid !== user.uid) return;
+      handleFavoriteChange(savedPlan.id, false);
+    } catch {
+      if (generation === requestGeneration.current && auth.currentUser?.uid === user.uid) {
+        alert(messages.dashboard.alerts.favoriteFailed);
+      }
+    } finally {
+      if (generation === requestGeneration.current) removing.current.delete(savedPlan.id);
+    }
   }
 
   function handleCardClick(plan: TravelPlan) {
+    const savedPlan = favorites.find((item) => item.plan === plan)?.plan;
+    if (!savedPlan) return;
     const searchParams = new URLSearchParams();
-    searchParams.set("plan", plan.title);
+    searchParams.set("plan", savedPlan.id);
 
-    setSelectedPlanTitle(plan.title);
+    setSelectedPlanId(savedPlan.id);
     router.push(`/favorites?${searchParams.toString()}`);
   }
 
   function handleBackToFavorites() {
     window.history.pushState(null, "", "/favorites");
-    setSelectedPlanTitle(null);
+    setSelectedPlanId(null);
   }
 
-  const selectedPlan = selectedPlanTitle
+  const selectedPlan = selectedPlanId
     ? favorites.find(
         (favorite) =>
-          favorite.plan.title === selectedPlanTitle
+          favorite.plan.id === selectedPlanId
       )?.plan
     : undefined;
 
@@ -116,6 +174,12 @@ export default function FavoritesPage() {
     return list.map((item) => item.plan);
   }, [favorites, intlLocale, search, sort]);
 
+  if (loading || loadFailed) {
+    return <main className="mx-auto max-w-6xl p-6"><p role="status">{loading
+      ? messages.myPageDetail.loading
+      : messages.dashboard.alerts.loadFailed}</p></main>;
+  }
+
   if (selectedPlan) {
     return (
       <main className="mx-auto max-w-6xl p-6">
@@ -129,7 +193,7 @@ export default function FavoritesPage() {
             : "お気に入り一覧に戻る"}
         </button>
 
-        <TravelPlanCard plan={selectedPlan} />
+        <TravelPlanCard key={selectedPlan.id} plan={selectedPlan} savedPlanId={selectedPlan.id} onFavoriteChange={handleFavoriteChange} />
       </main>
     );
   }

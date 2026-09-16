@@ -214,6 +214,7 @@ export type AppMessages = {
       copyFailed: string;
       pdfFailed: string;
       loginRequired: string;
+      saveBeforeFavorite: string;
       invalidPlan: string;
       authChanged: string;
       saveSuccess: string;
@@ -889,6 +890,7 @@ export const messages: LocaleRecord<AppMessages> = {
         copyFailed: "コピーに失敗しました。",
         pdfFailed: "PDFを作成できませんでした。",
         loginRequired: "ログインしてください。",
+        saveBeforeFavorite: "まずプランを保存してください。保存したプランの詳細画面からお気に入りに追加できます。",
         invalidPlan: "旅行プランの内容が不正なため保存できませんでした。",
         authChanged: "認証状態が変更されました。もう一度ログインしてください。",
         saveSuccess: "旅行プランを保存しました。",
@@ -1602,6 +1604,7 @@ export const messages: LocaleRecord<AppMessages> = {
         copyFailed: "Failed to copy the travel plan.",
         pdfFailed: "Could not create the PDF.",
         loginRequired: "Please log in.",
+        saveBeforeFavorite: "Please save this plan first. You can then add it to favorites from the saved plan's details.",
         invalidPlan: "This travel plan is invalid and could not be saved.",
         authChanged: "Your session has changed. Please log in again.",
         saveSuccess: "Travel plan saved.",
