@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useEffect,
   useId,
   useRef,
   useState,
@@ -32,12 +33,8 @@ import SpotImage from "./SpotImage";
 import TravelTimeline from "./TravelTimeline";
 
 import { auth } from "@/lib/firebase";
-import {
-  isFavorite,
-  removeFavorite,
-  saveFavorite,
-} from "@/lib/favorites";
-import { saveTravelPlan } from "@/lib/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import { saveTravelPlan, updateTravelPlan } from "@/lib/firestore";
 import {
   createGoogleMapsRoute,
   createGoogleMapsRouteSegments,
@@ -59,6 +56,8 @@ import type { GoogleMapsRouteSegment } from "@/lib/googleMaps";
 
 type Props = {
   plan: TravelPlan;
+  savedPlanId?: string;
+  onFavoriteChange?: (id: string, favorite: boolean) => void;
 };
 
 function isValidTravelPlan(value: unknown): value is TravelPlan {
@@ -135,26 +134,62 @@ function isAbortError(error: unknown) {
 
 export default function TravelPlanCard({
   plan,
+  savedPlanId,
+  onFavoriteChange,
 }: Props) {
   const { locale, messages: defaultMessages } = useLocale();
-  const [favorite, setFavorite] = useState(() =>
-    isFavorite(plan.title)
-  );
+  const [favorite, setFavorite] = useState(plan.favorite === true);
+  const [updatingFavorite, setUpdatingFavorite] = useState(false);
+  const favoriteRequest = useRef(0);
+  const favoriteBusy = useRef(false);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, () => {
+      favoriteRequest.current += 1;
+      favoriteBusy.current = false;
+      setUpdatingFavorite(false);
+      setFavorite(plan.favorite === true);
+    });
+    return () => {
+      favoriteRequest.current += 1;
+      unsubscribe();
+    };
+  }, [savedPlanId, plan.favorite]);
   const [saving, setSaving] = useState(false);
   const [routeSegments, setRouteSegments] =
     useState<GoogleMapsRouteSegment[]>([]);
   const routeSegmentsTitleId = useId();
   const savingRef = useRef(false);
 
-  function handleFavorite() {
-    if (favorite) {
-      removeFavorite(plan.title);
-      setFavorite(false);
+  async function handleFavorite() {
+    const user = auth.currentUser;
+    if (!user) {
+      alert(defaultMessages.travelPlanCard.alerts.loginRequired);
       return;
     }
-
-    saveFavorite(plan);
-    setFavorite(true);
+    if (!savedPlanId) {
+      alert(defaultMessages.travelPlanCard.alerts.saveBeforeFavorite);
+      return;
+    }
+    if (favoriteBusy.current) return;
+    favoriteBusy.current = true;
+    setUpdatingFavorite(true);
+    const request = ++favoriteRequest.current;
+    const nextFavorite = !favorite;
+    try {
+      await updateTravelPlan(savedPlanId, { favorite: nextFavorite });
+      if (request !== favoriteRequest.current || auth.currentUser?.uid !== user.uid) return;
+      setFavorite(nextFavorite);
+      onFavoriteChange?.(savedPlanId, nextFavorite);
+    } catch (error) {
+      if (request !== favoriteRequest.current || auth.currentUser?.uid !== user.uid) return;
+      logClientError("Favorite update failed.", error);
+      alert(defaultMessages.dashboard.alerts.favoriteFailed);
+    } finally {
+      if (request === favoriteRequest.current) {
+        favoriteBusy.current = false;
+        setUpdatingFavorite(false);
+      }
+    }
   }
 
   async function handleCopy() {
@@ -517,6 +552,7 @@ export default function TravelPlanCard({
                 <Button
                   size="icon"
                   onClick={handleFavorite}
+                  disabled={updatingFavorite}
                   variant="secondary"
                   aria-label={
                     favorite

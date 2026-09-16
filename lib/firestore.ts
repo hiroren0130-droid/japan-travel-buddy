@@ -66,8 +66,8 @@ export async function getTravelPlans(
   const snapshot = await getDocs(q);
 
   return snapshot.docs.map((doc) => ({
-  id: doc.id,
   ...(doc.data() as TravelPlan),
+  id: doc.id,
 })) as SavedTravelPlan[];
 }
 

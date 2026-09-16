@@ -1,210 +1,42 @@
-import { expect, test, type Page } from "@playwright/test";
+﻿import { expect, test } from "@playwright/test";
 
-const STORAGE_KEY = "favorite-travel-plans";
-const FAVORITES_TEST_BASE_URL =
-  process.env.FAVORITES_TEST_BASE_URL ?? "http://localhost:3000";
+const stateKey = "playwright-firebase-mock-state";
+const legacyKey = "favorite-travel-plans";
+const title = "Kyoto & Osaka? #trip";
+const savedPlan = (id: string) => ({
+  id, uid: "user-1", title, summary: `Summary ${id}`, favorite: true,
+  days: [{ day: 1, items: [] }],
+});
 
-function getAppUrl(pathname: string): string {
-  return new URL(pathname, FAVORITES_TEST_BASE_URL).toString();
-}
-
-const favoritePlan = {
-  title: "京都 & 大阪? #旅",
-  summary: "お気に入り詳細表示のテストプラン",
-  days: [
-    {
-      day: 1,
-      items: [],
-    },
-  ],
-};
-
-type RequestCounts = {
-  firebase: number;
-  openAi: number;
-  places: number;
-};
-
-async function blockExternalApis(
-  page: Page
-): Promise<RequestCounts> {
-  const counts: RequestCounts = {
-    firebase: 0,
-    openAi: 0,
-    places: 0,
-  };
-
-  await page.route("**/*", async (route) => {
-    const url = new URL(route.request().url());
-    const isLocalApp =
-      url.hostname === "localhost" ||
-      url.hostname === "127.0.0.1";
-
-    if (url.pathname.startsWith("/api/chat")) {
-      counts.openAi += 1;
-      await route.abort();
-      return;
-    }
-
-    if (url.pathname.startsWith("/api/places/photo")) {
-      counts.places += 1;
-      await route.abort();
-      return;
-    }
-
-    if (!isLocalApp) {
-      if (
-        url.hostname.includes("firebase") ||
-        url.hostname.includes("firestore") ||
-        url.hostname === "identitytoolkit.googleapis.com"
-      ) {
-        counts.firebase += 1;
-      } else if (url.hostname === "api.openai.com") {
-        counts.openAi += 1;
-      } else if (
-        url.hostname === "maps.googleapis.com" ||
-        url.hostname === "places.googleapis.com"
-      ) {
-        counts.places += 1;
+for (const legacy of [JSON.stringify([savedPlan("legacy")]), "{invalid json"]) {
+  test(`Firestore details use document ID and retain legacy storage: ${legacy[0]}`, async ({ page }) => {
+    await page.route("**/*", (route) => {
+      const host = new URL(route.request().url()).hostname;
+      return host === "localhost" || host === "127.0.0.1" ? route.continue() : route.abort();
+    });
+    await page.addInitScript(({ stateKey, legacyKey, legacy, plans }) => {
+      if (!localStorage.getItem(stateKey)) {
+        localStorage.setItem(stateKey, JSON.stringify({ user: { uid: "user-1" }, plans, calls: {} }));
+        localStorage.setItem(legacyKey, legacy);
       }
+      localStorage.setItem("japan-travel-buddy-locale", "en");
+    }, { stateKey, legacyKey, legacy, plans: [savedPlan("document-1"), savedPlan("document-2")] });
 
-      await route.abort();
-      return;
-    }
+    await page.goto("/favorites");
+    await expect(page.getByText(title, { exact: true })).toHaveCount(2);
+    await page.getByText(title, { exact: true }).nth(1).click();
+    await expect.poll(() => new URL(page.url()).searchParams.get("plan")).toBe("document-2");
+    await expect(page.getByText("Summary document-2", { exact: true }).first()).toBeVisible();
+    await page.reload();
+    await expect(page.getByText("Summary document-2", { exact: true }).first()).toBeVisible();
+    await page.getByRole("button", { name: "Back to favorites" }).click();
+    await expect(page).toHaveURL(/\/favorites$/);
+    await expect(page.getByText(title, { exact: true })).toHaveCount(2);
 
-    await route.continue();
+    // Old title-based URLs must not associate a saved document by title.
+    await page.goto(`/favorites?${new URLSearchParams({ plan: title })}`);
+    await expect(page.getByText(title, { exact: true })).toHaveCount(2);
+    await expect(page.getByRole("button", { name: "Back to favorites" })).toHaveCount(0);
+    expect(await page.evaluate((key) => localStorage.getItem(key), legacyKey)).toBe(legacy);
   });
-
-  return counts;
 }
-
-function expectNoApiRequests(counts: RequestCounts) {
-  expect(counts).toEqual({
-    firebase: 0,
-    openAi: 0,
-    places: 0,
-  });
-}
-
-test("new-format favorite opens by query, survives reload, and returns to the list", async ({
-  page,
-}) => {
-  const requestCounts = await blockExternalApis(page);
-
-  await page.addInitScript(
-    ({ key, plan }) => {
-      window.localStorage.setItem(
-        key,
-        JSON.stringify([{ plan, savedAt: 1_700_000_000_000 }])
-      );
-    },
-    { key: STORAGE_KEY, plan: favoritePlan }
-  );
-
-  await page.goto(getAppUrl("/favorites"));
-  await expect(page.getByText(favoritePlan.title)).toBeVisible();
-
-  await page.getByText(favoritePlan.title).click();
-
-  await expect
-    .poll(() => new URL(page.url()).searchParams.get("plan"))
-    .toBe(favoritePlan.title);
-  await expect(
-    page.getByText(favoritePlan.summary).first()
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "お気に入り一覧に戻る" })
-  ).toBeVisible();
-
-  await page.reload();
-  await expect(
-    page.getByText(favoritePlan.summary).first()
-  ).toBeVisible();
-
-  await page
-    .getByRole("button", { name: "お気に入り一覧に戻る" })
-    .click();
-  await expect(page).toHaveURL(/\/favorites$/);
-  await expect(page.getByText(favoritePlan.title)).toBeVisible();
-
-  expectNoApiRequests(requestCounts);
-});
-
-test("old-format TravelPlan array can open the existing detail UI", async ({
-  page,
-}) => {
-  const requestCounts = await blockExternalApis(page);
-
-  await page.addInitScript(
-    ({ key, plan }) => {
-      window.localStorage.setItem(key, JSON.stringify([plan]));
-    },
-    { key: STORAGE_KEY, plan: favoritePlan }
-  );
-
-  const searchParams = new URLSearchParams({
-    plan: favoritePlan.title,
-  });
-  await page.goto(
-    getAppUrl(`/favorites?${searchParams.toString()}`)
-  );
-
-  await expect(
-    page.getByText(favoritePlan.summary).first()
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "お気に入り一覧に戻る" })
-  ).toBeVisible();
-
-  expectNoApiRequests(requestCounts);
-});
-
-test("missing favorites and invalid storage safely show the normal list", async ({
-  page,
-}) => {
-  const requestCounts = await blockExternalApis(page);
-
-  await page.addInitScript((key) => {
-    window.localStorage.setItem(key, "{invalid json");
-  }, STORAGE_KEY);
-
-  await page.goto(
-    getAppUrl("/favorites?plan=存在しないプラン")
-  );
-
-  await expect(
-    page.getByRole("heading", {
-      name: "お気に入り",
-      exact: true,
-    })
-  ).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "お気に入り一覧に戻る" })
-  ).toHaveCount(0);
-
-  expectNoApiRequests(requestCounts);
-});
-
-test("remove button does not navigate to favorite details", async ({
-  page,
-}) => {
-  const requestCounts = await blockExternalApis(page);
-
-  await page.addInitScript(
-    ({ key, plan }) => {
-      window.localStorage.setItem(
-        key,
-        JSON.stringify([{ plan, savedAt: 1_700_000_000_000 }])
-      );
-    },
-    { key: STORAGE_KEY, plan: favoritePlan }
-  );
-
-  await page.goto(getAppUrl("/favorites"));
-  await page.locator('button[title="お気に入り解除"]').click();
-
-  await expect(page).toHaveURL(/\/favorites$/);
-  await expect(page.getByText(favoritePlan.title)).toHaveCount(0);
-
-  expectNoApiRequests(requestCounts);
-});

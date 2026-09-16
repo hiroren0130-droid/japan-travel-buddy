@@ -208,7 +208,7 @@ export default function TravelPlanDetailPage() {
         </Link>
       </div>
 
-      <TravelPlanCard plan={plan} />
+      <TravelPlanCard key={validatedId} plan={plan} savedPlanId={validatedId ?? undefined} />
     </main>
   );
 }

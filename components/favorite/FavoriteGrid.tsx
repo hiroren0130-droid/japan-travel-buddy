@@ -4,7 +4,7 @@ import type { TravelPlan } from "@/types/travel";
 import FavoriteCard from "./FavoriteCard";
 
 export interface FavoriteGridProps {
-  favorites: TravelPlan[];
+  favorites: Array<TravelPlan & { id?: string }>;
   view?: "grid" | "list";
   onCardClick?: (plan: TravelPlan) => void;
   onRemove?: (plan: TravelPlan) => void;
@@ -26,7 +26,7 @@ export default function FavoriteGrid({
     >
       {favorites.map((plan) => (
         <FavoriteCard
-  key={`${plan.title}-${plan.summary}`}
+  key={plan.id ?? `${plan.title}-${plan.summary}`}
   plan={plan}
   view={view}
   onClick={() => onCardClick?.(plan)}

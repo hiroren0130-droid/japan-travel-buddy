@@ -192,7 +192,7 @@ export default function HistoryDetailPage() {
     {historyDetailMessages.backToDashboard}
   </Link>
 
-  <TravelPlanCard plan={plan} />
+      <TravelPlanCard key={validatedId} plan={plan} savedPlanId={validatedId ?? undefined} />
 </div>
     </main>
   );
