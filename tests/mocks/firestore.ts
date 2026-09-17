@@ -2,6 +2,7 @@ import type {
   SavedTravelPlan,
   TravelPlan,
 } from "@/types/travel";
+import { serializeTravelPlanConditionUpdates } from "@/lib/travelPlanConditions";
 import {
   readFirebaseMockState,
   writeFirebaseMockState,
@@ -116,5 +117,22 @@ export async function updateTravelPlanDetails(
     | "endTime"
   >
 ): Promise<void> {
-  await updateTravelPlan(id, data);
+  const conditions = serializeTravelPlanConditionUpdates(data);
+  const updates: Record<string, unknown> = { title: data.title, summary: data.summary };
+  for (const [key, value] of Object.entries(conditions)) {
+    updates[key] = value === null ? { __deleteField: true } : value;
+  }
+  updateState((state) => {
+    state.calls!.updateTravelPlan ??= [];
+    state.calls!.updateTravelPlan.push({ id, data: updates });
+    state.plans = state.plans!.map((plan) => {
+      if (plan.id !== id) return plan;
+      const updated: Record<string, unknown> = { ...plan, title: data.title, summary: data.summary };
+      for (const [key, value] of Object.entries(conditions)) {
+        if (value === null) delete updated[key];
+        else updated[key] = value;
+      }
+      return updated;
+    });
+  });
 }

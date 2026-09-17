@@ -56,17 +56,25 @@ export function serializeTravelPlanConditions(
 export function serializeTravelPlanConditionUpdates(
   plan: TravelPlanConditions
 ) {
-  const conditions =
-    serializeTravelPlanConditions(plan);
+  const updates: Partial<Record<keyof TravelPlanConditions, string | null>> = {};
+  for (const key of ["startLocation", "startTime", "endLocation", "endTime"] as const) {
+    const value = plan[key];
+    if (value === undefined) continue;
+    if (key === "startTime" || key === "endTime") {
+      if (value !== "" && !TIME_PATTERN.test(value)) {
+        throw new InvalidTravelPlanTimeError();
+      }
+      updates[key] = value === "" ? null : value;
+    } else {
+      updates[key] = normalizeLocation(value) ?? null;
+    }
+  }
+  return updates;
+}
 
-  return {
-    startLocation:
-      conditions.startLocation ?? null,
-    startTime:
-      conditions.startTime ?? null,
-    endLocation:
-      conditions.endLocation ?? null,
-    endTime:
-      conditions.endTime ?? null,
-  };
+export class InvalidTravelPlanTimeError extends Error {
+  constructor() {
+    super("Time must use HH:mm format.");
+    this.name = "InvalidTravelPlanTimeError";
+  }
 }
