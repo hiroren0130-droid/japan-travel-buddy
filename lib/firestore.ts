@@ -23,7 +23,7 @@ import {
 export async function saveTravelPlan(
   uid: string,
   plan: TravelPlan
-): Promise<void> {
+): Promise<string> {
   const q = query(
   collection(db, "travelPlans"),
   where("uid", "==", uid),
@@ -42,7 +42,7 @@ if (alreadyExists) {
   throw new Error("同じタイトルの旅行プランはすでに保存されています。");
 }
 
-  await addDoc(collection(db, "travelPlans"), {
+  const savedDocument = await addDoc(collection(db, "travelPlans"), {
     uid,
     title: plan.title,
     summary: plan.summary,
@@ -53,6 +53,7 @@ if (alreadyExists) {
     favorite: false,
     createdAt: serverTimestamp(),
   });
+  return savedDocument.id;
 }
 
 export async function getTravelPlans(

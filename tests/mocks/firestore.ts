@@ -23,14 +23,28 @@ function updateState(
 export async function saveTravelPlan(
   uid: string,
   plan: TravelPlan
-): Promise<void> {
-  updateState((state) => {
+): Promise<string> {
+  const snapshot = updateState((state) => {
     state.calls!.saveTravelPlan ??= [];
     state.calls!.saveTravelPlan.push({
       uid,
       plan: plan as unknown as Record<string, unknown>,
     });
   });
+  if (snapshot.firestore?.saveDeferred) {
+    await new Promise<void>((resolve) => {
+      window.addEventListener("playwright-release-save", () => resolve(), { once: true });
+    });
+  }
+  if (snapshot.firestore?.saveReject) throw new Error("Mock save failure.");
+  if (snapshot.plans?.some((saved) => saved.uid === uid && saved.title === plan.title)) {
+    throw new Error("Duplicate plan title.");
+  }
+  const id = `mock-saved-${crypto.randomUUID()}`;
+  updateState((state) => {
+    state.plans!.push({ ...plan, id, uid, favorite: false });
+  });
+  return id;
 }
 
 export async function getTravelPlans(
