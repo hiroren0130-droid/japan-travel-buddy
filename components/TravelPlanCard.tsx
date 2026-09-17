@@ -142,18 +142,29 @@ export default function TravelPlanCard({
   const [updatingFavorite, setUpdatingFavorite] = useState(false);
   const favoriteRequest = useRef(0);
   const favoriteBusy = useRef(false);
+  // Invalidate pending saves even when the same user signs out and back in.
+  const saveGeneration = useRef(0);
+  const [savedDocument, setSavedDocument] = useState<{
+    id: string;
+    uid: string;
+    plan: TravelPlan;
+    generation: number;
+  } | null>(null);
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, () => {
+      saveGeneration.current += 1;
+      setSavedDocument(null);
       favoriteRequest.current += 1;
       favoriteBusy.current = false;
       setUpdatingFavorite(false);
       setFavorite(plan.favorite === true);
     });
     return () => {
+      saveGeneration.current += 1;
       favoriteRequest.current += 1;
       unsubscribe();
     };
-  }, [savedPlanId, plan.favorite]);
+  }, [savedPlanId, plan]);
   const [saving, setSaving] = useState(false);
   const [routeSegments, setRouteSegments] =
     useState<GoogleMapsRouteSegment[]>([]);
@@ -166,7 +177,15 @@ export default function TravelPlanCard({
       alert(defaultMessages.travelPlanCard.alerts.loginRequired);
       return;
     }
-    if (!savedPlanId) {
+    // A locally saved ID belongs only to this plan and authentication session.
+    const documentId = savedPlanId ?? (
+      savedDocument?.plan === plan &&
+      savedDocument.uid === user.uid &&
+      savedDocument.generation === saveGeneration.current
+        ? savedDocument.id
+        : undefined
+    );
+    if (!documentId) {
       alert(defaultMessages.travelPlanCard.alerts.saveBeforeFavorite);
       return;
     }
@@ -176,10 +195,10 @@ export default function TravelPlanCard({
     const request = ++favoriteRequest.current;
     const nextFavorite = !favorite;
     try {
-      await updateTravelPlan(savedPlanId, { favorite: nextFavorite });
+      await updateTravelPlan(documentId, { favorite: nextFavorite });
       if (request !== favoriteRequest.current || auth.currentUser?.uid !== user.uid) return;
       setFavorite(nextFavorite);
-      onFavoriteChange?.(savedPlanId, nextFavorite);
+      onFavoriteChange?.(documentId, nextFavorite);
     } catch (error) {
       if (request !== favoriteRequest.current || auth.currentUser?.uid !== user.uid) return;
       logClientError("Favorite update failed.", error);
@@ -242,6 +261,7 @@ export default function TravelPlanCard({
     }
 
     const uid = user.uid;
+    const generation = saveGeneration.current;
     const normalizedPlan: TravelPlan = {
       title: plan.title.trim(),
       summary: plan.summary.trim(),
@@ -261,13 +281,15 @@ export default function TravelPlanCard({
     setSaving(true);
 
     try {
-      await saveTravelPlan(uid, normalizedPlan);
+      const id = await saveTravelPlan(uid, normalizedPlan);
 
       if (auth.currentUser?.uid !== uid) {
         alert(defaultMessages.travelPlanCard.alerts.authChanged);
         return;
       }
 
+      if (generation !== saveGeneration.current) return;
+      setSavedDocument({ id, uid, plan, generation });
       alert(defaultMessages.travelPlanCard.alerts.saveSuccess);
     } catch (error) {
       logClientError(

@@ -18,6 +18,7 @@ type AuthBehavior = {
 export type FirebaseMockState = {
   user: MockUser | null;
   auth?: AuthBehavior;
+  firestore?: { saveReject?: boolean; saveDeferred?: boolean };
   plans?: Array<Record<string, unknown>>;
   calls?: {
     signIn?: Array<{ email: string; password: string }>;
@@ -100,7 +101,7 @@ export function onAuthStateChanged(
 ): () => void {
   let active = true;
 
-  queueMicrotask(() => {
+  const notify = () => {
     if (!active) return;
 
     const state = readFirebaseMockState();
@@ -111,10 +112,13 @@ export function onAuthStateChanged(
     }
 
     next(state.user);
-  });
+  };
+  queueMicrotask(notify);
+  window.addEventListener("playwright-auth-changed", notify);
 
   return () => {
     active = false;
+    window.removeEventListener("playwright-auth-changed", notify);
   };
 }
 
