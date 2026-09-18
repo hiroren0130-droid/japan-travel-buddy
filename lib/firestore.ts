@@ -116,21 +116,10 @@ export async function updateTravelPlanDetails(
   await updateDoc(ref, {
     title: data.title,
     summary: data.summary,
-    startLocation:
-      conditions.startLocation === null
-        ? deleteField()
-        : conditions.startLocation,
-    startTime:
-      conditions.startTime === null
-        ? deleteField()
-        : conditions.startTime,
-    endLocation:
-      conditions.endLocation === null
-        ? deleteField()
-        : conditions.endLocation,
-    endTime:
-      conditions.endTime === null
-        ? deleteField()
-        : conditions.endTime,
+    ...Object.fromEntries(
+      Object.entries(conditions).map(([key, value]) => [
+        key, value === null ? deleteField() : value,
+      ])
+    ),
   });
 }

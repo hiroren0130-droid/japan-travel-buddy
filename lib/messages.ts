@@ -451,6 +451,7 @@ export type AppMessages = {
     requiredAlert: string;
     titleTooLongAlert: string;
     summaryTooLongAlert: string;
+    invalidTimeAlert: string;
     saveSuccessAlert: string;
     saveFailedAlert: string;
     title: string;
@@ -1155,6 +1156,7 @@ export const messages: LocaleRecord<AppMessages> = {
       requiredAlert: "タイトルと概要を入力してください。",
       titleTooLongAlert: "タイトルは120文字以内で入力してください。",
       summaryTooLongAlert: "概要は2000文字以内で入力してください。",
+      invalidTimeAlert: "時刻は00:00〜23:59の形式で入力してください。",
       saveSuccessAlert: "保存しました",
       saveFailedAlert: "旅行プランを保存できませんでした。",
       title: "✏️ 旅行プラン編集",
@@ -1868,6 +1870,7 @@ export const messages: LocaleRecord<AppMessages> = {
       requiredAlert: "Enter a title and summary.",
       titleTooLongAlert: "Enter a title of no more than 120 characters.",
       summaryTooLongAlert: "Enter a summary of no more than 2,000 characters.",
+      invalidTimeAlert: "Enter a time in HH:mm format between 00:00 and 23:59.",
       saveSuccessAlert: "Saved",
       saveFailedAlert: "Could not save the travel plan.",
       title: "✏️ Edit Travel Plan",

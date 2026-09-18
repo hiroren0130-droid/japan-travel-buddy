@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { getTravelPlan, updateTravelPlanDetails } from "@/lib/firestore";
 import { useLocale } from "@/components/LocaleProvider";
+
+import { InvalidTravelPlanTimeError } from "@/lib/travelPlanConditions";
 
 const CONTROL_CHARACTER_PATTERN =
   /[\u0000-\u001f\u007f-\u009f]/;
@@ -84,6 +86,8 @@ const [startLocation, setStartLocation] = useState("");
 const [startTime, setStartTime] = useState("");
 const [endLocation, setEndLocation] = useState("");
 const [endTime, setEndTime] = useState("");
+const [dirtyConditions, setDirtyConditions] = useState<Partial<Record<"startLocation" | "startTime" | "endLocation" | "endTime", true>>>({});
+const fieldsRef = useRef<HTMLDivElement>(null);
 const [loading, setLoading] = useState(true);
 const [saving, setSaving] = useState(false);
 const [loadedUid, setLoadedUid] = useState<string | null>(null);
@@ -107,6 +111,7 @@ useEffect(() => {
     if (!active) return;
 
     const generation = ++requestGeneration;
+    setDirtyConditions({});
     setTitle("");
     setSummary("");
     setStartLocation("");
@@ -188,6 +193,7 @@ useEffect(() => {
     if (!active) return;
 
     requestGeneration++;
+    setDirtyConditions({});
     setTitle("");
     setSummary("");
     setStartLocation("");
@@ -254,16 +260,23 @@ async function handleSave() {
     return;
   }
 
+  // Native time inputs can have badInput while their value is an empty string.
+  const invalidInput = fieldsRef.current?.querySelector<HTMLInputElement>("input:invalid");
+  if (invalidInput) {
+    invalidInput.reportValidity();
+    return;
+  }
+
   setSaving(true);
 
   try {
     await updateTravelPlanDetails(validatedId, {
       title: trimmedTitle,
       summary: trimmedSummary,
-      startLocation,
-      startTime,
-      endLocation,
-      endTime,
+      ...(dirtyConditions.startLocation ? { startLocation } : {}),
+      ...(dirtyConditions.startTime ? { startTime } : {}),
+      ...(dirtyConditions.endLocation ? { endLocation } : {}),
+      ...(dirtyConditions.endTime ? { endTime } : {}),
     });
 
     alert(historyEditMessages.saveSuccessAlert);
@@ -275,7 +288,9 @@ async function handleSave() {
       console.error("Travel plan saving failed.");
     }
 
-    alert(historyEditMessages.saveFailedAlert);
+    alert(error instanceof InvalidTravelPlanTimeError
+      ? historyEditMessages.invalidTimeAlert
+      : historyEditMessages.saveFailedAlert);
   } finally {
     setSaving(false);
   }
@@ -290,7 +305,7 @@ async function handleSave() {
     {loading ? (
       <p>{historyEditMessages.loading}</p>
     ) : (
-      <div className="space-y-6">
+      <div ref={fieldsRef} className="space-y-6">
 
         <div>
           <label className="mb-2 block font-semibold">
@@ -325,11 +340,10 @@ async function handleSave() {
               type="text"
               maxLength={200}
               value={startLocation}
-              onChange={(event) =>
-                setStartLocation(
-                  event.target.value
-                )
-              }
+              onChange={(event) => {
+                setStartLocation(event.target.value);
+                setDirtyConditions((current) => ({ ...current, startLocation: true }));
+              }}
               className="mt-2 w-full rounded-lg border p-3 font-normal"
             />
           </label>
@@ -340,9 +354,10 @@ async function handleSave() {
             <input
               type="time"
               value={startTime}
-              onChange={(event) =>
-                setStartTime(event.target.value)
-              }
+              onChange={(event) => {
+                setStartTime(event.target.value);
+                setDirtyConditions((current) => ({ ...current, startTime: true }));
+              }}
               className="mt-2 w-full rounded-lg border p-3 font-normal"
             />
           </label>
@@ -354,11 +369,10 @@ async function handleSave() {
               type="text"
               maxLength={200}
               value={endLocation}
-              onChange={(event) =>
-                setEndLocation(
-                  event.target.value
-                )
-              }
+              onChange={(event) => {
+                setEndLocation(event.target.value);
+                setDirtyConditions((current) => ({ ...current, endLocation: true }));
+              }}
               className="mt-2 w-full rounded-lg border p-3 font-normal"
             />
           </label>
@@ -369,9 +383,10 @@ async function handleSave() {
             <input
               type="time"
               value={endTime}
-              onChange={(event) =>
-                setEndTime(event.target.value)
-              }
+              onChange={(event) => {
+                setEndTime(event.target.value);
+                setDirtyConditions((current) => ({ ...current, endTime: true }));
+              }}
               className="mt-2 w-full rounded-lg border p-3 font-normal"
             />
           </label>

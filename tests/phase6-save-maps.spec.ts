@@ -465,8 +465,21 @@ test("Firestore update serializerは空欄を削除指定へ変換できる", ()
     endTime: "17:30",
   })).toEqual({
     startLocation: null,
-    startTime: null,
     endLocation: "大阪駅",
     endTime: "17:30",
   });
 });
+
+test("omitted conditions and undefined preserve existing fields", () => {
+  expect(serializeTravelPlanConditionUpdates({})).toEqual({});
+  expect(serializeTravelPlanConditionUpdates({ startTime: undefined })).toEqual({});
+});
+
+for (const key of ["startTime", "endTime"] as const) {
+  test(`${key} rejects invalid times instead of deleting`, () => {
+    for (const value of ["24:00", "9:00", "09:60", "invalid", " "]) {
+      expect(() => serializeTravelPlanConditionUpdates({ [key]: value })).toThrow("HH:mm");
+    }
+    expect(serializeTravelPlanConditionUpdates({ [key]: "" })).toEqual({ [key]: null });
+  });
+}
