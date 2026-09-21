@@ -1,4 +1,56 @@
 import { expect, test } from "@playwright/test";
+import { getSpotById } from "@/lib/spotService";
+
+for (const scenario of [
+  { name: "同一都市", start: "京都駅", end: "京都駅", modes: ["walking", "walking", "walking", "walking", "walking"] },
+  { name: "異都市", start: "大阪駅", end: "大阪駅", modes: ["transit", "walking", "walking", "walking", "transit"] },
+  { name: "三ノ宮から神戸", start: "三ノ宮駅", end: "神戸駅", modes: [null, "walking", "walking", "walking", null] },
+]) {
+  test(`保存済みPlan・${scenario.name}は全体URLを開かず5区間を表示する`, async ({ page, context }) => {
+    const spots = ["nishiki-market", "gion", "yasaka-shrine", "kiyomizudera"].map((id) => getSpotById(id)!);
+    const plan = {
+      id: "route-segments-plan", uid: "user-1", favorite: true,
+      title: "保存済み区間ルート", summary: "京都の4地点を順に訪問します。",
+      startLocation: scenario.start, endLocation: scenario.end,
+      days: [{ day: 1, items: spots.map((spot) => ({
+        spotId: spot.id, time: "10:00", description: spot.name,
+        transport: "電車", duration: "30分",
+      })) }],
+    };
+    await page.route("**/*", (route) => {
+      const host = new URL(route.request().url()).hostname;
+      return host === "localhost" || host === "127.0.0.1" ? route.continue() : route.abort();
+    });
+    await page.addInitScript((savedPlan) => {
+      localStorage.setItem("japan-travel-buddy-locale", "ja");
+      localStorage.setItem("playwright-firebase-mock-state", JSON.stringify({
+        user: { uid: "user-1" }, plans: [savedPlan], calls: {},
+      }));
+      window.open = () => { throw new Error("Unexpected whole-route window.open"); };
+    }, plan);
+    await page.goto(`/favorites?plan=${plan.id}`);
+    const section = page.getByRole("region", { name: "区間別Google Mapsルート" });
+    await expect(section).toHaveCount(0);
+    await page.getByRole("button", { name: "Google Mapsでルートを開く" }).click();
+    await expect(section).toBeVisible();
+    const articles = section.getByRole("article");
+    const names = [scenario.start, ...spots.map((spot) => spot.name), scenario.end];
+    await expect(articles).toHaveCount(5);
+    for (let index = 0; index < 5; index++) {
+      await expect(articles.nth(index).getByText(names[index], { exact: true })).toBeVisible();
+      await expect(articles.nth(index).getByText(names[index + 1], { exact: true })).toBeVisible();
+      const link = articles.nth(index).getByRole("link", { name: "Google Mapsで開く" });
+      const url = new URL((await link.getAttribute("href"))!);
+      expect(url.searchParams.get("travelmode")).toBe(scenario.modes[index]);
+      expect(url.searchParams.has("waypoints")).toBe(false);
+      await expect(link).toHaveAttribute("target", "_blank");
+      await expect(link).toHaveAttribute("rel", "noopener noreferrer");
+    }
+    expect(context.pages()).toHaveLength(1);
+    await section.getByRole("button", { name: "閉じる", exact: false }).click();
+    await expect(section).toHaveCount(0);
+  });
+}
 
 test("複数city PlanはGoogle Maps区間リンクを順番どおり表示する", async ({
   page,

@@ -37,6 +37,26 @@ const osakaStationCity = getSpotById("osaka-station-city")!;
 const kyotoStationPlace = `${kyotoStation.name}, ${kyotoStation.address}`;
 const osakaStationCityPlace = `${osakaStationCity.name}, ${osakaStationCity.address}`;
 
+test("区間URLは日本語と予約文字をencodeし住所・座標・名称の優先順を維持する", () => {
+  const origin = "清水寺, 京都 & 大阪? #1|2";
+  const destination = "34.994856,135.785046";
+  const segments = createGoogleMapsRouteSegments([
+    { name: "清水寺", address: "京都 & 大阪? #1|2", latitude: 1, longitude: 2 },
+    { name: "祇園", latitude: 34.994856, longitude: 135.785046 },
+    { name: "八坂神社" },
+  ]);
+  expect(segments).toHaveLength(2);
+  expect(segments[0].url).toBe(
+    `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(destination)}`
+  );
+  expect(new URL(segments[0].url).searchParams.get("origin")).toBe(origin);
+  expect(new URL(segments[1].url).searchParams.get("destination")).toBe("八坂神社");
+  for (const segment of segments) {
+    expect(new URL(segment.url).searchParams.has("waypoints")).toBe(false);
+    expect(new URL(segment.url).searchParams.has("travelmode")).toBe(false);
+  }
+});
+
 const aiPlan: AITravelPlan = {
   title: "Phase 6 test",
   summary: "Phase 6 test plan",

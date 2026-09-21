@@ -36,9 +36,7 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { saveTravelPlan, updateTravelPlan } from "@/lib/firestore";
 import {
-  createGoogleMapsRoute,
   createGoogleMapsRouteSegments,
-  determineGoogleMapsTravelMode,
 } from "@/lib/googleMaps";
 import {
   getLocalizedSpotArea,
@@ -375,37 +373,12 @@ export default function TravelPlanCard({
           plan.endLocation,
       };
 
-      if (
-        determineGoogleMapsTravelMode(
+      setRouteSegments(
+        createGoogleMapsRouteSegments(
           routePoints,
           routeOptions
-        ) === "transit"
-      ) {
-        setRouteSegments(
-          createGoogleMapsRouteSegments(
-            routePoints,
-            routeOptions
-          )
-        );
-        return;
-      }
-
-      setRouteSegments([]);
-
-      const url = createGoogleMapsRoute(
-        routePoints,
-        routeOptions
+        )
       );
-
-      const openedWindow = window.open(
-        url,
-        "_blank",
-        "noopener,noreferrer"
-      );
-
-      if (openedWindow === null) {
-        throw new Error("Google Maps window was blocked.");
-      }
     } catch (error) {
       logClientError(
         "Google Mapsを開けませんでした。",
