@@ -59,7 +59,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 shadow-sm backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:px-8">
         {/* Brand */}
         <Link
           href="/"
@@ -102,12 +102,17 @@ export default function Header() {
           className="
             flex
             min-w-0
+            w-full
+            flex-wrap
             items-center
             gap-2
-            overflow-x-auto
             pb-1
             sm:gap-3
             sm:pb-0
+            lg:w-auto
+            lg:flex-nowrap
+            lg:gap-1.5
+            xl:gap-3
           "
         >
           <label className="shrink-0">
