@@ -38,7 +38,7 @@ export default function TravelTimeline({
               className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-blue-400/20 blur-3xl"
             />
 
-            <div className="relative flex items-center gap-4">
+            <div className="relative flex flex-col items-start gap-4 lg:flex-row lg:items-center">
               {/* カレンダーアイコン */}
               <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm sm:h-16 sm:w-16">
                 <CalendarDays
@@ -82,7 +82,7 @@ export default function TravelTimeline({
           {/* Timeline */}
           <div
             role="list"
-            className="relative px-3 py-6 sm:px-6 sm:py-8 lg:px-8"
+            className="relative px-2 py-6 sm:px-6 sm:py-8 lg:px-8"
           >
             {day.items.length === 0 ? (
               <div className="rounded-2xl bg-slate-50 px-5 py-10 text-center">

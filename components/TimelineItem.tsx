@@ -141,22 +141,22 @@ export default function TimelineItem({
       className="
         relative
         grid
-        grid-cols-[64px_24px_minmax(0,1fr)]
+        grid-cols-1
         items-stretch
         gap-3
-        sm:grid-cols-[76px_28px_minmax(0,1fr)]
-        sm:gap-4
+        lg:grid-cols-[76px_28px_minmax(0,1fr)]
+        lg:gap-4
       "
     >
       {/* 時刻 */}
-      <div className="pt-6 text-right sm:pt-7">
+      <div className="text-left lg:pt-7 lg:text-right">
         <time className="whitespace-nowrap text-sm font-bold text-blue-600 sm:text-base">
           {time}
         </time>
       </div>
 
       {/* タイムライン */}
-      <div className="relative flex min-h-full justify-center">
+      <div className="relative hidden min-h-full justify-center lg:flex">
         <div className="absolute inset-y-0 w-[2px] bg-blue-500" />
 
         <div className="relative z-10 mt-7 flex h-5 w-5 items-center justify-center rounded-full bg-white sm:h-6 sm:w-6">
@@ -168,6 +168,8 @@ export default function TimelineItem({
       <Card
         className="
           mb-4
+          p-0!
+          lg:p-5!
           min-w-0
           overflow-hidden
           rounded-2xl
@@ -180,7 +182,7 @@ export default function TimelineItem({
           hover:shadow-[0_8px_24px_rgba(15,23,42,0.10)]
         "
       >
-        <div className="flex flex-col sm:min-h-[180px] sm:flex-row">
+        <div className="flex flex-col lg:min-h-[180px] lg:flex-row">
           {/* スポット画像 */}
           {spotData && (
             <div
@@ -190,8 +192,7 @@ export default function TimelineItem({
                 shrink-0
                 overflow-hidden
                 bg-slate-100
-                sm:h-[180px]
-                sm:w-[210px]
+                lg:h-[180px]
                 lg:w-[230px]
               "
             >
@@ -208,23 +209,23 @@ export default function TimelineItem({
           )}
 
           {/* スポット情報 */}
-          <div className="flex min-w-0 flex-1 flex-col lg:flex-row">
-            <div className="flex min-w-0 flex-1 flex-col justify-center px-5 py-5 sm:px-6">
+          <div className="flex min-w-0 flex-1 flex-col xl:flex-row">
+            <div className="flex min-w-0 flex-1 flex-col justify-center px-3 py-5 lg:px-6">
               {/* スポット名・エリア */}
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                <h3 className="text-xl font-bold leading-tight tracking-tight text-blue-600 sm:text-2xl">
+                <h3 className="min-w-0 break-words text-xl font-bold leading-tight tracking-tight text-blue-600 sm:text-2xl [&_a>span]:min-w-0">
                   <PlaceLink name={spot} />
                 </h3>
 
                 {spotData?.area && (
-                  <div className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
+                  <div className="flex min-w-0 items-center gap-1.5 text-sm font-medium text-slate-500">
                     <MapPin
                       size={16}
                       className="shrink-0 text-blue-600"
                       aria-hidden="true"
                     />
 
-                    <span>
+                    <span className="min-w-0 break-words">
                       {getLocalizedSpotArea(
                         spotData,
                         locale
@@ -235,7 +236,7 @@ export default function TimelineItem({
               </div>
 
               {/* 説明 */}
-              <p className="mt-3 text-sm leading-6 text-slate-700 sm:text-base sm:leading-7">
+              <p className="mt-3 break-words text-sm leading-6 text-slate-700 sm:text-base sm:leading-7">
                 {displayedDescription ||
                   defaultMessages.timelineItem.descriptionFallback}
               </p>
@@ -278,12 +279,12 @@ export default function TimelineItem({
             </div>
 
             {/* PC用地図ボタン */}
-            <div className="hidden shrink-0 items-center border-l border-slate-100 px-5 lg:flex">
+            <div className="hidden shrink-0 items-center border-l border-slate-100 px-5 xl:flex">
               <TimelineMapButton spot={spot} />
             </div>
 
             {/* スマホ・タブレット用地図ボタン */}
-            <div className="flex justify-end border-t border-slate-100 px-5 py-3 lg:hidden">
+            <div className="flex justify-end border-t border-slate-100 px-3 py-3 xl:hidden">
               <TimelineMapButton spot={spot} />
             </div>
           </div>

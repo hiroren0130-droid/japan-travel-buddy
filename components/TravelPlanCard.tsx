@@ -473,7 +473,7 @@ export default function TravelPlanCard({
     "h-11 w-11 rounded-xl border border-white/80 bg-white text-slate-700 shadow-lg transition hover:-translate-y-0.5 hover:bg-blue-50 hover:text-blue-700";
 
   return (
-    <Card className="overflow-hidden rounded-[28px] border border-slate-200 bg-slate-50 p-0 shadow-xl">
+    <Card className="overflow-hidden rounded-[28px] border border-slate-200 bg-slate-50 p-0! shadow-xl lg:p-5!">
       {/* Hero */}
       <header className="relative overflow-hidden bg-gradient-to-br from-[#17376f] via-[#124ca8] to-[#08a4dc]">
         {/* Background decoration */}
@@ -509,11 +509,11 @@ export default function TravelPlanCard({
             {firstSpot && (
               <div className="absolute bottom-3 left-3 right-3">
                 <div className="rounded-xl border border-white/30 bg-slate-950/40 px-3 py-2 text-white backdrop-blur-md">
-                  <p className="truncate text-sm font-bold">
+                  <p className="break-words text-sm font-bold lg:truncate">
                     {firstSpotName}
                   </p>
 
-                  <p className="mt-0.5 truncate text-xs text-white/75">
+                  <p className="mt-0.5 break-words text-xs text-white/75 lg:truncate">
                     {firstSpotArea}
                   </p>
                 </div>
@@ -531,12 +531,12 @@ export default function TravelPlanCard({
                   {defaultMessages.appName}
                 </p>
 
-                <h1 className="mt-2 text-3xl font-black leading-[1.16] tracking-tight sm:text-4xl lg:text-[40px]">
+                <h1 className="mt-2 break-words text-3xl font-black leading-[1.16] tracking-tight sm:text-4xl lg:text-[40px]">
                   {plan.title}
                 </h1>
 
                 {heroSummary && (
-                  <p className="mt-3 max-w-3xl text-sm leading-6 text-blue-50/90 sm:text-base sm:leading-7">
+                  <p className="mt-3 max-w-3xl break-words text-sm leading-6 text-blue-50/90 sm:text-base sm:leading-7">
                     {heroSummary}
                   </p>
                 )}
@@ -654,7 +654,7 @@ export default function TravelPlanCard({
             </div>
 
             {/* Plan information */}
-            <div className="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
+            <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-2xl border border-white/15 bg-white/15 px-4 py-3 backdrop-blur-md">
                 <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-blue-100">
                   {defaultMessages.travelPlanCard.info.durationLabel}
@@ -686,7 +686,7 @@ export default function TravelPlanCard({
                     aria-hidden="true"
                   />
 
-                  <p className="whitespace-nowrap text-base font-bold text-white">
+                  <p className="min-w-0 break-words text-base font-bold text-white lg:whitespace-nowrap">
                     {totalSpots}
                     {defaultMessages.travelPlanCard.info.spotSuffix}
                   </p>
@@ -705,7 +705,7 @@ export default function TravelPlanCard({
                     aria-hidden="true"
                   />
 
-                  <p className="truncate text-base font-bold text-white">
+                  <p className="min-w-0 break-words text-base font-bold text-white lg:truncate">
                     {firstSpotArea ?? defaultMessages.travelPlanCard.info.defaultArea}
                   </p>
                 </div>
@@ -723,7 +723,7 @@ export default function TravelPlanCard({
                     aria-hidden="true"
                   />
 
-                  <p className="truncate text-base font-bold text-white">
+                  <p className="min-w-0 break-words text-base font-bold text-white lg:truncate">
                     {defaultMessages.travelPlanCard.info.aiValue}
                   </p>
                 </div>
@@ -843,7 +843,7 @@ export default function TravelPlanCard({
         {/* Summary */}
         {plan.summary && (
           <section className="rounded-[24px] border border-slate-200 bg-white px-5 py-5 shadow-sm sm:px-7">
-            <div className="flex items-start gap-4">
+            <div className="flex flex-col items-start gap-4 lg:flex-row">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
                 <NotebookText
                   size={23}
@@ -860,7 +860,7 @@ export default function TravelPlanCard({
                   {defaultMessages.travelPlanCard.summaryTitle}
                 </h2>
 
-                <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
+                <p className="mt-3 break-words text-sm leading-7 text-slate-600 sm:text-base sm:leading-8">
                   {plan.summary}
                 </p>
               </div>
