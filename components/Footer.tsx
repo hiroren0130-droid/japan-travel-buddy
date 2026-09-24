@@ -8,7 +8,7 @@ export default function Footer() {
   const { locale, messages } = useLocale();
 
   return (
-    <footer className="mt-20 border-t bg-gray-50">
+    <footer className="border-t bg-gray-50">
       <div className="mx-auto max-w-7xl px-6 py-10">
 
         <div className="grid gap-8 md:grid-cols-2">
