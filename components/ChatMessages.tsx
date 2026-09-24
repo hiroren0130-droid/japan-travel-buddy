@@ -24,7 +24,7 @@ export default function ChatMessages({
 
   return (
     <div
-      className="space-y-6 bg-gray-50 p-6"
+      className="space-y-6 bg-gray-50 p-2 lg:p-6"
       role="log"
       aria-live="polite"
       aria-label={chatMessages.ariaLabel}
