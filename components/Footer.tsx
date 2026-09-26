@@ -8,7 +8,7 @@ export default function Footer() {
   const { locale, messages } = useLocale();
 
   return (
-    <footer className="border-t bg-gray-50">
+    <footer className="border-t bg-gray-50 text-gray-900">
       <div className="mx-auto max-w-7xl px-6 py-10">
 
         <div className="grid gap-8 md:grid-cols-2">
@@ -49,7 +49,7 @@ export default function Footer() {
 
         </div>
 
-        <div className="mt-10 border-t pt-6 text-center text-sm text-gray-500">
+        <div className="mt-10 border-t pt-6 text-center text-sm text-gray-600">
           © {new Date().getFullYear()} {messages.appName}.{" "}
           {messages.footer.rightsReserved}
         </div>
