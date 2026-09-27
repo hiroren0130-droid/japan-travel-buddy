@@ -37,12 +37,12 @@ export default function SpotDetail({
     <main className="mx-auto max-w-5xl p-6 sm:p-8">
       <Link
         href={`/discover/${spot.prefectureId}`}
-        className="mb-6 inline-block text-sm font-semibold text-blue-600 hover:text-blue-700"
+        className="mb-6 inline-block text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
       >
         {spotDetailMessages.backToSpots}
       </Link>
 
-      <div className="overflow-hidden rounded-2xl border bg-white shadow-lg">
+      <div className="overflow-hidden rounded-2xl border bg-white text-slate-900 shadow-lg">
         <div className="relative h-80 w-full">
           <SpotImage
             loading="eager"
