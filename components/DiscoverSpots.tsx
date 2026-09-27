@@ -143,23 +143,23 @@ export default function DiscoverSpots({
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-10">
-          <p className="text-sm font-bold tracking-widest text-blue-600">
+          <p className="text-sm font-bold tracking-widest text-blue-600 dark:text-blue-400">
             {regionNameEn.toUpperCase()} SPOT DATABASE
           </p>
 
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-slate-50">
             {locale === "en"
               ? `${regionName} Spots`
               : `${regionName}スポット一覧`}
           </h1>
 
-          <p className="mt-3 text-slate-600">
+          <p className="mt-3 text-slate-600 dark:text-slate-300">
             {locale === "en"
               ? `Browse sightseeing spots in ${regionName}.`
               : `${regionName}の観光スポットを一覧から探せます。`}
           </p>
 
-          <p className="mt-2 text-sm font-semibold text-slate-500">
+          <p className="mt-2 text-sm font-semibold text-slate-500 dark:text-slate-300">
             {spotsPageMessages.countPrefix}
             {spots.length}
             {spotsPageMessages.countSuffix}
@@ -179,7 +179,7 @@ export default function DiscoverSpots({
               type="button"
               disabled={selectedCount === 0}
               onClick={openChatWithSelectedSpots}
-              className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-700"
             >
               {locale === "en"
                 ? `Create an AI plan with ${selectedCount} selected spots`
