@@ -1260,8 +1260,8 @@ export const messages: LocaleRecord<AppMessages> = {
     },
     aboutPage: {
       metadata: {
-        title: "About | Japan Travel Buddy",
-        description: "Learn more about Japan Travel Buddy",
+        title: "サービスについて | Japan Travel Buddy",
+        description: "Japan Travel Buddyのサービスと機能をご紹介します。",
       },
       title: "About Japan Travel Buddy",
       mission: {
@@ -1303,7 +1303,7 @@ export const messages: LocaleRecord<AppMessages> = {
       responseTimeDescription: "お問い合わせには順次返信いたします。内容や受付状況によって、お時間をいただく場合があります。",
     },
     privacyPage: {
-      metadata: { title: "Privacy Policy | Japan Travel Buddy", description: "Privacy Policy for Japan Travel Buddy" },
+      metadata: { title: "プライバシーポリシー | Japan Travel Buddy", description: "Japan Travel Buddyにおける個人情報の取り扱いについて。" },
       title: "Privacy Policy",
       informationTitle: "1. Information We Collect",
       informationDescription: "Japan Travel Buddy may collect information necessary to provide travel planning services, including your account information, travel preferences, and usage data.",
@@ -1319,7 +1319,7 @@ export const messages: LocaleRecord<AppMessages> = {
       contactDescription: "If you have any questions regarding this Privacy Policy, please contact us through the Contact page.",
     },
     termsPage: {
-      metadata: { title: "Terms of Service | Japan Travel Buddy", description: "Terms of Service for Japan Travel Buddy" },
+      metadata: { title: "利用規約 | Japan Travel Buddy", description: "Japan Travel Buddyのご利用に関する規約。" },
       title: "Terms of Service",
       acceptanceTitle: "1. Acceptance of Terms",
       acceptanceDescription: "By using Japan Travel Buddy, you agree to these Terms of Service.",
@@ -1341,17 +1341,17 @@ export const messages: LocaleRecord<AppMessages> = {
     siteMetadata: {
       defaultTitle: "Japan Travel Buddy",
       titleTemplate: "%s | Japan Travel Buddy",
-      description: "Plan your perfect trip to Japan with AI. Discover destinations, build personalized itineraries, explore interactive maps, and save your travel plans with Japan Travel Buddy.",
+      description: "AIと一緒に日本旅行を計画。Japan Travel Buddyで観光スポットを探し、旅程を作成して、地図で確認・保存できます。",
       keywords: ["Japan", "Travel", "Kyoto", "AI", "Travel Planner", "Japan Trip", "Itinerary", "Tourism", "OpenAI"],
       authorName: "Japan Travel Buddy",
       creator: "Japan Travel Buddy",
       applicationName: "Japan Travel Buddy",
       openGraphSiteName: "Japan Travel Buddy",
       openGraphTitle: "Japan Travel Buddy",
-      openGraphDescription: "Create personalized Japan travel plans with AI.",
+      openGraphDescription: "AIで、あなたに合った日本旅行のプランを作成。",
       openGraphImageAlt: "Japan Travel Buddy",
       twitterTitle: "Japan Travel Buddy",
-      twitterDescription: "Create personalized Japan travel plans with AI.",
+      twitterDescription: "AIで、あなたに合った日本旅行のプランを作成。",
     },
     travelRouteMap: {
       title: "🗺️ Travel Route Map",

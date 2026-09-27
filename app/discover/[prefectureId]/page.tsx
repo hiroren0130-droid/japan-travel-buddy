@@ -3,10 +3,11 @@ import { notFound } from "next/navigation";
 
 import DiscoverSpots from "@/components/DiscoverSpots";
 import {
-  getPrefectureDisplayName,
   isPrefectureId,
 } from "@/data/regions";
 import { getSpotsByPrefectureId } from "@/lib/spotService";
+import { DEFAULT_LOCALE } from "@/lib/locale";
+import { getLocalizedPageMetadata } from "@/lib/localeMetadata";
 
 type Props = {
   params: Promise<{
@@ -25,15 +26,10 @@ export async function generateMetadata({
     };
   }
 
-  const regionName =
-    getPrefectureDisplayName(
-      prefectureId,
-      "en"
-    );
-
+  const localized = getLocalizedPageMetadata(`/discover/${prefectureId}`, DEFAULT_LOCALE)!;
   return {
-    title: `Discover ${regionName}`,
-    description: `Browse sightseeing spots in ${regionName}.`,
+    title: { absolute: localized.title },
+    description: localized.description,
   };
 }
 
