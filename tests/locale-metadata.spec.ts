@@ -41,7 +41,8 @@ for (const path of ["/chat", "/discover/kyoto"]) {
       }
       const url = `https://japan-travel-buddy-cmuv-psi.vercel.app${location.pathname}`;
       document.querySelector<HTMLMetaElement>('meta[property="og:url"]')!.content = url;
-      const canonical = document.createElement("link");
+      const canonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')
+        ?? document.createElement("link");
       canonical.rel = "canonical";
       canonical.href = url;
       document.head.append(canonical);
