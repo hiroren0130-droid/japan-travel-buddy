@@ -5,13 +5,12 @@ import LocaleProvider from "@/components/LocaleProvider";
 import LocaleMetadata from "@/components/LocaleMetadata";
 import { DEFAULT_LOCALE } from "@/lib/locale";
 import { getMessages } from "@/lib/messages";
+import { SITE_ORIGIN, sharedOpenGraph } from "@/lib/seoMetadata";
 
 const messages = getMessages(DEFAULT_LOCALE).siteMetadata;
 
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    "https://japan-travel-buddy-cmuv-psi.vercel.app"
-  ),
+  metadataBase: new URL(SITE_ORIGIN),
 
   title: {
     default: messages.defaultTitle,
@@ -37,22 +36,7 @@ export const metadata: Metadata = {
     follow: true,
   },
 
-  openGraph: {
-    type: "website",
-    locale: "ja_JP",
-    url: "https://japan-travel-buddy-cmuv-psi.vercel.app",
-    siteName: messages.openGraphSiteName,
-    title: messages.openGraphTitle,
-    description: messages.openGraphDescription,
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: messages.openGraphImageAlt,
-      },
-    ],
-  },
+  openGraph: sharedOpenGraph,
 
   twitter: {
     card: "summary_large_image",

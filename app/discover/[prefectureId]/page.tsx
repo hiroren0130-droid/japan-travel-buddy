@@ -8,6 +8,7 @@ import {
 import { getSpotsByPrefectureId } from "@/lib/spotService";
 import { DEFAULT_LOCALE } from "@/lib/locale";
 import { getLocalizedPageMetadata } from "@/lib/localeMetadata";
+import { getPageUrlMetadata } from "@/lib/seoMetadata";
 
 type Props = {
   params: Promise<{
@@ -20,14 +21,16 @@ export async function generateMetadata({
 }: Props): Promise<Metadata> {
   const { prefectureId } = await params;
 
-  if (!isPrefectureId(prefectureId)) {
+  if (!isPrefectureId(prefectureId) || getSpotsByPrefectureId(prefectureId).length === 0) {
     return {
       title: "Discover",
+      robots: { index: false, follow: false },
     };
   }
 
   const localized = getLocalizedPageMetadata(`/discover/${prefectureId}`, DEFAULT_LOCALE)!;
   return {
+    ...getPageUrlMetadata(`/discover/${encodeURIComponent(prefectureId)}`),
     title: { absolute: localized.title },
     description: localized.description,
   };

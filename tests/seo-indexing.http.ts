@@ -19,7 +19,6 @@ const privateRoutes = [
 const publicRoutes = [
   "/",
   "/chat",
-  "/spots",
   "/spots/kiyomizudera",
   "/discover/kyoto",
   "/discover/osaka",
@@ -30,6 +29,7 @@ const publicRoutes = [
   "/image-credits",
   "/login",
   "/signup",
+  "/logout-incomplete",
 ];
 
 async function getInitialResponse(path: string, userAgent: string) {
@@ -55,6 +55,21 @@ function robotsDirectives(html: string): string[] {
 }
 
 for (const userAgent of ["Mozilla/5.0", "Twitterbot/1.0"]) {
+  test(`${userAgent}: /spots redirects without becoming an independent search page`, async () => {
+    const response = await fetch(new URL("/spots", baseURL), {
+      redirect: "manual",
+      headers: { "User-Agent": userAgent },
+    });
+    if (response.status === 307 || response.status === 308) {
+      assert.equal(new URL(response.headers.get("location")!, baseURL).pathname, "/discover/kyoto");
+      return;
+    }
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, /http-equiv="refresh"[^>]*url=\/discover\/kyoto/);
+    assert.ok(robotsDirectives(html).includes("noindex"));
+    assert.ok(!robotsDirectives(html).includes("index"));
+  });
   for (const path of privateRoutes) {
     test(`${userAgent}: ${path} excludes indexing in initial HTML`, async () => {
       const { html } = await getInitialResponse(path, userAgent);
