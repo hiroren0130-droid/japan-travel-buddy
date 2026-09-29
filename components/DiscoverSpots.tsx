@@ -138,28 +138,28 @@ export default function DiscoverSpots({
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-blue-50 bg-gradient-to-br from-slate-50 via-white to-blue-100 text-slate-900 [color-scheme:light]">
       <Header />
 
       <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="mb-10">
-          <p className="text-sm font-bold tracking-widest text-blue-600 dark:text-blue-400">
+          <p className="text-sm font-bold tracking-widest text-blue-700">
             {regionNameEn.toUpperCase()} SPOT DATABASE
           </p>
 
-          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl dark:text-slate-50">
+          <h1 className="mt-2 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
             {locale === "en"
               ? `${regionName} Spots`
               : `${regionName}スポット一覧`}
           </h1>
 
-          <p className="mt-3 text-slate-600 dark:text-slate-300">
+          <p className="mt-3 text-slate-600">
             {locale === "en"
               ? `Browse sightseeing spots in ${regionName}.`
               : `${regionName}の観光スポットを一覧から探せます。`}
           </p>
 
-          <p className="mt-2 text-sm font-semibold text-slate-500 dark:text-slate-300">
+          <p className="mt-2 text-sm font-semibold text-slate-600">
             {spotsPageMessages.countPrefix}
             {spots.length}
             {spotsPageMessages.countSuffix}
@@ -210,6 +210,6 @@ export default function DiscoverSpots({
           })}
         </div>
       </main>
-    </>
+    </div>
   );
 }
