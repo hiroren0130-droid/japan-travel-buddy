@@ -6,7 +6,7 @@ const messages = getMessages(DEFAULT_LOCALE).termsPage;
 
 export const metadata = {
   ...getPageUrlMetadata("/terms"),
-  title: messages.metadata.title,
+  title: { absolute: messages.metadata.title },
   description: messages.metadata.description,
 };
 

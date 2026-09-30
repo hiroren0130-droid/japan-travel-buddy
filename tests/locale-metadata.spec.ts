@@ -1,4 +1,21 @@
 import { expect, test } from "@playwright/test";
+import { getLocalizedPageMetadata } from "../lib/localeMetadata";
+
+for (const path of ["/about", "/contact", "/privacy", "/terms"]) {
+  test(`${path}: complete titles stay unique through language switching and reload`, async ({ page }) => {
+    await page.goto(path);
+    for (const locale of ["ja", "en", "ja", "en"] as const) {
+      await page.evaluate(language => {
+        localStorage.setItem("japan-travel-buddy-locale", language);
+        window.dispatchEvent(new Event("japan-travel-buddy-locale-change"));
+      }, locale);
+      await expect(page).toHaveTitle(getLocalizedPageMetadata(path, locale)!.title);
+      expect((await page.title()).split("Japan Travel Buddy").length - 1).toBe(1);
+    }
+    await page.reload();
+    await expect(page).toHaveTitle(getLocalizedPageMetadata(path, "en")!.title);
+  });
+}
 
 test("home starts in Japanese and translates its existing social metadata", async ({ page, request }) => {
   const html = await (await request.get("/")).text();

@@ -6,7 +6,7 @@ const messages = getMessages(DEFAULT_LOCALE).aboutPage;
 
 export const metadata = {
   ...getPageUrlMetadata("/about"),
-  title: messages.metadata.title,
+  title: { absolute: messages.metadata.title },
   description: messages.metadata.description,
 };
 

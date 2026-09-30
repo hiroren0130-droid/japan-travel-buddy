@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { allSpots } from "../data";
+import { getLocalizedPageMetadata } from "../lib/localeMetadata";
 
 // Run against a separately started production server:
 // node --test tests/seo-indexing.http.ts (Node.js 24)
@@ -94,15 +96,40 @@ for (const userAgent of ["Mozilla/5.0", "Twitterbot/1.0"]) {
   }
 }
 
-test("sitemap includes only the existing public entries", async () => {
+test("sitemap contains exactly public content, two regions and all 125 real spots", async () => {
   const { html } = await getInitialResponse("/sitemap.xml", "Mozilla/5.0");
   const urls = [...html.matchAll(/<loc>([^<]+)<\/loc>/g)].map(
     (match) => new URL(match[1])
   );
-  assert.deepEqual(urls.map((url) => url.pathname).sort(), ["/", "/chat"]);
+  assert.equal(allSpots.length, 125);
+  const expectedPaths = [
+    "/", "/chat", "/about", "/contact", "/privacy", "/terms", "/image-credits",
+    "/discover/kyoto", "/discover/osaka",
+    ...allSpots.map(spot => `/spots/${encodeURIComponent(spot.id)}`),
+  ];
+  assert.equal(urls.length, 134);
+  assert.equal(new Set(urls.map(url => url.href)).size, urls.length);
+  assert.deepEqual(urls.map(url => url.pathname).sort(), expectedPaths.sort());
+  assert.doesNotMatch(html, /<lastmod>|hreflang=/);
   for (const url of urls) {
     assert.equal(url.origin, "https://japan-travel-buddy-cmuv-psi.vercel.app");
     assert.doesNotMatch(url.pathname, /^\/(favorites|mypage|dashboard|history|admin)(\/|$)/);
+    const { html: pageHtml, response } = await getInitialResponse(url.pathname, "Twitterbot/1.0");
+    assert.ok(!robotsDirectives(pageHtml).includes("noindex"), url.pathname);
+    assert.doesNotMatch(response.headers.get("x-robots-tag") ?? "", /noindex|none/i);
+    assert.equal(url.search, "");
+    assert.equal(url.hash, "");
+  }
+});
+
+test("static page initial titles contain the brand exactly once", async () => {
+  for (const userAgent of ["Mozilla/5.0", "Twitterbot/1.0"]) {
+    for (const path of ["/about", "/contact", "/privacy", "/terms"]) {
+      const { html } = await getInitialResponse(path, userAgent);
+      const titles = [...html.matchAll(/<title>([^<]*)<\/title>/g)].map(match => match[1]);
+      assert.deepEqual(titles, [getLocalizedPageMetadata(path, "ja")!.title], path);
+      assert.equal(titles[0].split("Japan Travel Buddy").length - 1, 1, path);
+    }
   }
 });
 

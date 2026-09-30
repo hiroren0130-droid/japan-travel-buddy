@@ -6,7 +6,7 @@ const messages = getMessages(DEFAULT_LOCALE).privacyPage;
 
 export const metadata = {
   ...getPageUrlMetadata("/privacy"),
-  title: messages.metadata.title,
+  title: { absolute: messages.metadata.title },
   description: messages.metadata.description,
 };
 
