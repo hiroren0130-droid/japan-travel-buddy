@@ -15,6 +15,23 @@ export type SpotImageCredit = {
 
 export const SPOT_IMAGE_CREDITS: readonly SpotImageCredit[] = [
   {
+    spotId: "fushimi-inari",
+    spotNameJa: "伏見稲荷大社",
+    spotNameEn: "Fushimi Inari Taisha",
+    localFilename: "/spots/fushimi-inari.jpg",
+    sourceTitle: "Torii and Romon of Fushimi Inari Grand Shrine.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Torii_and_Romon_of_Fushimi_Inari_Grand_Shrine.jpg",
+    photographerName: "そらみみ",
+    licenseName: "CC BY-SA 3.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0/",
+    attributionRequired: true,
+    modifications:
+      "Resized from 2429 × 3239 to 1200 × 1600 pixels and JPEG-compressed at quality 84; no additional cropping or color adjustments.",
+    notes:
+      "This adapted image is licensed under Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0). The portrait composition of the current Commons original was retained; its file history records prior rotation by the author.",
+  },
+  {
     spotId: "kiyomizudera",
     spotNameJa: "清水寺",
     spotNameEn: "Kiyomizu-dera",
