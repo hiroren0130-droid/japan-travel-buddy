@@ -15,6 +15,23 @@ export type SpotImageCredit = {
 
 export const SPOT_IMAGE_CREDITS: readonly SpotImageCredit[] = [
   {
+    spotId: "kiyomizudera",
+    spotNameJa: "清水寺",
+    spotNameEn: "Kiyomizu-dera",
+    localFilename: "/spots/kiyomizudera.jpg",
+    sourceTitle: "Kiyomizu-dera, Kyoto, November 2016 -01.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Kiyomizu-dera,_Kyoto,_November_2016_-01.jpg",
+    photographerName: "Martin Falbisoner",
+    licenseName: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Resized from 5852 × 3601 to 1200 × 738 pixels and JPEG-compressed at quality 84; no additional cropping or color adjustments.",
+    notes:
+      "This adapted image is licensed under CC BY-SA 4.0. The composition of the current Commons original was retained; its file history records prior cropping and color adjustments by the author.",
+  },
+  {
     spotId: "osaka-castle",
     spotNameJa: "大阪城",
     spotNameEn: "Osaka Castle",
