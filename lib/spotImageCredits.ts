@@ -463,6 +463,24 @@ export const SPOT_IMAGE_CREDITS: readonly SpotImageCredit[] = [
     notes:
       "The broad gravel avenue, trees, wall, gate, and distant mountain were retained.",
   },
+  {
+    spotId: "kitano-tenmangu",
+    spotNameJa: "北野天満宮",
+    spotNameEn: "Kitano Tenmangu Shrine",
+    localFilename: "/spots/kitano-tenmangu.jpg",
+    sourceTitle: "Kitano-tenmangu Kyoto Japan29s3s4200.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Kitano-tenmangu_Kyoto_Japan29s3s4200.jpg",
+    photographerName: "663highland",
+    photographerUrl: "https://ja.wikipedia.org/wiki/User:663highland",
+    licenseName: "CC BY 2.5",
+    licenseUrl: "https://creativecommons.org/licenses/by/2.5/",
+    attributionRequired: true,
+    modifications:
+      "Resized from 4200 × 2800 to 1200 × 800 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    notes:
+      "Used under Creative Commons Attribution 2.5 Generic (CC BY 2.5). The original 3:2 composition was retained.",
+  },
 ] as const;
 
 export function getSpotImageCredit(
