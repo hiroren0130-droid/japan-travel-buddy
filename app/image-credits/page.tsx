@@ -47,7 +47,20 @@ export default function ImageCreditsPage() {
               <dt className="font-semibold text-gray-700">
                 {isEnglish ? "Photographer" : "作者"}
               </dt>
-              <dd>{credit.photographerName}</dd>
+              <dd>
+                {credit.photographerUrl ? (
+                  <a
+                    href={credit.photographerUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    {credit.photographerName}
+                  </a>
+                ) : (
+                  credit.photographerName
+                )}
+              </dd>
 
               <dt className="font-semibold text-gray-700">
                 {isEnglish ? "Source" : "出典"}
