@@ -6,6 +6,7 @@ export type SpotImageCredit = {
   sourceTitle: string;
   sourcePageUrl: string;
   photographerName: string;
+  photographerUrl?: string;
   licenseName: string;
   licenseUrl: string;
   attributionRequired: boolean;
@@ -14,6 +15,24 @@ export type SpotImageCredit = {
 };
 
 export const SPOT_IMAGE_CREDITS: readonly SpotImageCredit[] = [
+  {
+    spotId: "kinkakuji",
+    spotNameJa: "金閣寺",
+    spotNameEn: "Kinkaku-ji Temple",
+    localFilename: "/spots/kinkakuji.jpg",
+    sourceTitle: "Kinkaku-ji temple in Kyoto.jpg",
+    sourcePageUrl:
+      "https://commons.wikimedia.org/wiki/File:Kinkaku-ji_temple_in_Kyoto.jpg",
+    photographerName: "Geertchaos",
+    photographerUrl: "https://commons.wikimedia.org/wiki/User:Geertchaos",
+    licenseName: "CC BY-SA 4.0",
+    licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0/",
+    attributionRequired: true,
+    modifications:
+      "Resized from 5644 × 3763 to 1200 × 800 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    notes:
+      "Copyright Geert Catteeuw. This adapted image is licensed under Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0). The composition of the Commons original was retained.",
+  },
   {
     spotId: "fushimi-inari",
     spotNameJa: "伏見稲荷大社",
