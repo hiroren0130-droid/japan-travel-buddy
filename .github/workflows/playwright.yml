@@ -23,6 +23,8 @@ jobs:
       run: npm run lint
     - name: Validate Spot Database
       run: npm run check:spots
+    - name: Test registered Spot images
+      run: npm run test:spot-images
     - name: Build
       run: npm run build
       env:

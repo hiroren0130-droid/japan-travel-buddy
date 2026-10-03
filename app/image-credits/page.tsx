@@ -80,14 +80,18 @@ export default function ImageCreditsPage() {
                 {isEnglish ? "License" : "ライセンス"}
               </dt>
               <dd>
-                <a
-                  href={credit.licenseUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-blue-600 hover:underline"
-                >
-                  {credit.licenseName}
-                </a>
+                {credit.licenseUrl ? (
+                  <a
+                    href={credit.licenseUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    {credit.licenseName}
+                  </a>
+                ) : (
+                  credit.licenseName
+                )}
               </dd>
 
               <dt className="font-semibold text-gray-700">

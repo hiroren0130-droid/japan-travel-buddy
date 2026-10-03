@@ -10,6 +10,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:spot-images": "node --import tsx --test tests/spot-image-inventory.unit.ts tests/phase6f1-spot-image-pipeline.test.ts",
+    "test:spot-images:completion": "node --import tsx --test tests/spot-image-inventory.unit.ts tests/spot-image-completion.audit.ts",
     "check:spots": "tsx scripts/validateSpotDatabase.ts",
     "update:meals": "tsx scripts/updateMealRecommended.ts",
     "update:hours": "tsx scripts/updateSpotHours.ts",
