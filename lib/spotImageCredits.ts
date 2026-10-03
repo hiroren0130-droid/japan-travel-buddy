@@ -8,7 +8,7 @@ export type SpotImageCredit = {
   photographerName: string;
   photographerUrl?: string;
   licenseName: string;
-  licenseUrl: string;
+  licenseUrl: string | null;
   attributionRequired: boolean;
   modifications: string;
   notes: string;
@@ -480,6 +480,157 @@ export const SPOT_IMAGE_CREDITS: readonly SpotImageCredit[] = [
       "Resized from 4200 × 2800 to 1200 × 800 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
     notes:
       "Used under Creative Commons Attribution 2.5 Generic (CC BY 2.5). The original 3:2 composition was retained.",
+  },
+  {
+    "spotId": "ninnaji",
+    "spotNameJa": "仁和寺",
+    "spotNameEn": "Ninna-ji Temple",
+    "localFilename": "/spots/ninnaji.jpg",
+    "sourceTitle": "Ninnaji Kyoto07n4500.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Ninnaji_Kyoto07n4500.jpg",
+    "photographerName": "663highland",
+    "photographerUrl": "https://ja.wikipedia.org/wiki/user:663highland",
+    "licenseName": "CC BY 2.5",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.5",
+    "attributionRequired": true,
+    "modifications": "Resized from 4500 × 3000 to 1200 × 800 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "The original composition was retained."
+  },
+  {
+    "spotId": "shorenin",
+    "spotNameJa": "青蓮院",
+    "spotNameEn": "Shoren-in Temple",
+    "localFilename": "/spots/shorenin.jpg",
+    "sourceTitle": "Shōren-in overview.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Sh%C5%8Dren-in_overview.jpg",
+    "photographerName": "Christophe95",
+    "photographerUrl": "https://commons.wikimedia.org/wiki/User:Christophe95",
+    "licenseName": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attributionRequired": true,
+    "modifications": "Resized from 4032 × 3024 to 1200 × 900 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "This adapted image is licensed under CC BY-SA 4.0. The original composition was retained."
+  },
+  {
+    "spotId": "philosophers-path",
+    "spotNameJa": "哲学の道",
+    "spotNameEn": "Philosopher's Path",
+    "localFilename": "/spots/philosophers-path.jpg",
+    "sourceTitle": "Cherry blossoms at \"Tetsugaku no Michi\".jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Cherry_blossoms_at_%22Tetsugaku_no_Michi%22.jpg",
+    "photographerName": "Kirin7739",
+    "photographerUrl": "https://commons.wikimedia.org/wiki/User:Kirin7739",
+    "licenseName": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attributionRequired": true,
+    "modifications": "Resized from 1948 × 1297 to 1200 × 799 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "This adapted image is licensed under CC BY-SA 4.0. The original composition was retained."
+  },
+  {
+    "spotId": "higashi-honganji",
+    "spotNameJa": "東本願寺",
+    "spotNameEn": "Higashi Hongan-ji Temple",
+    "localFilename": "/spots/higashi-honganji.jpg",
+    "sourceTitle": "Founder's Hall gate of Higashi-Honganji Temple, with water reflection, Kyoto, Japan.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Founder%27s_Hall_gate_of_Higashi-Honganji_Temple,_with_water_reflection,_Kyoto,_Japan.jpg",
+    "photographerName": "Basile Morin",
+    "photographerUrl": "https://commons.wikimedia.org/wiki/User:Basile_Morin",
+    "licenseName": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attributionRequired": true,
+    "modifications": "Resized from 6291 × 4194 to 1200 × 800 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "This adapted image is licensed under CC BY-SA 4.0. The original composition was retained."
+  },
+  {
+    "spotId": "nishi-hongwanji",
+    "spotNameJa": "西本願寺",
+    "spotNameEn": "Nishi Hongwan-ji Temple",
+    "localFilename": "/spots/nishi-hongwanji.jpg",
+    "sourceTitle": "Amida Hall, Nishi Hongwanji - interior 01.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Amida_Hall,_Nishi_Hongwanji_-_interior_01.jpg",
+    "photographerName": "Davide Mauro",
+    "photographerUrl": "https://commons.wikimedia.org/wiki/User:Codas",
+    "licenseName": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attributionRequired": true,
+    "modifications": "Resized from 6000 × 4000 to 1200 × 800 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "This adapted image is licensed under CC BY-SA 4.0. The original composition was retained."
+  },
+  {
+    "spotId": "kyoto-imperial-palace",
+    "spotNameJa": "京都御所",
+    "spotNameEn": "Kyoto Imperial Palace",
+    "localFilename": "/spots/kyoto-imperial-palace.jpg",
+    "sourceTitle": "Kyoto Imperial palace garden.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Kyoto_Imperial_palace_garden.jpg",
+    "photographerName": "Nacaru",
+    "photographerUrl": "https://commons.wikimedia.org/wiki/User:Nacaru",
+    "licenseName": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attributionRequired": true,
+    "modifications": "Resized from 6000 × 3796 to 1200 × 759 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "This adapted image is licensed under CC BY-SA 4.0. The original composition was retained."
+  },
+  {
+    "spotId": "daitokuji",
+    "spotNameJa": "大徳寺",
+    "spotNameEn": "Daitoku-ji Temple",
+    "localFilename": "/spots/daitokuji.jpg",
+    "sourceTitle": "Daitoku-ji Temple , 大徳寺 勅使門 - panoramio.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Daitoku-ji_Temple_,_%E5%A4%A7%E5%BE%B3%E5%AF%BA_%E5%8B%85%E4%BD%BF%E9%96%80_-_panoramio.jpg",
+    "photographerName": "z tanuki",
+    "photographerUrl": "https://web.archive.org/web/20161014012229/http://www.panoramio.com/user/238971?with_photo_id=28883627",
+    "licenseName": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "attributionRequired": true,
+    "modifications": "Resized from 1196 × 700 to 1196 × 700 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "The original composition was retained."
+  },
+  {
+    "spotId": "imamiya-shrine",
+    "spotNameJa": "今宮神社",
+    "spotNameEn": "Imamiya Shrine",
+    "localFilename": "/spots/imamiya-shrine.jpg",
+    "sourceTitle": "Imamiya Shrine gate.JPG",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Imamiya_Shrine_gate.JPG",
+    "photographerName": "Torsodog",
+    "photographerUrl": "https://commons.wikimedia.org/wiki/User:Torsodog",
+    "licenseName": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "attributionRequired": true,
+    "modifications": "Resized from 2592 × 1944 to 1200 × 900 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "The original composition was retained."
+  },
+  {
+    "spotId": "genkoan",
+    "spotNameJa": "源光庵",
+    "spotNameEn": "Genko-an Temple",
+    "localFilename": "/spots/genkoan.jpg",
+    "sourceTitle": "Genkō-an, Main Hall 01.jpg",
+    "sourcePageUrl": "https://commons.wikimedia.org/wiki/File:Genk%C5%8D-an,_Main_Hall_01.jpg",
+    "photographerName": "Naokijp",
+    "photographerUrl": "https://commons.wikimedia.org/wiki/User:Naokijp",
+    "licenseName": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "attributionRequired": true,
+    "modifications": "Resized from 3159 × 2369 to 1200 × 900 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    "notes": "This adapted image is licensed under CC BY-SA 4.0. The original composition was retained."
+  },
+  {
+    spotId: "seimei-shrine",
+    spotNameJa: "晴明神社",
+    spotNameEn: "Seimei Shrine",
+    localFilename: "/spots/seimei-shrine.jpg",
+    sourceTitle: "Seimei Shrine-3504.jpg",
+    sourcePageUrl: "https://commons.wikimedia.org/wiki/File:Seimei_Shrine-3504.jpg",
+    photographerName: "Fg2",
+    licenseName: "Public Domain",
+    licenseUrl: null,
+    attributionRequired: false,
+    modifications:
+      "Resized from 1500 × 1125 to 1200 × 900 pixels and JPEG-compressed at quality 84; no cropping or color adjustments.",
+    notes:
+      'The photographer Fg2 released their own photograph into the public domain. Wikimedia Commons records: "Own work, all rights released (Public domain)". See the source page for the rights statement; no separate license URL is provided.',
   },
 ] as const;
 
