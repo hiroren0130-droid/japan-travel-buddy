@@ -57,7 +57,14 @@ test("missing local Spot images fall back to the placeholder", async ({
     }
   );
 
+  let missingImageRequests = 0;
+  await page.route("**/spots/umeda-sky-building.jpg", async (route) => {
+    missingImageRequests += 1;
+    await route.fulfill({ status: 404, contentType: "text/plain", body: "Not found" });
+  });
+
   await page.goto("/spots/umeda-sky-building");
+  expect(missingImageRequests).toBeGreaterThan(0);
 
   const image = page.locator("main img").first();
   await expect(image).toBeVisible();
@@ -65,6 +72,9 @@ test("missing local Spot images fall back to the placeholder", async ({
     "src",
     /\/spots\/placeholder\.jpg$/
   );
+  await expect.poll(() => image.evaluate((element: HTMLImageElement) =>
+    element.complete && element.naturalWidth > 0
+  )).toBe(true);
   await expect(image).toHaveAttribute("loading", "eager");
   expect(placesPhotoRequests).toBe(0);
 });
