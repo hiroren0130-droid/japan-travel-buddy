@@ -32,7 +32,7 @@ export default function ImageCreditsPage() {
           <article
             key={credit.spotId}
             id={credit.spotId}
-            className="scroll-mt-6 rounded-2xl border bg-white p-6 text-slate-900 shadow-sm"
+            className="min-w-0 scroll-mt-6 rounded-2xl border bg-white p-6 text-slate-900 shadow-sm [overflow-wrap:anywhere]"
           >
             <h2 className="text-xl font-bold">
               {isEnglish ? credit.spotNameEn : credit.spotNameJa}

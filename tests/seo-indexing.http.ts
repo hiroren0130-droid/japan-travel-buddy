@@ -7,6 +7,9 @@ import { getLocalizedPageMetadata } from "../lib/localeMetadata";
 // node --test tests/seo-indexing.http.ts (Node.js 24)
 const baseURL = process.env.SEO_TEST_BASE_URL ?? "http://localhost:3100";
 const privateRoutes = [
+  "/login",
+  "/signup",
+  "/logout-incomplete",
   "/favorites",
   "/mypage",
   "/mypage/seo-test-plan",
@@ -29,9 +32,6 @@ const publicRoutes = [
   "/terms",
   "/contact",
   "/image-credits",
-  "/login",
-  "/signup",
-  "/logout-incomplete",
 ];
 
 async function getInitialResponse(path: string, userAgent: string) {
@@ -113,7 +113,7 @@ test("sitemap contains exactly public content, two regions and all 125 real spot
   assert.doesNotMatch(html, /<lastmod>|hreflang=/);
   for (const url of urls) {
     assert.equal(url.origin, "https://japan-travel-buddy-cmuv-psi.vercel.app");
-    assert.doesNotMatch(url.pathname, /^\/(favorites|mypage|dashboard|history|admin)(\/|$)/);
+    assert.doesNotMatch(url.pathname, /^\/(login|signup|logout-incomplete|favorites|mypage|dashboard|history|admin)(\/|$)/);
     const { html: pageHtml, response } = await getInitialResponse(url.pathname, "Twitterbot/1.0");
     assert.ok(!robotsDirectives(pageHtml).includes("noindex"), url.pathname);
     assert.doesNotMatch(response.headers.get("x-robots-tag") ?? "", /noindex|none/i);
