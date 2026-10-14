@@ -232,7 +232,7 @@ async function handleShare(plan: SavedTravelPlan) {
       </p>
 
       <div className="mt-8 rounded-xl bg-white p-6 shadow">
-        <h2 className="mb-4 text-2xl font-semibold">
+        <h2 className="mb-4 text-2xl font-semibold text-gray-800">
           {dashboardMessages.savedPlansTitle}
         </h2>
 
