@@ -42,7 +42,7 @@ const spotCount =
 >
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
-          <h2 className="text-xl font-bold">
+          <h2 className="text-xl font-bold text-gray-800">
             {plan.title}
           </h2>
 
