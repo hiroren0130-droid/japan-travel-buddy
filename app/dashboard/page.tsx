@@ -250,7 +250,7 @@ async function handleShare(plan: SavedTravelPlan) {
   placeholder={dashboardMessages.searchPlaceholder}
   value={searchText}
   onChange={(e) => setSearchText(e.target.value)}
-  className="mb-4 w-full rounded-lg border p-3"
+  className="mb-4 w-full rounded-lg border p-3 placeholder:text-gray-600"
 />
 
         {plans.length === 0 ? (
