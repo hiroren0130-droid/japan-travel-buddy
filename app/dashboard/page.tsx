@@ -214,7 +214,7 @@ async function handleShare(plan: SavedTravelPlan) {
   <main className="min-h-screen bg-gray-100">
     <div className="mx-auto max-w-6xl p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-3xl font-bold sm:text-4xl">
+        <h1 className="text-3xl font-bold text-gray-800 sm:text-4xl">
           {dashboardMessages.title}
         </h1>
 
